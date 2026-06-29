@@ -11,6 +11,7 @@ const navItems = [
   { href: "/followups", label: "Follow-ups", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4", badge: 6 },
   { href: "/reminders", label: "Reminders", icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", badge: 4 },
   { href: "/documents", label: "Documents", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+  { href: "/knowledge", label: "Knowledge", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
   { href: "/health", label: "Health", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
   { href: "/intelligence", label: "Intelligence", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
   { href: "/search", label: "Search", icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
@@ -23,12 +24,7 @@ const bottomItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside style={{
-      width: 220, minWidth: 220, height: "100vh",
-      background: "var(--bg-surface)", borderRight: "1px solid var(--border)",
-      display: "flex", flexDirection: "column",
-      position: "fixed", left: 0, top: 0, zIndex: 50,
-    }}>
+    <aside style={{ width: 220, minWidth: 220, height: "100vh", background: "var(--bg-surface)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", position: "fixed", left: 0, top: 0, zIndex: 50 }}>
       <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid var(--border)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, background: "var(--accent-blue)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "white", flexShrink: 0 }}>C</div>
@@ -47,9 +43,7 @@ export default function Sidebar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
               </svg>
               <span style={{ flex: 1, fontSize: 13 }}>{item.label}</span>
-              {item.badge && (
-                <span style={{ background: "var(--accent-blue)", color: "white", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 10, lineHeight: 1.6 }}>{item.badge}</span>
-              )}
+              {item.badge && <span style={{ background: "var(--accent-blue)", color: "white", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 10, lineHeight: 1.6 }}>{item.badge}</span>}
             </Link>
           );
         })}
