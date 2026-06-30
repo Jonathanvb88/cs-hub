@@ -72,6 +72,7 @@ export default function ClientsPage() {
   });
 
   return (
+    <>
           <Header
         title="Clients"
         subtitle={`${clients.length} clients — saved to database`}
@@ -202,6 +203,7 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
+    </>
   );
 }
 
