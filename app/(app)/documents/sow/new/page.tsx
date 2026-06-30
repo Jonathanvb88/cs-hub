@@ -8,6 +8,15 @@ import { mockClients } from "@/lib/mockData";
 interface Deliverable { id: string; title: string; description: string; milestone: string; }
 interface Assumption { id: string; text: string; }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="card" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", paddingBottom: 10, borderBottom: "1px solid var(--border)" }}>{title}</div>
+      {children}
+    </div>
+  );
+}
+
 export default function NewSOWPage() {
   const [clientId, setClientId] = useState("");
   const [title, setTitle] = useState("");
@@ -45,13 +54,6 @@ export default function NewSOWPage() {
   const removeAssumption = (id: string) => setAssumptions(p => p.filter(a => a.id !== id));
 
   const selectedClient = mockClients.find(c => c.id === clientId);
-
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="card" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", paddingBottom: 10, borderBottom: "1px solid var(--border)" }}>{title}</div>
-      {children}
-    </div>
-  );
 
   return (
     <AppLayout>
