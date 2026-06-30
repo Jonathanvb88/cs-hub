@@ -162,6 +162,7 @@ export default function FollowUpsPage() {
               const isOverdue = f.status === "pending" && !!f.due_date && f.due_date < today;
               const isDueToday = f.due_date === today;
               return (
+    <>
                 <div key={f.id} className="card" style={{ padding: "14px 18px", display: "flex", alignItems: "flex-start", gap: 14, opacity: f.status !== "pending" ? 0.6 : 1 }}>
                   <button
                     onClick={() => update(f.id, f.status === "completed" ? "pending" : "completed")}
@@ -197,5 +198,6 @@ export default function FollowUpsPage() {
           </div>
         )}
       </div>
+    </>
   );
 }
