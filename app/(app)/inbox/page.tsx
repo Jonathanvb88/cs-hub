@@ -12,6 +12,7 @@ export default function InboxPage() {
     p === "high" ? "var(--accent-red)" : p === "medium" ? "var(--accent-amber)" : "var(--accent-green)";
 
   return (
+    <>
           <Header
         title="Work Inbox"
         subtitle="Emails requiring your action"
@@ -65,5 +66,6 @@ export default function InboxPage() {
           </div>
         )}
       </div>
+    </>
   );
 }
