@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
@@ -30,6 +30,20 @@ export default function NewQuotePage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+
+  useEffect(() => {
+    const prefill = sessionStorage.getItem("cshub_template_prefill");
+    if (prefill) {
+      try {
+        const data = JSON.parse(prefill);
+        if (data.items) setItems(data.items);
+        if (data.notes) setNotes(data.notes);
+        if (typeof data.includeVat === "boolean") setIncludeVat(data.includeVat);
+      } catch {}
+      sessionStorage.removeItem("cshub_template_prefill");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedClient = mockClients.find(c => c.id === clientId);
 
@@ -313,4 +327,5 @@ export default function NewQuotePage() {
     </AppLayout>
   );
 }
+
 
