@@ -4,6 +4,7 @@ import Link from "next/link";
 import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
+import { useActiveClient } from "@/lib/clientContext";
 
 interface Client {
   id: string;
@@ -16,6 +17,7 @@ interface Client {
 }
 
 export default function ClientsPage() {
+  const { setActiveClient } = useActiveClient();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -151,8 +153,23 @@ export default function ClientsPage() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
             {filtered.map(client => (
-              <Link key={client.id} href={`/clients/${client.id}`} style={{ textDecoration: "none" }}>
-                <div className="card" style={{ cursor: "pointer" }}>
+              <div
+                key={client.id}
+                className="card"
+                style={{ cursor: "pointer", position: "relative" }}
+                onClick={() => setActiveClient({ id: client.id, name: client.name, industry: client.industry || undefined, health_score: client.health_score, health_status: client.health_status })}
+              >
+                <button
+                  onClick={(e) => { e.stopPropagation(); window.location.href = `/clients/${client.id}`; }}
+                  style={{
+                    position: "absolute", top: 12, right: 12,
+                    background: "var(--bg-elevated)", border: "1px solid var(--border)",
+                    borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 600,
+                    color: "var(--text-secondary)", cursor: "pointer", zIndex: 2,
+                  }}
+                >
+                  Open →
+                </button>
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <div style={{
@@ -182,8 +199,7 @@ export default function ClientsPage() {
                   <div style={{ fontSize: 12, color: "var(--text-muted)", paddingTop: 12, borderTop: "1px solid var(--border)" }}>
                     {client.contacts?.length || 0} contact{client.contacts?.length !== 1 ? "s" : ""}
                   </div>
-                </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
@@ -191,3 +207,4 @@ export default function ClientsPage() {
     </AppLayout>
   );
 }
+
