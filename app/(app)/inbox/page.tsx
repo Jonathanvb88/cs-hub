@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockEmails } from "@/lib/mockData";
 
@@ -13,8 +12,7 @@ export default function InboxPage() {
     p === "high" ? "var(--accent-red)" : p === "medium" ? "var(--accent-amber)" : "var(--accent-green)";
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Work Inbox"
         subtitle="Emails requiring your action"
         actions={
@@ -67,6 +65,5 @@ export default function InboxPage() {
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }
