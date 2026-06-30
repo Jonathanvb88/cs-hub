@@ -40,6 +40,7 @@ export default function KnowledgePage() {
   });
 
   return (
+    <>
           <Header
         title="Knowledge Library"
         subtitle="Reusable assets, templates, SOWs, and lessons learned across all clients"
@@ -176,6 +177,7 @@ export default function KnowledgePage() {
           );
         })()}
       </div>
+    </>
     </>
   );
 }
