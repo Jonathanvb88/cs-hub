@@ -9,13 +9,20 @@ interface FollowUp {
   title: string;
   description: string | null;
   due_date: string | null;
-  priority: "high" | "medium" | "low";
+  priority: string;
   status: "pending" | "completed" | "dismissed";
   ai_suggested: boolean;
 }
 
+interface PriorityOption {
+  key: string;
+  label: string;
+  color: string;
+}
+
 export default function FollowUpsPage() {
   const [items, setItems] = useState<FollowUp[]>([]);
+  const [priorities, setPriorities] = useState<PriorityOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("pending");
@@ -25,6 +32,14 @@ export default function FollowUpsPage() {
   const [newDue, setNewDue] = useState("");
   const [newPriority, setNewPriority] = useState("medium");
   const [saving, setSaving] = useState(false);
+
+  const fetchPriorities = async () => {
+    try {
+      const res = await fetch("/api/db/priorities");
+      const data = await res.json();
+      setPriorities(data.priorities || []);
+    } catch {}
+  };
 
   const fetchFollowUps = async () => {
     setLoading(true);
@@ -41,7 +56,7 @@ export default function FollowUpsPage() {
     }
   };
 
-  useEffect(() => { fetchFollowUps(); }, []);
+  useEffect(() => { fetchFollowUps(); fetchPriorities(); }, []);
 
   const update = async (id: string, status: string) => {
     setItems(p => p.map(f => f.id === id ? { ...f, status: status as FollowUp["status"] } : f));
@@ -57,7 +72,8 @@ export default function FollowUpsPage() {
   };
 
   const filtered = items.filter(f => filter === "all" || f.status === filter);
-  const priorityColor: Record<string, string> = { high: "var(--accent-red)", medium: "var(--accent-amber)", low: "var(--accent-green)" };
+  const getPriorityColor = (key: string) => priorities.find(p => p.key === key)?.color || "#94a3b8";
+  const getPriorityLabel = (key: string) => priorities.find(p => p.key === key)?.label || key;
   const today = new Date().toISOString().split("T")[0];
 
   const addNew = async () => {
@@ -121,9 +137,7 @@ export default function FollowUpsPage() {
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Priority</label>
                 <select className="input" value={newPriority} onChange={e => setNewPriority(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
+                  {priorities.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
                 </select>
               </div>
             </div>
@@ -175,7 +189,7 @@ export default function FollowUpsPage() {
                   >
                     {f.status === "completed" && <svg width="11" height="11" fill="none" stroke="white" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                   </button>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: priorityColor[f.priority], flexShrink: 0, marginTop: 5 }} />
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: getPriorityColor(f.priority), flexShrink: 0, marginTop: 5 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
                       <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", textDecoration: f.status === "completed" ? "line-through" : "none" }}>{f.title}</span>
@@ -187,7 +201,7 @@ export default function FollowUpsPage() {
                     <div style={{ fontSize: 12, fontWeight: 600, color: isOverdue ? "var(--accent-red)" : isDueToday ? "var(--accent-amber)" : "var(--text-secondary)" }}>
                       {isOverdue ? "Overdue" : isDueToday ? "Today" : f.due_date ? new Date(f.due_date).toLocaleDateString("en-ZA", { day: "numeric", month: "short" }) : "No date"}
                     </div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "capitalize", marginTop: 2 }}>{f.priority}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>{getPriorityLabel(f.priority)}</div>
                   </div>
                   {f.status === "pending" && (
                     <button onClick={() => update(f.id, "dismissed")} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 16, flexShrink: 0 }}>×</button>
@@ -201,4 +215,5 @@ export default function FollowUpsPage() {
     </>
   );
 }
+
 
