@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 
 interface Communication {
@@ -17,14 +18,20 @@ interface Communication {
   ai_summary: string | null;
 }
 
+interface ClientOption {
+  id: string;
+  name: string;
+}
+
 export default function CommunicationsPage() {
   const [comms, setComms] = useState<Communication[]>([]);
+  const [clients, setClients] = useState<ClientOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [newOpen, setNewOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [clientName, setClientName] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState("");
   const [subject, setSubject] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [type, setType] = useState("email");
@@ -47,9 +54,18 @@ export default function CommunicationsPage() {
     }
   };
 
-  useEffect(() => { fetchComms(); }, []);
+  const fetchClients = async () => {
+    try {
+      const res = await fetch("/api/db/clients");
+      const data = await res.json();
+      setClients((data.clients || []).map((c: { id: string; name: string }) => ({ id: c.id, name: c.name })));
+    } catch {}
+  };
+
+  useEffect(() => { fetchComms(); fetchClients(); }, []);
 
   const selectedComm = comms.find(c => c.id === selected);
+  const selectedClientForNew = clients.find(c => c.id === selectedClientId);
 
   const typeIcon = (t: string) => t === "email"
     ? "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
@@ -64,7 +80,7 @@ export default function CommunicationsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system: "You are a Business Analyst assistant. In 1-2 concise sentences, classify this customer communication and note its priority and main ask. South African business context.",
-          user: `Client: ${clientName}\nSubject: ${subject}\n\nContent:\n${bodyText}`,
+          user: `Client: ${selectedClientForNew?.name || "Unknown"}\nSubject: ${subject}\n\nContent:\n${bodyText}`,
           maxTokens: 150,
         }),
       });
@@ -85,13 +101,15 @@ export default function CommunicationsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientName, type, direction: "inbound", subject, body: bodyText,
+          clientId: selectedClientId || null,
+          clientName: selectedClientForNew?.name || "",
+          type, direction: "inbound", subject, body: bodyText,
           actionRequired: true, aiSummary: aiSummary || null,
         }),
       });
       if (!res.ok) throw new Error("Failed to save");
       await fetchComms();
-      setClientName(""); setSubject(""); setBodyText(""); setAiSummary(""); setNewOpen(false);
+      setSelectedClientId(""); setSubject(""); setBodyText(""); setAiSummary(""); setNewOpen(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save communication");
     } finally {
@@ -101,7 +119,7 @@ export default function CommunicationsPage() {
 
   return (
     <>
-          <Header
+      <Header
         title="Communications"
         subtitle="Emails and meeting notes — saved to database"
         actions={
@@ -153,11 +171,20 @@ export default function CommunicationsPage() {
 
         {selectedComm && !newOpen && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border)" }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginBottom: 2 }}>{selectedComm.subject}</div>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-                {selectedComm.client_name} · {selectedComm.sender || "—"} · {new Date(selectedComm.received_at).toLocaleString("en-ZA")}
+            <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginBottom: 2 }}>{selectedComm.subject}</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                  {selectedComm.client_name} · {selectedComm.sender || "—"} · {new Date(selectedComm.received_at).toLocaleString("en-ZA")}
+                </div>
               </div>
+              {selectedComm.client_id ? (
+                <Link href={`/clients/${selectedComm.client_id}`}>
+                  <button className="btn-secondary" style={{ fontSize: 11, whiteSpace: "nowrap" }}>View Client Profile</button>
+                </Link>
+              ) : (
+                <span className="badge badge-gray" style={{ whiteSpace: "nowrap" }}>No client linked</span>
+              )}
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
               <div style={{ whiteSpace: "pre-wrap", fontSize: 14, color: "var(--text-primary)", lineHeight: 1.7, maxWidth: 680, marginBottom: 24 }}>
@@ -187,8 +214,11 @@ export default function CommunicationsPage() {
               )}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
                 <div>
-                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Client Name</label>
-                  <input className="input" placeholder="Client name" value={clientName} onChange={e => setClientName(e.target.value)} />
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Client</label>
+                  <select className="input" value={selectedClientId} onChange={e => setSelectedClientId(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                    <option value="">Select a client...</option>
+                    {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Type</label>
