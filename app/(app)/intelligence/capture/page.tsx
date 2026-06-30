@@ -235,6 +235,7 @@ Sarah Mkhize
 IT Manager, ABC Retail Group`;
 
   return (
+    <>
           <Header
         title="Requirement Capture Engine"
         subtitle="AI extracts requirements, user stories, and developer tasks from customer communications"
@@ -553,6 +554,7 @@ IT Manager, ABC Retail Group`;
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
+    </>
     </>
   );
 }
