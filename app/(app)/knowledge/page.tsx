@@ -134,6 +134,7 @@ export default function KnowledgePage() {
         {selected && (() => {
           const cfg = typeConfig[selected.type] || { label: selected.type, color: "var(--accent-blue)", icon: "" };
           return (
+    <>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="card" style={{ borderTop: `3px solid ${cfg.color}` }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
@@ -175,5 +176,6 @@ export default function KnowledgePage() {
           );
         })()}
       </div>
+    </>
   );
 }
