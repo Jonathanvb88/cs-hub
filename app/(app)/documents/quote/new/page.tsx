@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
 
@@ -90,8 +89,7 @@ export default function NewQuotePage() {
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="New Quote"
         subtitle="Create a quote for a client"
         actions={
@@ -324,7 +322,6 @@ export default function NewQuotePage() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }
 
