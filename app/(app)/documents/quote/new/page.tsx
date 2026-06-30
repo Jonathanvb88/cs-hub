@@ -89,6 +89,7 @@ export default function NewQuotePage() {
   };
 
   return (
+    <>
           <Header
         title="New Quote"
         subtitle="Create a quote for a client"
@@ -322,6 +323,7 @@ export default function NewQuotePage() {
           </div>
         </div>
       </div>
+    </>
   );
 }
 
