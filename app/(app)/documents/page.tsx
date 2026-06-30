@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 
 interface Document {
@@ -122,8 +121,7 @@ export default function DocumentsPage() {
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Documents"
         subtitle="Quotes, SOWs, POCs and proposals — saved to database"
         actions={
@@ -332,6 +330,5 @@ export default function DocumentsPage() {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 }
