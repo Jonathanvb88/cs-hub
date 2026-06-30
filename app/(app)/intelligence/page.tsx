@@ -43,6 +43,7 @@ const modules = [
 
 export default function IntelligencePage() {
   return (
+    <>
           <Header title="Intelligence" subtitle="AI-powered requirement analysis and project knowledge" />
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
@@ -156,5 +157,6 @@ export default function IntelligencePage() {
           </div>
         </div>
       </div>
+    </>
   );
 }
