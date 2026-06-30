@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
 
@@ -103,8 +102,7 @@ export default function NewSOWPage() {
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="New SOW"
         subtitle="Statement of Work"
         actions={
@@ -260,7 +258,6 @@ export default function NewSOWPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }
 
