@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 
 interface Communication {
@@ -101,8 +100,7 @@ export default function CommunicationsPage() {
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Communications"
         subtitle="Emails and meeting notes — saved to database"
         actions={
@@ -227,6 +225,5 @@ export default function CommunicationsPage() {
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }
