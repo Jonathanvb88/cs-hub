@@ -90,6 +90,7 @@ export default function ProjectsPage() {
   };
 
   return (
+    <>
           <Header
         title="Projects"
         subtitle={`${projects.length} projects — saved to database`}
@@ -194,5 +195,6 @@ export default function ProjectsPage() {
           )}
         </div>
       </div>
+    </>
   );
 }
