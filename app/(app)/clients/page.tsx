@@ -13,6 +13,15 @@ interface Client {
   health_score: number;
   health_status: string;
   contacts: { id: string; name: string }[];
+  assigned_user_id: string | null;
+  assigned_user_name: string | null;
+  assigned_user_initials: string | null;
+}
+
+interface TeamMember {
+  id: string;
+  name: string;
+  avatar_initials: string;
 }
 
 export default function ClientsPage() {
@@ -27,6 +36,16 @@ export default function ClientsPage() {
   const [newName, setNewName] = useState("");
   const [newIndustry, setNewIndustry] = useState("");
   const [newWebsite, setNewWebsite] = useState("");
+  const [newAssignedUserId, setNewAssignedUserId] = useState("");
+  const [team, setTeam] = useState<TeamMember[]>([]);
+
+  const fetchTeam = async () => {
+    try {
+      const res = await fetch("/api/db/users");
+      const data = await res.json();
+      setTeam(data.users || []);
+    } catch {}
+  };
 
   const fetchClients = async () => {
     setLoading(true);
@@ -43,7 +62,7 @@ export default function ClientsPage() {
     }
   };
 
-  useEffect(() => { fetchClients(); }, []);
+  useEffect(() => { fetchClients(); fetchTeam(); }, []);
 
   const addClient = async () => {
     if (!newName.trim()) return;
@@ -52,15 +71,29 @@ export default function ClientsPage() {
       const res = await fetch("/api/db/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, industry: newIndustry, website: newWebsite }),
+        body: JSON.stringify({ name: newName, industry: newIndustry, website: newWebsite, assignedUserId: newAssignedUserId || null }),
       });
       if (!res.ok) throw new Error("Failed to save client");
       await fetchClients();
-      setNewName(""); setNewIndustry(""); setNewWebsite(""); setShowAdd(false);
+      setNewName(""); setNewIndustry(""); setNewWebsite(""); setNewAssignedUserId(""); setShowAdd(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save client");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const reassignClient = async (clientId: string, userId: string) => {
+    setClients(p => p.map(c => c.id === clientId ? { ...c, assigned_user_id: userId } : c));
+    try {
+      await fetch("/api/db/clients", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: clientId, assignedUserId: userId }),
+      });
+      fetchClients();
+    } catch {
+      fetchClients();
     }
   };
 
@@ -96,7 +129,7 @@ export default function ClientsPage() {
         {showAdd && (
           <div className="card" style={{ border: "1px solid var(--accent-blue)", marginBottom: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Client</div>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1.5fr", gap: 12, marginBottom: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1.2fr 1.2fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Client Name</label>
                 <input className="input" placeholder="e.g. ABC Retail Group" value={newName} onChange={e => setNewName(e.target.value)} />
@@ -108,6 +141,13 @@ export default function ClientsPage() {
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Website</label>
                 <input className="input" placeholder="https://..." value={newWebsite} onChange={e => setNewWebsite(e.target.value)} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Assign To</label>
+                <select className="input" value={newAssignedUserId} onChange={e => setNewAssignedUserId(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="">Unassigned</option>
+                  {team.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
               </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -195,8 +235,22 @@ export default function ClientsPage() {
                       <div style={{ height: "100%", borderRadius: 2, width: `${client.health_score}%`, background: getHealthColor(client.health_status) }} />
                     </div>
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", paddingTop: 12, borderTop: "1px solid var(--border)" }}>
-                    {client.contacts?.length || 0} contact{client.contacts?.length !== 1 ? "s" : ""}
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", paddingTop: 12, borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span>{client.contacts?.length || 0} contact{client.contacts?.length !== 1 ? "s" : ""}</span>
+                    <select
+                      value={client.assigned_user_id || ""}
+                      onClick={e => e.stopPropagation()}
+                      onChange={e => { e.stopPropagation(); reassignClient(client.id, e.target.value); }}
+                      style={{
+                        fontSize: 11, padding: "3px 6px", borderRadius: 6,
+                        border: "1px solid var(--border)", background: "var(--bg-elevated)",
+                        color: client.assigned_user_name ? "var(--text-primary)" : "var(--text-muted)",
+                        cursor: "pointer", maxWidth: 110,
+                      }}
+                    >
+                      <option value="">Unassigned</option>
+                      {team.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
                   </div>
               </div>
             ))}
@@ -206,4 +260,5 @@ export default function ClientsPage() {
     </>
   );
 }
+
 
