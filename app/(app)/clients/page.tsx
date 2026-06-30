@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 import { useActiveClient } from "@/lib/clientContext";
@@ -73,8 +72,7 @@ export default function ClientsPage() {
   });
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Clients"
         subtitle={`${clients.length} clients — saved to database`}
         actions={
@@ -204,7 +202,6 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }
 
