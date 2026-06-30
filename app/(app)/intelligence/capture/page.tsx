@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
 
@@ -236,8 +235,7 @@ Sarah Mkhize
 IT Manager, ABC Retail Group`;
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Requirement Capture Engine"
         subtitle="AI extracts requirements, user stories, and developer tasks from customer communications"
         actions={
@@ -554,6 +552,5 @@ IT Manager, ABC Retail Group`;
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
-    </AppLayout>
   );
 }
