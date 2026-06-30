@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients, mockProjects, getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
 
@@ -15,11 +14,9 @@ export default function ClientPlaybookPage() {
   const projects = mockProjects.filter(p => p.clientId === id);
 
   if (!client) return (
-    <AppLayout>
-      <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
         Client not found. <Link href="/clients" style={{ color: "var(--accent-blue)" }}>Back</Link>
       </div>
-    </AppLayout>
   );
 
   const handleGenerate = async () => {
