@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients, mockProjects } from "@/lib/mockData";
 
@@ -111,8 +110,7 @@ Assess similarity and estimate reuse potential.`;
     score >= 80 ? "var(--accent-green)" : score >= 50 ? "var(--accent-amber)" : "var(--accent-red)";
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Project Intelligence"
         subtitle="AI searches previous projects for similar work and estimates reuse potential"
         actions={<Link href="/intelligence"><button className="btn-secondary" style={{ fontSize: 12 }}>Back</button></Link>}
@@ -257,6 +255,5 @@ Assess similarity and estimate reuse potential.`;
           </>
         )}
       </div>
-    </AppLayout>
   );
 }
