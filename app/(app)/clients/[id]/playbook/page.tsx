@@ -73,7 +73,7 @@ Generate a practical client playbook.`;
   };
 
   return (
-    <AppLayout>
+    <>
       <Header
         title={`Client Playbook — ${client.name}`}
         subtitle="Accumulated knowledge and best practices for this client relationship"
@@ -270,6 +270,6 @@ Generate a practical client playbook.`;
         </div>
       </div>
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </AppLayout>
+    </>
   );
 }
