@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
@@ -29,6 +29,21 @@ export default function NewPOCPage() {
   const removeCriteria = (id: string) => setCriteria(p => p.filter(c => c.id !== id));
 
   const selectedClient = mockClients.find(c => c.id === clientId);
+
+  useEffect(() => {
+    const prefill = sessionStorage.getItem("cshub_template_prefill");
+    if (prefill) {
+      try {
+        const data = JSON.parse(prefill);
+        if (data.objective) setObjective(data.objective);
+        if (data.duration) setDuration(data.duration);
+        if (data.resources) setResources(data.resources);
+        if (data.criteria) setCriteria(data.criteria);
+      } catch {}
+      sessionStorage.removeItem("cshub_template_prefill");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSavePOC = async () => {
     setSaveError("");
@@ -185,4 +200,5 @@ export default function NewPOCPage() {
     </AppLayout>
   );
 }
+
 
