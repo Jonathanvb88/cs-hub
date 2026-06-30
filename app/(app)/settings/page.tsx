@@ -1,7 +1,6 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 
 interface GraphEmail {
@@ -41,8 +40,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <AppLayout>
-      <Header title="Settings" subtitle="Account, integrations, and preferences" />
+          <Header title="Settings" subtitle="Account, integrations, and preferences" />
       <div style={{ padding: 24, maxWidth: 800, display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* Microsoft 365 Integration */}
@@ -144,6 +142,5 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }
