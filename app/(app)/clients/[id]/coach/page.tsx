@@ -100,7 +100,7 @@ Notes: ${client.notes}`;
   };
 
   return (
-    <AppLayout>
+    <>
       <Header
         title={`Relationship Coach — ${client.name}`}
         subtitle="AI-powered meeting preparation brief"
@@ -333,6 +333,6 @@ Notes: ${client.notes}`;
         </div>
       </div>
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </AppLayout>
+    </>
   );
 }
