@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
 
@@ -119,8 +118,7 @@ Produce a structured meeting summary.`;
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Meeting Intelligence"
         subtitle="AI generates structured summaries, decisions, and action items from meeting notes"
         actions={
@@ -264,6 +262,5 @@ Produce a structured meeting summary.`;
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }
