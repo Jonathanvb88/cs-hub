@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
@@ -43,12 +43,28 @@ export default function NewSOWPage() {
     { id: "4", text: "Infrastructure and hosting costs are excluded unless explicitly stated in the quote." },
   ]);
 
-  const [exclusions] = useState([
+  const [exclusions, setExclusions] = useState([
     "Third-party software licensing costs",
     "Ongoing maintenance and support (covered under a separate SLA)",
     "Changes to scope not documented in this SOW",
     "Data migration from legacy systems unless explicitly included",
   ]);
+
+  useEffect(() => {
+    const prefill = sessionStorage.getItem("cshub_template_prefill");
+    if (prefill) {
+      try {
+        const data = JSON.parse(prefill);
+        if (data.scope) setScope(data.scope);
+        if (data.deliverables) setDeliverables(data.deliverables);
+        if (data.assumptions) setAssumptions(data.assumptions);
+        if (data.paymentTerms) setPaymentTerms(data.paymentTerms);
+        if (data.exclusions) setExclusions(data.exclusions);
+      } catch {}
+      sessionStorage.removeItem("cshub_template_prefill");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addDeliverable = () => setDeliverables(p => [...p, { id: Date.now().toString(), title: "", description: "", milestone: "" }]);
   const addAssumption = () => setAssumptions(p => [...p, { id: Date.now().toString(), text: "" }]);
@@ -247,4 +263,5 @@ export default function NewSOWPage() {
     </AppLayout>
   );
 }
+
 
