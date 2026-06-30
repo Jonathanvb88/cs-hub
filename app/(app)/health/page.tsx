@@ -37,6 +37,7 @@ export default function HealthPage() {
   };
 
   return (
+    <>
           <Header title="Customer Health" subtitle="Monitor and improve engagement across all clients" />
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
@@ -119,5 +120,6 @@ export default function HealthPage() {
           ))}
         </div>
       </div>
+    </>
   );
 }
