@@ -100,6 +100,7 @@ export default function CommunicationsPage() {
   };
 
   return (
+    <>
           <Header
         title="Communications"
         subtitle="Emails and meeting notes — saved to database"
@@ -225,5 +226,6 @@ export default function CommunicationsPage() {
           </div>
         )}
       </div>
+    </>
   );
 }
