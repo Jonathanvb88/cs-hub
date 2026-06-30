@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients, mockProjects, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 import { mockCommunications, mockFollowUpsFull } from "@/lib/mockDataSprint2";
@@ -29,11 +28,9 @@ export default function RelationshipCoachPage() {
   const clientFollowUps = mockFollowUpsFull.filter(f => f.clientId === id && f.status === "pending");
 
   if (!client) return (
-    <AppLayout>
-      <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
         Client not found. <Link href="/clients" style={{ color: "var(--accent-blue)" }}>Back to clients</Link>
       </div>
-    </AppLayout>
   );
 
   const handleGenerateBrief = async () => {
