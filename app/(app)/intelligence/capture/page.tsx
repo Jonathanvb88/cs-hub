@@ -474,7 +474,6 @@ IT Manager, ABC Retail Group`;
                 const tasks = result.developerTasks.filter(t => t.category === cat);
                 if (!tasks.length) return null;
                 return (
-    <>
                   <div key={cat}>
                     <div style={{ padding: "8px 18px", background: "var(--bg-elevated)", fontSize: 10, fontWeight: 700, color: CATEGORY_COLORS[cat], textTransform: "uppercase", letterSpacing: "0.06em", borderBottom: "1px solid var(--border)" }}>
                       {cat}
@@ -555,6 +554,6 @@ IT Manager, ABC Retail Group`;
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </>
-    </>
   );
 }
+
