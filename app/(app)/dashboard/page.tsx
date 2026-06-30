@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockEmails, mockFollowUps, mockMeetings, mockClients, getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
 
@@ -15,8 +14,7 @@ export default function DashboardPage() {
   const today = new Date().toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Dashboard"
         subtitle={today}
         actions={
@@ -226,6 +224,5 @@ export default function DashboardPage() {
         )}
 
       </div>
-    </AppLayout>
   );
 }
