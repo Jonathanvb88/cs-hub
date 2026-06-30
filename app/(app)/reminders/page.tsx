@@ -229,7 +229,6 @@ export default function RemindersPage() {
               const client = mockClients.find(c => c.id === selectedMilestone.clientId);
               if (!client) return null;
               return (
-    <>
                 <div className="card">
                   <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>
                     Client Snapshot
@@ -260,6 +259,6 @@ export default function RemindersPage() {
         )}
       </div>
     </>
-    </>
   );
 }
+
