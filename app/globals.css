@@ -178,7 +178,10 @@ body {
   .desktop-client-panel { display: none !important; }
   .mobile-bottom-nav { display: flex !important; }
   .app-main-content { margin-left: 0 !important; margin-right: 0 !important; padding-bottom: 64px !important; }
+  .ai-assistant-bubble { bottom: 76px !important; }
+  .ai-assistant-panel { bottom: 140px !important; left: 12px !important; right: 12px !important; width: auto !important; }
 }
 @media (min-width: 769px) {
   .mobile-bottom-nav { display: none !important; }
 }
+
