@@ -121,6 +121,7 @@ export default function DocumentsPage() {
   };
 
   return (
+    <>
           <Header
         title="Documents"
         subtitle="Quotes, SOWs, POCs and proposals — saved to database"
@@ -330,5 +331,6 @@ export default function DocumentsPage() {
           )}
         </div>
       </div>
+    </>
   );
 }
