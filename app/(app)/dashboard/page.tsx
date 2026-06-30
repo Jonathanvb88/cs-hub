@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const today = new Date().toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
+    <>
           <Header
         title="Dashboard"
         subtitle={today}
@@ -224,5 +225,6 @@ export default function DashboardPage() {
         )}
 
       </div>
+    </>
   );
 }
