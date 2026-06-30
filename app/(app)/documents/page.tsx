@@ -1,9 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
-import { mockDocuments } from "@/lib/mockDataSprint2";
+
+interface Document {
+  id: string;
+  client_id: string | null;
+  client_name: string | null;
+  type: string;
+  title: string;
+  version: string;
+  status: string;
+  total_value: string | number;
+  currency: string;
+  created_at: string;
+}
 
 const statusBadge: Record<string, string> = {
   draft: "badge-gray",
@@ -23,25 +35,46 @@ const typeColor: Record<string, string> = {
 };
 
 export default function DocumentsPage() {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  const filtered = mockDocuments.filter(d => {
+  const fetchDocuments = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/db/documents");
+      if (!res.ok) throw new Error("Failed to load documents");
+      const data = await res.json();
+      setDocuments(data.documents || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchDocuments(); }, []);
+
+  const filtered = documents.filter(d => {
     const matchType = filter === "all" || d.type === filter;
-    const matchSearch = d.title.toLowerCase().includes(search.toLowerCase()) ||
-      d.clientName.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !search ||
+      d.title.toLowerCase().includes(search.toLowerCase()) ||
+      (d.client_name || "").toLowerCase().includes(search.toLowerCase());
     return matchType && matchSearch;
   });
 
-  const totalValue = mockDocuments
+  const totalValue = documents
     .filter(d => d.status === "accepted" || d.status === "approved")
-    .reduce((sum, d) => sum + d.totalValue, 0);
+    .reduce((sum, d) => sum + Number(d.total_value || 0), 0);
 
   return (
     <AppLayout>
       <Header
         title="Documents"
-        subtitle="Quotes, SOWs, POCs and proposals"
+        subtitle="Quotes, SOWs, POCs and proposals — saved to database"
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <Link href="/documents/quote/new">
@@ -58,11 +91,17 @@ export default function DocumentsPage() {
       />
 
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+        {error && (
+          <div style={{ padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, fontSize: 13, color: "var(--accent-red)" }}>
+            {error}
+          </div>
+        )}
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
-            { label: "Total Documents", value: mockDocuments.length, color: "var(--accent-blue)" },
-            { label: "Quotes", value: mockDocuments.filter(d => d.type === "quote").length, color: "var(--accent-green)" },
-            { label: "SOWs", value: mockDocuments.filter(d => d.type === "sow").length, color: "var(--accent-blue)" },
+            { label: "Total Documents", value: documents.length, color: "var(--accent-blue)" },
+            { label: "Quotes", value: documents.filter(d => d.type === "quote").length, color: "var(--accent-green)" },
+            { label: "SOWs", value: documents.filter(d => d.type === "sow").length, color: "var(--accent-blue)" },
             { label: "Accepted Value", value: `R${(totalValue / 1000).toFixed(0)}k`, color: "var(--accent-amber)" },
           ].map(stat => (
             <div key={stat.label} className="card" style={{ padding: "16px 20px" }}>
@@ -104,40 +143,46 @@ export default function DocumentsPage() {
               <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
             ))}
           </div>
-          {filtered.map(doc => (
-            <div key={doc.id} className="table-row" style={{
-              gridTemplateColumns: "32px 2fr 1.5fr 90px 100px 130px 120px 70px",
-              alignItems: "center",
-            }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: 6,
-                background: (typeColor[doc.type] || "var(--accent-blue)") + "18",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <svg width="13" height="13" fill="none" stroke={typeColor[doc.type] || "var(--accent-blue)"} strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{doc.title}</div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{doc.version}</div>
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{doc.clientName}</div>
-              <div><span className="badge badge-gray" style={{ fontSize: 10 }}>{doc.type.toUpperCase()}</span></div>
-              <div><span className={`badge ${statusBadge[doc.status] || "badge-gray"}`}>{doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</span></div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: doc.totalValue > 0 ? "var(--text-primary)" : "var(--text-muted)" }}>
-                {doc.totalValue > 0 ? `R ${doc.totalValue.toLocaleString("en-ZA")}` : "—"}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-                {new Date(doc.createdAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
-              </div>
-              <div>
-                <button className="btn-secondary" style={{ fontSize: 11, padding: "3px 8px" }}>View</button>
-              </div>
+
+          {loading ? (
+            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Loading from database...</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
+              No documents yet — create a Quote, SOW, or POC above to get started
             </div>
-          ))}
-          {filtered.length === 0 && (
-            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>No documents found</div>
+          ) : (
+            filtered.map(doc => (
+              <div key={doc.id} className="table-row" style={{
+                gridTemplateColumns: "32px 2fr 1.5fr 90px 100px 130px 120px 70px",
+                alignItems: "center",
+              }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: (typeColor[doc.type] || "var(--accent-blue)") + "18",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <svg width="13" height="13" fill="none" stroke={typeColor[doc.type] || "var(--accent-blue)"} strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{doc.title}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{doc.version}</div>
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{doc.client_name || "—"}</div>
+                <div><span className="badge badge-gray" style={{ fontSize: 10 }}>{doc.type.toUpperCase()}</span></div>
+                <div><span className={`badge ${statusBadge[doc.status] || "badge-gray"}`}>{doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</span></div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: Number(doc.total_value) > 0 ? "var(--text-primary)" : "var(--text-muted)" }}>
+                  {Number(doc.total_value) > 0 ? `R ${Number(doc.total_value).toLocaleString("en-ZA")}` : "—"}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                  {new Date(doc.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
+                </div>
+                <div>
+                  <button className="btn-secondary" style={{ fontSize: 11, padding: "3px 8px" }}>View</button>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
