@@ -26,6 +26,8 @@ export default function NewSOWPage() {
   const [endDate, setEndDate] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("50% deposit upon acceptance. 50% balance upon go-live.");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const [deliverables, setDeliverables] = useState<Deliverable[]>([
     { id: "1", title: "Discovery & Requirements Sign-off", description: "Documented requirements signed off by client.", milestone: "Week 1" },
@@ -55,6 +57,35 @@ export default function NewSOWPage() {
 
   const selectedClient = mockClients.find(c => c.id === clientId);
 
+  const handleSaveSOW = async () => {
+    setSaveError("");
+    if (!title.trim()) { setSaveError("Please add a SOW title before saving."); return; }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/db/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: clientId || null,
+          type: "sow",
+          title,
+          version: "v1.0",
+          status: "draft",
+          contentJson: { projectName, scope, startDate, endDate, paymentTerms, deliverables, assumptions, exclusions },
+          totalValue: 0,
+          currency: "ZAR",
+          createdBy: "Jonathan",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save SOW");
+      setSaved(true);
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Failed to save SOW");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <AppLayout>
       <Header
@@ -64,15 +95,21 @@ export default function NewSOWPage() {
           <div style={{ display: "flex", gap: 8 }}>
             <Link href="/documents"><button className="btn-secondary" style={{ fontSize: 12 }}>Cancel</button></Link>
             <button className="btn-secondary" style={{ fontSize: 12 }}>Preview PDF</button>
-            <button className="btn-primary" style={{ fontSize: 12 }} onClick={() => setSaved(true)}>Save SOW</button>
+            <button className="btn-primary" style={{ fontSize: 12, opacity: saving ? 0.7 : 1 }} onClick={handleSaveSOW} disabled={saving}>{saving ? "Saving..." : "Save SOW"}</button>
           </div>
         }
       />
 
+      {saveError && (
+        <div style={{ margin: "16px 24px 0", padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, fontSize: 13, color: "var(--accent-red)" }}>
+          {saveError}
+        </div>
+      )}
+
       {saved && (
         <div style={{ margin: "16px 24px 0", padding: "12px 16px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "#10b981" }}>
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          SOW saved as draft.
+          SOW saved to database. <a href="/documents" style={{ color: "#10b981", textDecoration: "underline" }}>View in Documents</a>
           <button onClick={() => setSaved(false)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#10b981", cursor: "pointer", fontSize: 18 }}>×</button>
         </div>
       )}
@@ -210,3 +247,4 @@ export default function NewSOWPage() {
     </AppLayout>
   );
 }
+
