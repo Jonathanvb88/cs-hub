@@ -17,6 +17,14 @@ interface Document {
   created_at: string;
 }
 
+interface Template {
+  id: string;
+  type: string;
+  name: string;
+  description: string | null;
+  content_json: Record<string, unknown>;
+}
+
 const statusBadge: Record<string, string> = {
   draft: "badge-gray",
   review: "badge-amber",
@@ -34,12 +42,22 @@ const typeColor: Record<string, string> = {
   proposal: "var(--accent-amber)",
 };
 
+const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "POC" };
+const typeRoute: Record<string, string> = { quote: "/documents/quote/new", sow: "/documents/sow/new", poc: "/documents/poc/new" };
+
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [pickerType, setPickerType] = useState<string | null>(null);
+  const [showAddTemplate, setShowAddTemplate] = useState(false);
+  const [newTplType, setNewTplType] = useState("quote");
+  const [newTplName, setNewTplName] = useState("");
+  const [newTplDesc, setNewTplDesc] = useState("");
+  const [savingTpl, setSavingTpl] = useState(false);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -56,7 +74,15 @@ export default function DocumentsPage() {
     }
   };
 
-  useEffect(() => { fetchDocuments(); }, []);
+  const fetchTemplates = async () => {
+    try {
+      const res = await fetch("/api/db/templates");
+      const data = await res.json();
+      setTemplates(data.templates || []);
+    } catch {}
+  };
+
+  useEffect(() => { fetchDocuments(); fetchTemplates(); }, []);
 
   const filtered = documents.filter(d => {
     const matchType = filter === "all" || d.type === filter;
@@ -70,6 +96,31 @@ export default function DocumentsPage() {
     .filter(d => d.status === "accepted" || d.status === "approved")
     .reduce((sum, d) => sum + Number(d.total_value || 0), 0);
 
+  const templatesForType = (type: string) => templates.filter(t => t.type === type);
+
+  const useTemplate = (template: Template) => {
+    sessionStorage.setItem("cshub_template_prefill", JSON.stringify(template.content_json));
+    window.location.href = typeRoute[template.type];
+  };
+
+  const saveNewTemplate = async () => {
+    if (!newTplName.trim()) return;
+    setSavingTpl(true);
+    try {
+      await fetch("/api/db/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: newTplType, name: newTplName, description: newTplDesc, contentJson: {} }),
+      });
+      await fetchTemplates();
+      setNewTplName(""); setNewTplDesc(""); setShowAddTemplate(false);
+    } catch (e) {
+      setError("Failed to save template");
+    } finally {
+      setSavingTpl(false);
+    }
+  };
+
   return (
     <AppLayout>
       <Header
@@ -77,29 +128,125 @@ export default function DocumentsPage() {
         subtitle="Quotes, SOWs, POCs and proposals — saved to database"
         actions={
           <div style={{ display: "flex", gap: 8 }}>
-            <Link href="/documents/quote/new">
-              <button className="btn-secondary" style={{ fontSize: 12 }}>New Quote</button>
-            </Link>
-            <Link href="/documents/sow/new">
-              <button className="btn-secondary" style={{ fontSize: 12 }}>New SOW</button>
-            </Link>
-            <Link href="/documents/poc/new">
-              <button className="btn-primary" style={{ fontSize: 12 }}>New POC</button>
-            </Link>
+            <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowAddTemplate(true)}>
+              + New Template
+            </button>
           </div>
         }
       />
 
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
         {error && (
-          <div style={{ padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, fontSize: 13, color: "var(--accent-red)" }}>
+          <div style={{ padding: "10px 14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, fontSize: 13, color: "var(--accent-red)" }}>
             {error}
+          </div>
+        )}
+
+        {/* Template-driven creation buttons — the main "create new document" entry point */}
+        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+            Create New Document
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
+            {["quote", "sow", "poc"].map((type, i) => (
+              <div key={type} style={{ padding: 20, borderRight: i < 2 ? "1px solid var(--border)" : "none", position: "relative" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: typeColor[type] + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="15" height="15" fill="none" stroke={typeColor[type]} strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>{typeLabel[type]}</span>
+                </div>
+                <button
+                  className="btn-primary"
+                  style={{ width: "100%", justifyContent: "center", marginBottom: 8 }}
+                  onClick={() => setPickerType(pickerType === type ? null : type)}
+                >
+                  Use a Template
+                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" style={{ transform: pickerType === type ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <Link href={typeRoute[type]}>
+                  <button className="btn-secondary" style={{ width: "100%", justifyContent: "center", fontSize: 12 }}>
+                    Start from Blank
+                  </button>
+                </Link>
+
+                {pickerType === type && (
+                  <div style={{
+                    position: "absolute", top: "100%", left: 8, right: 8, zIndex: 10,
+                    background: "var(--bg-surface)", border: "1px solid var(--border)",
+                    borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                    marginTop: 4, overflow: "hidden",
+                  }}>
+                    {templatesForType(type).length === 0 ? (
+                      <div style={{ padding: 16, fontSize: 12, color: "var(--text-muted)", textAlign: "center" }}>
+                        No templates yet for {typeLabel[type]}
+                      </div>
+                    ) : (
+                      templatesForType(type).map(tpl => (
+                        <button
+                          key={tpl.id}
+                          onClick={() => useTemplate(tpl)}
+                          style={{
+                            display: "block", width: "100%", textAlign: "left",
+                            padding: "10px 14px", border: "none", borderBottom: "1px solid var(--border)",
+                            background: "var(--bg-surface)", cursor: "pointer",
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "var(--bg-surface)")}
+                        >
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{tpl.name}</div>
+                          {tpl.description && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{tpl.description}</div>}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Add template form */}
+        {showAddTemplate && (
+          <div className="card" style={{ border: "1px solid var(--accent-green)" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Template Shell</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 2fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Document Type</label>
+                <select className="input" value={newTplType} onChange={e => setNewTplType(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="quote">Quote</option>
+                  <option value="sow">SOW</option>
+                  <option value="poc">POC</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Template Name</label>
+                <input className="input" placeholder="e.g. Enterprise SOW" value={newTplName} onChange={e => setNewTplName(e.target.value)} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Description</label>
+                <input className="input" placeholder="Brief description" value={newTplDesc} onChange={e => setNewTplDesc(e.target.value)} />
+              </div>
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+              This creates a named shell. Build it out fully by using it once, filling in the form, and saving — future updates to template content editing are coming in a later sprint.
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="btn-primary" style={{ fontSize: 12, opacity: savingTpl ? 0.7 : 1 }} onClick={saveNewTemplate} disabled={savingTpl}>
+                {savingTpl ? "Saving..." : "Save Template"}
+              </button>
+              <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowAddTemplate(false)}>Cancel</button>
+            </div>
           </div>
         )}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
-            { label: "Total Documents", value: documents.length, color: "var(--accent-blue)" },
+            { label: "Total Documents", value: documents.length, color: "var(--accent-green)" },
             { label: "Quotes", value: documents.filter(d => d.type === "quote").length, color: "var(--accent-green)" },
             { label: "SOWs", value: documents.filter(d => d.type === "sow").length, color: "var(--accent-blue)" },
             { label: "Accepted Value", value: `R${(totalValue / 1000).toFixed(0)}k`, color: "var(--accent-amber)" },
@@ -124,9 +271,8 @@ export default function DocumentsPage() {
               <button key={f} onClick={() => setFilter(f)} style={{
                 padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500,
                 border: "1px solid var(--border-light)", cursor: "pointer",
-                background: filter === f ? "var(--accent-blue)" : "var(--bg-elevated)",
+                background: filter === f ? "var(--accent-green)" : "var(--bg-elevated)",
                 color: filter === f ? "white" : "var(--text-secondary)",
-                transition: "all 0.15s",
               }}>
                 {f === "all" ? "All" : f.toUpperCase()}
               </button>
@@ -148,7 +294,7 @@ export default function DocumentsPage() {
             <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Loading from database...</div>
           ) : filtered.length === 0 ? (
             <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
-              No documents yet — create a Quote, SOW, or POC above to get started
+              No documents yet — use a template or start blank above
             </div>
           ) : (
             filtered.map(doc => (
@@ -158,10 +304,10 @@ export default function DocumentsPage() {
               }}>
                 <div style={{
                   width: 28, height: 28, borderRadius: 6,
-                  background: (typeColor[doc.type] || "var(--accent-blue)") + "18",
+                  background: (typeColor[doc.type] || "var(--accent-green)") + "18",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <svg width="13" height="13" fill="none" stroke={typeColor[doc.type] || "var(--accent-blue)"} strokeWidth={2} viewBox="0 0 24 24">
+                  <svg width="13" height="13" fill="none" stroke={typeColor[doc.type] || "var(--accent-green)"} strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
