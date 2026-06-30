@@ -102,6 +102,7 @@ export default function NewSOWPage() {
   };
 
   return (
+    <>
           <Header
         title="New SOW"
         subtitle="Statement of Work"
@@ -258,6 +259,7 @@ export default function NewSOWPage() {
           </div>
         </div>
       </div>
+    </>
   );
 }
 
