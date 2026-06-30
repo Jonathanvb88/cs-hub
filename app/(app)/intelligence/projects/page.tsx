@@ -110,6 +110,7 @@ Assess similarity and estimate reuse potential.`;
     score >= 80 ? "var(--accent-green)" : score >= 50 ? "var(--accent-amber)" : "var(--accent-red)";
 
   return (
+    <>
           <Header
         title="Project Intelligence"
         subtitle="AI searches previous projects for similar work and estimates reuse potential"
@@ -255,5 +256,6 @@ Assess similarity and estimate reuse potential.`;
           </>
         )}
       </div>
+    </>
   );
 }
