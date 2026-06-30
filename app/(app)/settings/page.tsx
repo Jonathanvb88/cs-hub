@@ -1,6 +1,7 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 
 interface GraphEmail {
@@ -132,6 +133,30 @@ export default function SettingsPage() {
           )}
         </div>
 
+        {/* Priority Categories */}
+        <div className="card">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 10,
+                background: "var(--accent-green-bg)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>Priority Categories</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Customize labels and colors used on Follow-ups and Projects</div>
+              </div>
+            </div>
+            <Link href="/settings/priorities">
+              <button className="btn-secondary" style={{ fontSize: 12 }}>Manage</button>
+            </Link>
+          </div>
+        </div>
+
         {/* Status note */}
         <div style={{
           background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)",
@@ -146,3 +171,4 @@ export default function SettingsPage() {
     </>
   );
 }
+
