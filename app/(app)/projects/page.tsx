@@ -1,7 +1,19 @@
 "use client";
+import { useState, useEffect } from "react";
 import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
-import { mockProjects, mockClients } from "@/lib/mockData";
+
+interface Project {
+  id: string;
+  client_id: string | null;
+  client_name: string | null;
+  name: string;
+  status: string;
+  type: string;
+  priority: string;
+  target_date: string | null;
+  created_at: string;
+}
 
 const statusColor: Record<string, string> = {
   active: "badge-green",
@@ -19,13 +31,72 @@ const priorityColor: Record<string, string> = {
 };
 
 export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newType, setNewType] = useState("new_build");
+  const [newPriority, setNewPriority] = useState("medium");
+  const [newTargetDate, setNewTargetDate] = useState("");
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/db/projects");
+      if (!res.ok) throw new Error("Failed to load projects");
+      const data = await res.json();
+      setProjects(data.projects || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchProjects(); }, []);
+
+  const addProject = async () => {
+    if (!newName.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/db/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, type: newType, priority: newPriority, targetDate: newTargetDate || null }),
+      });
+      if (!res.ok) throw new Error("Failed to save project");
+      await fetchProjects();
+      setNewName(""); setNewType("new_build"); setNewPriority("medium"); setNewTargetDate(""); setShowAdd(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save project");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    setProjects(p => p.map(proj => proj.id === id ? { ...proj, status } : proj));
+    try {
+      await fetch("/api/db/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+    } catch {
+      fetchProjects();
+    }
+  };
+
   return (
     <AppLayout>
       <Header
         title="Projects"
-        subtitle={`${mockProjects.length} projects`}
+        subtitle={`${projects.length} projects — saved to database`}
         actions={
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={() => setShowAdd(p => !p)}>
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -34,37 +105,95 @@ export default function ProjectsPage() {
         }
       />
       <div style={{ padding: 24 }}>
+        {error && (
+          <div style={{ padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, fontSize: 13, color: "var(--accent-red)", marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+
+        {showAdd && (
+          <div className="card" style={{ border: "1px solid var(--accent-blue)", marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Project</div>
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Project Name</label>
+                <input className="input" placeholder="e.g. Loyalty Programme Phase 2" value={newName} onChange={e => setNewName(e.target.value)} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Type</label>
+                <select className="input" value={newType} onChange={e => setNewType(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="new_build">New Build</option>
+                  <option value="enhancement">Enhancement</option>
+                  <option value="support">Support</option>
+                  <option value="annual_recurring">Annual Recurring</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Priority</label>
+                <select className="input" value={newPriority} onChange={e => setNewPriority(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Target Date</label>
+                <input className="input" type="date" value={newTargetDate} onChange={e => setNewTargetDate(e.target.value)} />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="btn-primary" style={{ fontSize: 12, opacity: saving ? 0.7 : 1 }} onClick={addProject} disabled={saving}>
+                {saving ? "Saving..." : "Save Project"}
+              </button>
+              <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowAdd(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          {/* Table header */}
           <div style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1.5fr 100px 100px 140px 80px",
-            padding: "10px 20px",
-            borderBottom: "1px solid var(--border)",
-            background: "var(--bg-elevated)",
+            display: "grid", gridTemplateColumns: "2fr 1.5fr 100px 100px 140px 80px",
+            padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)",
           }}>
             {["Project", "Client", "Status", "Priority", "Target Date", ""].map(h => (
               <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
             ))}
           </div>
-          {mockProjects.map(project => {
-            const client = mockClients.find(c => c.id === project.clientId);
-            return (
+          {loading ? (
+            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Loading from database...</div>
+          ) : projects.length === 0 ? (
+            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
+              No projects yet — create one above to get started
+            </div>
+          ) : (
+            projects.map(project => (
               <div key={project.id} className="table-row" style={{
                 gridTemplateColumns: "2fr 1.5fr 100px 100px 140px 80px",
                 alignItems: "center",
               }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{project.name}</div>
-                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{client?.name}</div>
-                <div><span className={`badge ${statusColor[project.status] || "badge-gray"}`}>{project.status.charAt(0).toUpperCase() + project.status.slice(1)}</span></div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{project.client_name || "—"}</div>
+                <div>
+                  <select
+                    value={project.status}
+                    onChange={e => updateStatus(project.id, e.target.value)}
+                    className={`badge ${statusColor[project.status] || "badge-gray"}`}
+                    style={{ border: "none", cursor: "pointer", appearance: "none", paddingRight: 8 }}
+                  >
+                    <option value="active">Active</option>
+                    <option value="on_hold">On Hold</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
                 <div><span className={`badge ${priorityColor[project.priority] || "badge-gray"}`}>{project.priority.charAt(0).toUpperCase() + project.priority.slice(1)}</span></div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-                  {new Date(project.targetDate).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
+                  {project.target_date ? new Date(project.target_date).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                 </div>
                 <div><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open</button></div>
               </div>
-            );
-          })}
+            ))
+          )}
         </div>
       </div>
     </AppLayout>
