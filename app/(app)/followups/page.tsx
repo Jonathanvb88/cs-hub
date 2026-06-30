@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 
 interface FollowUp {
@@ -81,8 +80,7 @@ export default function FollowUpsPage() {
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Follow-ups"
         subtitle={`${items.filter(f => f.status === "pending").length} pending — saved to database`}
         actions={
@@ -199,6 +197,5 @@ export default function FollowUpsPage() {
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }
