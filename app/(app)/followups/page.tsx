@@ -80,6 +80,7 @@ export default function FollowUpsPage() {
   };
 
   return (
+    <>
           <Header
         title="Follow-ups"
         subtitle={`${items.filter(f => f.status === "pending").length} pending — saved to database`}
@@ -198,6 +199,7 @@ export default function FollowUpsPage() {
           </div>
         )}
       </div>
+    </>
     </>
   );
 }
