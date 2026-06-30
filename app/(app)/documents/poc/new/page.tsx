@@ -16,6 +16,8 @@ export default function NewPOCPage() {
   const [duration, setDuration] = useState("2 weeks");
   const [resources, setResources] = useState("1 x Developer, 1 x CSM");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const [criteria, setCriteria] = useState<SuccessCriteria[]>([
     { id: "1", criteria: "Core user journey completes end-to-end", measure: "User can complete the full workflow without errors" },
@@ -28,6 +30,35 @@ export default function NewPOCPage() {
 
   const selectedClient = mockClients.find(c => c.id === clientId);
 
+  const handleSavePOC = async () => {
+    setSaveError("");
+    if (!title.trim()) { setSaveError("Please add a POC title before saving."); return; }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/db/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: clientId || null,
+          type: "poc",
+          title,
+          version: "v1.0",
+          status: "draft",
+          contentJson: { objective, scope, outOfScope, duration, resources, criteria },
+          totalValue: 0,
+          currency: "ZAR",
+          createdBy: "Jonathan",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save POC");
+      setSaved(true);
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Failed to save POC");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <AppLayout>
       <Header
@@ -36,15 +67,21 @@ export default function NewPOCPage() {
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <Link href="/documents"><button className="btn-secondary" style={{ fontSize: 12 }}>Cancel</button></Link>
-            <button className="btn-primary" style={{ fontSize: 12 }} onClick={() => setSaved(true)}>Save POC</button>
+            <button className="btn-primary" style={{ fontSize: 12, opacity: saving ? 0.7 : 1 }} onClick={handleSavePOC} disabled={saving}>{saving ? "Saving..." : "Save POC"}</button>
           </div>
         }
       />
 
+      {saveError && (
+        <div style={{ margin: "16px 24px 0", padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, fontSize: 13, color: "var(--accent-red)" }}>
+          {saveError}
+        </div>
+      )}
+
       {saved && (
         <div style={{ margin: "16px 24px 0", padding: "12px 16px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "#10b981" }}>
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          POC saved as draft.
+          POC saved to database. <a href="/documents" style={{ color: "#10b981", textDecoration: "underline" }}>View in Documents</a>
           <button onClick={() => setSaved(false)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#10b981", cursor: "pointer", fontSize: 18 }}>×</button>
         </div>
       )}
@@ -148,3 +185,4 @@ export default function NewPOCPage() {
     </AppLayout>
   );
 }
+
