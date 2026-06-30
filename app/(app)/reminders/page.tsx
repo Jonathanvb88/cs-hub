@@ -81,6 +81,7 @@ export default function RemindersPage() {
   const activeReminders = smartReminders.filter(r => !dismissed.includes(r.clientId + r.reminder));
 
   return (
+    <>
           <Header
         title="Smart Reminders"
         subtitle="AI-detected milestones and proactive engagement prompts"
@@ -258,6 +259,7 @@ export default function RemindersPage() {
           </div>
         )}
       </div>
+    </>
     </>
   );
 }
