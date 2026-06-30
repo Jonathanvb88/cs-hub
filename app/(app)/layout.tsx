@@ -2,7 +2,6 @@
 import Sidebar from "@/components/layout/Sidebar";
 import ClientContextPanel from "@/components/layout/ClientContextPanel";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
-import AIAssistant from "@/components/assistant/AIAssistant";
 import { ClientContextProvider, useActiveClient } from "@/lib/clientContext";
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
@@ -26,7 +25,6 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       </main>
       <ClientContextPanel />
       <MobileBottomNav />
-      <AIAssistant />
     </div>
   );
 }
