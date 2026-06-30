@@ -1,16 +1,29 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients, mockProjects, mockTimeline, mockEmails, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
+import { mockClients, mockProjects, mockEmails, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 
 const TABS = ["Overview", "Contacts", "Timeline", "Projects", "Documents", "Health"];
 
 export default function ClientProfilePage() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("Overview");
+  const [timelineEvents, setTimelineEvents] = useState<{ type: string; title: string; date: string; meta: string }[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
   const client = mockClients.find(c => c.id === id);
+
+  useEffect(() => {
+    if (activeTab === "Timeline" && id) {
+      setTimelineLoading(true);
+      fetch(`/api/db/timeline?clientId=${id}`)
+        .then(res => res.json())
+        .then(data => setTimelineEvents(data.events || []))
+        .catch(() => setTimelineEvents([]))
+        .finally(() => setTimelineLoading(false));
+    }
+  }, [activeTab, id]);
 
   if (!client) {
     return (
@@ -291,38 +304,48 @@ export default function ClientProfilePage() {
 
         {activeTab === "Timeline" && (
           <div style={{ maxWidth: 600 }}>
-            <div style={{ position: "relative" }}>
-              <div style={{
-                position: "absolute", left: 16, top: 0, bottom: 0,
-                width: 1, background: "var(--border)",
-              }} />
-              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                {mockTimeline.map((item, i) => (
-                  <div key={item.id} style={{ display: "flex", gap: 20, paddingBottom: 24, position: "relative" }}>
-                    <div style={{
-                      width: 32, height: 32, borderRadius: "50%",
-                      background: "var(--bg-elevated)",
-                      border: "2px solid var(--border-light)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, zIndex: 1,
-                    }}>
-                      <svg width="12" height="12" fill="none" stroke="var(--accent-blue)" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d={
-                          item.type === "email" ? "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" :
-                          item.type === "meeting" ? "M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" :
-                          item.type === "document" ? "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" :
-                          "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        } />
-                      </svg>
-                    </div>
-                    <div className="card" style={{ flex: 1, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", marginBottom: 4 }}>{item.title}</div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{item.date}</div>
-                    </div>
-                  </div>
-                ))}
+            {timelineLoading ? (
+              <div style={{ textAlign: "center", padding: 32, color: "var(--text-muted)", fontSize: 13 }}>Loading timeline...</div>
+            ) : timelineEvents.length === 0 ? (
+              <div style={{ textAlign: "center", padding: 32, color: "var(--text-muted)", fontSize: 13 }}>
+                No activity recorded yet for this client. Communications, documents, follow-ups, and projects will appear here automatically.
               </div>
-            </div>
+            ) : (
+              <div style={{ position: "relative" }}>
+                <div style={{
+                  position: "absolute", left: 16, top: 0, bottom: 0,
+                  width: 1, background: "var(--border)",
+                }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                  {timelineEvents.map((item, i) => (
+                    <div key={i} style={{ display: "flex", gap: 20, paddingBottom: 24, position: "relative" }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        background: "var(--bg-elevated)",
+                        border: "2px solid var(--border-light)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, zIndex: 1,
+                      }}>
+                        <svg width="12" height="12" fill="none" stroke="var(--accent-green)" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d={
+                            item.type === "communication" ? "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" :
+                            item.type === "document" ? "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" :
+                            item.type === "project" ? "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" :
+                            "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                          } />
+                        </svg>
+                      </div>
+                      <div className="card" style={{ flex: 1, padding: "12px 16px" }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", marginBottom: 4 }}>{item.title}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                          {new Date(item.date).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })} · {item.meta}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -423,3 +446,4 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
