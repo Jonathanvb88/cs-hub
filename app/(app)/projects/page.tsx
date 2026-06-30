@@ -22,6 +22,12 @@ interface TeamMember {
   name: string;
 }
 
+interface PriorityOption {
+  key: string;
+  label: string;
+  color: string;
+}
+
 const statusColor: Record<string, string> = {
   active: "badge-green",
   completed: "badge-blue",
@@ -30,16 +36,10 @@ const statusColor: Record<string, string> = {
   draft: "badge-gray",
 };
 
-const priorityColor: Record<string, string> = {
-  critical: "badge-red",
-  high: "badge-red",
-  medium: "badge-amber",
-  low: "badge-gray",
-};
-
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [priorities, setPriorities] = useState<PriorityOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -49,6 +49,17 @@ export default function ProjectsPage() {
   const [newPriority, setNewPriority] = useState("medium");
   const [newTargetDate, setNewTargetDate] = useState("");
   const [newAssignedUserId, setNewAssignedUserId] = useState("");
+
+  const getPriorityColor = (key: string) => priorities.find(p => p.key === key)?.color || "#94a3b8";
+  const getPriorityLabel = (key: string) => priorities.find(p => p.key === key)?.label || key;
+
+  const fetchPriorities = async () => {
+    try {
+      const res = await fetch("/api/db/priorities");
+      const data = await res.json();
+      setPriorities(data.priorities || []);
+    } catch {}
+  };
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -73,7 +84,7 @@ export default function ProjectsPage() {
     } catch {}
   };
 
-  useEffect(() => { fetchProjects(); fetchTeam(); }, []);
+  useEffect(() => { fetchProjects(); fetchTeam(); fetchPriorities(); }, []);
 
   const addProject = async () => {
     if (!newName.trim()) return;
@@ -162,9 +173,7 @@ export default function ProjectsPage() {
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Priority</label>
                 <select className="input" value={newPriority} onChange={e => setNewPriority(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
+                  {priorities.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
                 </select>
               </div>
               <div>
@@ -224,7 +233,11 @@ export default function ProjectsPage() {
                     <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
-                <div><span className={`badge ${priorityColor[project.priority] || "badge-gray"}`}>{project.priority.charAt(0).toUpperCase() + project.priority.slice(1)}</span></div>
+                <div>
+                  <span className="badge" style={{ background: getPriorityColor(project.priority) + "1a", color: getPriorityColor(project.priority) }}>
+                    {getPriorityLabel(project.priority)}
+                  </span>
+                </div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
                   {project.target_date ? new Date(project.target_date).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                 </div>
@@ -256,3 +269,4 @@ export default function ProjectsPage() {
     </>
   );
 }
+
