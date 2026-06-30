@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients, getHealthColor } from "@/lib/mockData";
 
@@ -82,8 +81,7 @@ export default function RemindersPage() {
   const activeReminders = smartReminders.filter(r => !dismissed.includes(r.clientId + r.reminder));
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Smart Reminders"
         subtitle="AI-detected milestones and proactive engagement prompts"
         actions={
@@ -259,6 +257,5 @@ export default function RemindersPage() {
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }
