@@ -24,7 +24,7 @@ export default function ClientProfilePage() {
   const clientEmails = mockEmails.filter(e => e.clientId === id);
 
   return (
-    <AppLayout>
+    <>
       <Header
         title={client.name}
         subtitle={client.industry}
@@ -420,6 +420,6 @@ export default function ClientProfilePage() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }
