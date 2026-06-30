@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 
 interface Project {
@@ -12,6 +13,13 @@ interface Project {
   priority: string;
   target_date: string | null;
   created_at: string;
+  assigned_user_id: string | null;
+  assigned_user_name: string | null;
+}
+
+interface TeamMember {
+  id: string;
+  name: string;
 }
 
 const statusColor: Record<string, string> = {
@@ -31,6 +39,7 @@ const priorityColor: Record<string, string> = {
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -39,6 +48,7 @@ export default function ProjectsPage() {
   const [newType, setNewType] = useState("new_build");
   const [newPriority, setNewPriority] = useState("medium");
   const [newTargetDate, setNewTargetDate] = useState("");
+  const [newAssignedUserId, setNewAssignedUserId] = useState("");
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -55,7 +65,15 @@ export default function ProjectsPage() {
     }
   };
 
-  useEffect(() => { fetchProjects(); }, []);
+  const fetchTeam = async () => {
+    try {
+      const res = await fetch("/api/db/users");
+      const data = await res.json();
+      setTeam(data.users || []);
+    } catch {}
+  };
+
+  useEffect(() => { fetchProjects(); fetchTeam(); }, []);
 
   const addProject = async () => {
     if (!newName.trim()) return;
@@ -64,11 +82,11 @@ export default function ProjectsPage() {
       const res = await fetch("/api/db/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, type: newType, priority: newPriority, targetDate: newTargetDate || null }),
+        body: JSON.stringify({ name: newName, type: newType, priority: newPriority, targetDate: newTargetDate || null, assignedUserId: newAssignedUserId || null }),
       });
       if (!res.ok) throw new Error("Failed to save project");
       await fetchProjects();
-      setNewName(""); setNewType("new_build"); setNewPriority("medium"); setNewTargetDate(""); setShowAdd(false);
+      setNewName(""); setNewType("new_build"); setNewPriority("medium"); setNewTargetDate(""); setNewAssignedUserId(""); setShowAdd(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save project");
     } finally {
@@ -89,9 +107,23 @@ export default function ProjectsPage() {
     }
   };
 
+  const reassignProject = async (id: string, userId: string) => {
+    setProjects(p => p.map(proj => proj.id === id ? { ...proj, assigned_user_id: userId } : proj));
+    try {
+      await fetch("/api/db/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, assignedUserId: userId }),
+      });
+      fetchProjects();
+    } catch {
+      fetchProjects();
+    }
+  };
+
   return (
     <>
-          <Header
+      <Header
         title="Projects"
         subtitle={`${projects.length} projects — saved to database`}
         actions={
@@ -113,7 +145,7 @@ export default function ProjectsPage() {
         {showAdd && (
           <div className="card" style={{ border: "1px solid var(--accent-blue)", marginBottom: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Project</div>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.2fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Project Name</label>
                 <input className="input" placeholder="e.g. Loyalty Programme Phase 2" value={newName} onChange={e => setNewName(e.target.value)} />
@@ -139,6 +171,13 @@ export default function ProjectsPage() {
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Target Date</label>
                 <input className="input" type="date" value={newTargetDate} onChange={e => setNewTargetDate(e.target.value)} />
               </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Assign To</label>
+                <select className="input" value={newAssignedUserId} onChange={e => setNewAssignedUserId(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="">Unassigned</option>
+                  {team.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button className="btn-primary" style={{ fontSize: 12, opacity: saving ? 0.7 : 1 }} onClick={addProject} disabled={saving}>
@@ -151,10 +190,10 @@ export default function ProjectsPage() {
 
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{
-            display: "grid", gridTemplateColumns: "2fr 1.5fr 100px 100px 140px 80px",
+            display: "grid", gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px",
             padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)",
           }}>
-            {["Project", "Client", "Status", "Priority", "Target Date", ""].map(h => (
+            {["Project", "Client", "Status", "Priority", "Target Date", "Assigned To", ""].map(h => (
               <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
             ))}
           </div>
@@ -167,7 +206,7 @@ export default function ProjectsPage() {
           ) : (
             projects.map(project => (
               <div key={project.id} className="table-row" style={{
-                gridTemplateColumns: "2fr 1.5fr 100px 100px 140px 80px",
+                gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px",
                 alignItems: "center",
               }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{project.name}</div>
@@ -189,7 +228,26 @@ export default function ProjectsPage() {
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
                   {project.target_date ? new Date(project.target_date).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                 </div>
-                <div><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open</button></div>
+                <div>
+                  <select
+                    value={project.assigned_user_id || ""}
+                    onChange={e => reassignProject(project.id, e.target.value)}
+                    style={{
+                      fontSize: 11, padding: "3px 6px", borderRadius: 6, width: "100%",
+                      border: "1px solid var(--border)", background: "var(--bg-elevated)",
+                      color: project.assigned_user_name ? "var(--text-primary)" : "var(--text-muted)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <option value="">Unassigned</option>
+                    {team.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <Link href={`/projects/${project.id}`}>
+                    <button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open</button>
+                  </Link>
+                </div>
               </div>
             ))
           )}
