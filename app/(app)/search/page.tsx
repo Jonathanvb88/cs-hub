@@ -16,6 +16,7 @@ export default function SearchPage() {
   const total = results ? results.clients.length + results.projects.length + results.emails.length : 0;
 
   return (
+    <>
           <Header title="Global Search" subtitle="Search across all clients, projects, emails and documents" />
       <div style={{ padding: 24, maxWidth: 760 }}>
         <div style={{ position: "relative", marginBottom: 24 }}>
@@ -112,5 +113,6 @@ export default function SearchPage() {
           </div>
         )}
       </div>
+    </>
   );
 }
