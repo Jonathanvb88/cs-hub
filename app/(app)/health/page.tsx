@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 
@@ -38,8 +37,7 @@ export default function HealthPage() {
   };
 
   return (
-    <AppLayout>
-      <Header title="Customer Health" subtitle="Monitor and improve engagement across all clients" />
+          <Header title="Customer Health" subtitle="Monitor and improve engagement across all clients" />
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
         {/* Summary bands */}
@@ -121,6 +119,5 @@ export default function HealthPage() {
           ))}
         </div>
       </div>
-    </AppLayout>
   );
 }
