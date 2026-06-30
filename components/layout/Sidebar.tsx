@@ -24,16 +24,27 @@ const bottomItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside style={{ width: 220, minWidth: 220, height: "100vh", background: "var(--bg-surface)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", position: "fixed", left: 0, top: 0, zIndex: 50 }}>
-      <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid var(--border)" }}>
+    <aside className="desktop-sidebar" style={{
+      width: 220, minWidth: 220, height: "100vh",
+      background: "var(--bg-dark)",
+      borderRight: "1px solid #2a2e32",
+      display: "flex", flexDirection: "column",
+      position: "fixed", left: 0, top: 0, zIndex: 50,
+    }}>
+      <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid #2a2e32" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, background: "var(--accent-blue)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "white", flexShrink: 0 }}>C</div>
+          <div style={{
+            width: 32, height: 32, background: "var(--accent-green)", borderRadius: 8,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 14, fontWeight: 700, color: "white", flexShrink: 0,
+          }}>C</div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.2 }}>CS Hub</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", lineHeight: 1.2 }}>URUP Connect</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-on-dark)", lineHeight: 1.2 }}>CS Hub</div>
+            <div style={{ fontSize: 10, color: "#7a827e", lineHeight: 1.2 }}>URUP Connect</div>
           </div>
         </div>
       </div>
+
       <nav style={{ flex: 1, padding: "10px 8px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 1 }}>
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -43,12 +54,18 @@ export default function Sidebar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
               </svg>
               <span style={{ flex: 1, fontSize: 13 }}>{item.label}</span>
-              {item.badge && <span style={{ background: "var(--accent-blue)", color: "white", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 10, lineHeight: 1.6 }}>{item.badge}</span>}
+              {item.badge && (
+                <span style={{
+                  background: isActive ? "rgba(255,255,255,0.25)" : "var(--accent-green)",
+                  color: "white", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 10, lineHeight: 1.6,
+                }}>{item.badge}</span>
+              )}
             </Link>
           );
         })}
       </nav>
-      <div style={{ padding: "8px 8px 10px", borderTop: "1px solid var(--border)" }}>
+
+      <div style={{ padding: "8px 8px 10px", borderTop: "1px solid #2a2e32" }}>
         {bottomItems.map((item) => (
           <Link key={item.href} href={item.href} className="sidebar-link">
             <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -57,11 +74,15 @@ export default function Sidebar() {
             <span style={{ fontSize: 13 }}>{item.label}</span>
           </Link>
         ))}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginTop: 4, background: "var(--bg-elevated)", borderRadius: 8 }}>
-          <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--accent-blue-dim)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0 }}>JV</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginTop: 4, background: "var(--bg-dark-elevated)", borderRadius: 8 }}>
+          <div style={{
+            width: 26, height: 26, borderRadius: "50%", background: "var(--accent-green)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0,
+          }}>JV</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Jonathan</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>CSM</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Jonathan</div>
+            <div style={{ fontSize: 10, color: "#7a827e" }}>CSM</div>
           </div>
         </div>
       </div>
