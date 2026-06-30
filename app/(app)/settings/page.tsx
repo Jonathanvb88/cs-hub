@@ -40,6 +40,7 @@ export default function SettingsPage() {
   };
 
   return (
+    <>
           <Header title="Settings" subtitle="Account, integrations, and preferences" />
       <div style={{ padding: 24, maxWidth: 800, display: "flex", flexDirection: "column", gap: 20 }}>
 
@@ -142,5 +143,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+    </>
   );
 }
