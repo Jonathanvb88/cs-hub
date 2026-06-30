@@ -126,7 +126,7 @@ export default function AIAssistant() {
       {open && (
         <div className="ai-assistant-panel" style={{
           position: "fixed", bottom: 88, left: 24, zIndex: 70,
-          width: 380, maxHeight: "70vh",
+          width: 380, maxHeight: "min(70vh, 560px)",
           background: "var(--bg-surface)", border: "1px solid var(--border)",
           borderRadius: 16, boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
           display: "flex", flexDirection: "column", overflow: "hidden",
