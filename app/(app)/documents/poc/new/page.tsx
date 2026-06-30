@@ -74,6 +74,7 @@ export default function NewPOCPage() {
   };
 
   return (
+    <>
           <Header
         title="New POC"
         subtitle="Proof of Concept document"
@@ -195,6 +196,7 @@ export default function NewPOCPage() {
           </div>
         </div>
       </div>
+    </>
   );
 }
 
