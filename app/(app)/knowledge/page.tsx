@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
 
@@ -41,8 +40,7 @@ export default function KnowledgePage() {
   });
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Knowledge Library"
         subtitle="Reusable assets, templates, SOWs, and lessons learned across all clients"
         actions={
@@ -177,6 +175,5 @@ export default function KnowledgePage() {
           );
         })()}
       </div>
-    </AppLayout>
   );
 }
