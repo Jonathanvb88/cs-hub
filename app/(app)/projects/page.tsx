@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 
 interface Project {
@@ -91,8 +90,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="Projects"
         subtitle={`${projects.length} projects — saved to database`}
         actions={
@@ -196,6 +194,5 @@ export default function ProjectsPage() {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 }
