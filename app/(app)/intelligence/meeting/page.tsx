@@ -118,6 +118,7 @@ Produce a structured meeting summary.`;
   };
 
   return (
+    <>
           <Header
         title="Meeting Intelligence"
         subtitle="AI generates structured summaries, decisions, and action items from meeting notes"
@@ -262,5 +263,6 @@ Produce a structured meeting summary.`;
           </div>
         )}
       </div>
+    </>
   );
 }
