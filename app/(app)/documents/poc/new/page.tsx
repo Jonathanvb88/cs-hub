@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import AppLayout from "@/app/(app)/layout";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
 
@@ -75,8 +74,7 @@ export default function NewPOCPage() {
   };
 
   return (
-    <AppLayout>
-      <Header
+          <Header
         title="New POC"
         subtitle="Proof of Concept document"
         actions={
@@ -197,7 +195,6 @@ export default function NewPOCPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }
 
