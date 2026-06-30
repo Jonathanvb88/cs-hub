@@ -56,7 +56,7 @@ function calculateHealthScore(params: {
 
 export async function GET() {
   try {
-    const clients: ClientRow[] = await sql(`SELECT id, name, industry FROM clients WHERE deleted_at IS NULL`);
+    const clients = await sql(`SELECT id, name, industry FROM clients WHERE deleted_at IS NULL`) as ClientRow[];
 
     const results = [];
 
@@ -125,3 +125,4 @@ export async function GET() {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
+
