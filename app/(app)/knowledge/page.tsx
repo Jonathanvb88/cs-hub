@@ -29,8 +29,35 @@ export default function KnowledgePage() {
   const [clientFilter, setClientFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [selected, setSelected] = useState<typeof mockAssets[0] | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [assets, setAssets] = useState(mockAssets);
+  const [newLabel, setNewLabel] = useState("");
+  const [newType, setNewType] = useState("journey_url");
+  const [newClientName, setNewClientName] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+  const [newNotes, setNewNotes] = useState("");
+  const [newTags, setNewTags] = useState("");
 
-  const filtered = mockAssets.filter(a => {
+  const addAsset = () => {
+    if (!newLabel.trim()) return;
+    const asset = {
+      id: Date.now().toString(),
+      clientId: "custom",
+      clientName: newClientName || "—",
+      type: newType,
+      label: newLabel,
+      url: newUrl,
+      notes: newNotes,
+      tags: newTags.split(",").map(t => t.trim()).filter(Boolean),
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    setAssets(p => [asset, ...p]);
+    setNewLabel(""); setNewType("journey_url"); setNewClientName("");
+    setNewUrl(""); setNewNotes(""); setNewTags("");
+    setShowAdd(false);
+  };
+
+  const filtered = assets.filter(a => {
     const matchSearch = !search || a.label.toLowerCase().includes(search.toLowerCase()) ||
       a.notes.toLowerCase().includes(search.toLowerCase()) ||
       a.tags.some(t => t.includes(search.toLowerCase()));
@@ -45,7 +72,7 @@ export default function KnowledgePage() {
         title="Knowledge Library"
         subtitle="Reusable assets, templates, SOWs, and lessons learned across all clients"
         actions={
-          <button className="btn-primary" style={{ fontSize: 12 }}>
+          <button className="btn-primary" style={{ fontSize: 12 }} onClick={() => setShowAdd(p => !p)}>
             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -57,13 +84,59 @@ export default function KnowledgePage() {
       <div style={{ padding: 24, display: "grid", gridTemplateColumns: selected ? "1fr 360px" : "1fr", gap: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
+          {/* Add Asset Form */}
+          {showAdd && (
+            <div className="card" style={{ border: "1px solid var(--accent-green)" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Asset</div>
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Asset Label</label>
+                  <input className="input" placeholder="e.g. Black Friday Journey 2026" value={newLabel} onChange={e => setNewLabel(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Type</label>
+                  <select className="input" value={newType} onChange={e => setNewType(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                    <option value="journey_url">Journey URL</option>
+                    <option value="import_template">Import Template</option>
+                    <option value="email_template">Email Template</option>
+                    <option value="test_cases">Test Cases</option>
+                    <option value="sow">SOW</option>
+                    <option value="lessons_learned">Lessons Learned</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Client Name</label>
+                  <input className="input" placeholder="e.g. ABC Retail Group" value={newClientName} onChange={e => setNewClientName(e.target.value)} />
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>URL (optional)</label>
+                  <input className="input" placeholder="https://..." value={newUrl} onChange={e => setNewUrl(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Tags (comma separated)</label>
+                  <input className="input" placeholder="e.g. loyalty, black-friday" value={newTags} onChange={e => setNewTags(e.target.value)} />
+                </div>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Notes</label>
+                <textarea className="input" rows={2} placeholder="Describe the asset and how to reuse it..." value={newNotes} onChange={e => setNewNotes(e.target.value)} />
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="btn-primary" style={{ fontSize: 12 }} onClick={addAsset}>Save Asset</button>
+                <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowAdd(false)}>Cancel</button>
+              </div>
+            </div>
+          )}
+
           {/* Stats */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
             {[
               { label: "Total Assets", value: mockAssets.length, color: "var(--accent-blue)" },
-              { label: "Journey URLs", value: mockAssets.filter(a => a.type === "journey_url").length, color: "var(--accent-green)" },
-              { label: "Templates", value: mockAssets.filter(a => a.type === "import_template" || a.type === "email_template").length, color: "var(--accent-purple)" },
-              { label: "Lessons Learned", value: mockAssets.filter(a => a.type === "lessons_learned").length, color: "var(--accent-amber)" },
+              { label: "Journey URLs", value: assets.filter(a => a.type === "journey_url").length, color: "var(--accent-green)" },
+              { label: "Templates", value: assets.filter(a => a.type === "import_template" || a.type === "email_template").length, color: "var(--accent-purple)" },
+              { label: "Lessons Learned", value: assets.filter(a => a.type === "lessons_learned").length, color: "var(--accent-amber)" },
             ].map(s => (
               <div key={s.label} className="card" style={{ padding: "14px 16px" }}>
                 <div style={{ fontSize: 20, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
@@ -191,6 +264,7 @@ export default function KnowledgePage() {
     </>
   );
 }
+
 
 
 
