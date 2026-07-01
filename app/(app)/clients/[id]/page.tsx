@@ -5,7 +5,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { mockClients, mockProjects, mockEmails, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 
-const TABS = ["Overview", "Contacts", "Timeline", "Projects", "Documents", "Health"];
+const TABS = ["Overview", "Contacts", "Timeline", "Projects", "Documents", "Conversations", "Health"];
 
 export default function ClientProfilePage() {
   const { id } = useParams();
@@ -402,6 +402,23 @@ export default function ClientProfilePage() {
           </div>
         )}
 
+        {activeTab === "Conversations" && (
+          <div style={{ maxWidth: 600 }}>
+            <div style={{ padding: 24, background: "var(--bg-elevated)", borderRadius: 12, border: "1px solid var(--border)", textAlign: "center" }}>
+              <svg width="48" height="48" fill="none" stroke="var(--accent-green)" strokeWidth={1.5} viewBox="0 0 24 24" style={{ margin: "0 auto 12px" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>WhatsApp, SMS & Other Conversations</div>
+              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20, lineHeight: 1.6 }}>
+                Paste raw conversations from any channel and convert them into formal email records with a full audit trail.
+              </div>
+              <Link href={`/clients/${id}/conversations`}>
+                <button className="btn-primary">Open Conversation Capture</button>
+              </Link>
+            </div>
+          </div>
+        )}
+
         {activeTab === "Health" && (
           <div style={{ maxWidth: 600 }}>
             <div className="card" style={{ marginBottom: 16 }}>
@@ -446,4 +463,5 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
