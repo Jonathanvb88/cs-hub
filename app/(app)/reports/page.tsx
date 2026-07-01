@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import AppLayout from "@/app/(app)/layout";
+
 import Header from "@/components/layout/Header";
 
 interface ReportData {
@@ -57,23 +57,23 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <AppLayout>
+      <>
         <Header title="Reports" subtitle="Analytics across your client portfolio" />
         <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Loading reports...</div>
-      </AppLayout>
+      </>
     );
   }
 
   if (error || !data) {
     return (
-      <AppLayout>
+      <>
         <Header title="Reports" subtitle="Analytics across your client portfolio" />
         <div style={{ padding: 24 }}>
           <div style={{ padding: "10px 14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, fontSize: 13, color: "var(--accent-red)" }}>
             {error || "No data available"}
           </div>
         </div>
-      </AppLayout>
+      </>
     );
   }
 
@@ -83,7 +83,7 @@ export default function ReportsPage() {
   const quoteTotal = data.quoteConversion.reduce((s, q) => s + Number(q.count), 0);
 
   return (
-    <AppLayout>
+    <>
       <Header title="Reports" subtitle="Analytics across your client portfolio — computed from live data" />
 
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
@@ -187,6 +187,7 @@ export default function ReportsPage() {
           )}
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }
+
