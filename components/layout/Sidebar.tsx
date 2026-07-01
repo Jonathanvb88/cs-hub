@@ -76,7 +76,7 @@ export default function Sidebar() {
             <span style={{ fontSize: 13 }}>{item.label}</span>
           </Link>
         ))}
-        <Link href="/settings" style={{ textDecoration: "none" }}>
+        <Link href="/profile" style={{ textDecoration: "none" }}>
           <div style={{
             display: "flex", alignItems: "center", gap: 10, padding: "8px 12px",
             marginTop: 4, background: "var(--bg-dark-elevated)", borderRadius: 8,
@@ -100,5 +100,6 @@ export default function Sidebar() {
     </aside>
   );
 }
+
 
 
