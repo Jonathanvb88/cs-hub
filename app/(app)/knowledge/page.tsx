@@ -170,8 +170,14 @@ export default function KnowledgePage() {
                   Added {new Date(selected.createdAt).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" })}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {selected.url && <button className="btn-primary" style={{ fontSize: 12, justifyContent: "flex-start" }}>Open URL</button>}
-                  <button className="btn-secondary" style={{ fontSize: 12, justifyContent: "flex-start" }}>Reuse for New Project</button>
+                  {selected.url && (
+                    <a href={selected.url} target="_blank" rel="noopener noreferrer">
+                      <button className="btn-primary" style={{ fontSize: 12, justifyContent: "flex-start", width: "100%" }}>Open URL</button>
+                    </a>
+                  )}
+                  <Link href="/projects">
+                    <button className="btn-secondary" style={{ fontSize: 12, justifyContent: "flex-start", width: "100%" }}>Reuse for New Project</button>
+                  </Link>
                   <button className="btn-secondary" style={{ fontSize: 12, justifyContent: "flex-start" }}>Edit Asset</button>
                   <Link href={`/clients/${selected.clientId}`}>
                     <button className="btn-secondary" style={{ fontSize: 12, justifyContent: "flex-start", width: "100%" }}>View Client Profile</button>
@@ -185,5 +191,6 @@ export default function KnowledgePage() {
     </>
   );
 }
+
 
 
