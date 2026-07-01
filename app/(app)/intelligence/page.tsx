@@ -101,8 +101,10 @@ export default function IntelligencePage() {
             <Link key={mod.href} href={mod.href} style={{ textDecoration: "none" }}>
               <div className="card" style={{
                 cursor: "pointer", borderLeft: `3px solid ${mod.color}`,
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border-light)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = "translateY(0)"; }}
+                transition: "box-shadow 0.15s, transform 0.15s",
+              }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
               >
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
                   <div style={{
@@ -168,4 +170,5 @@ export default function IntelligencePage() {
     </>
   );
 }
+
 
