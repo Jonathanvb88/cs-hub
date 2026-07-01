@@ -144,9 +144,32 @@ export default function HealthPage() {
           </div>
 
           {loading ? (
-            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Calculating health scores from live data...</div>
+            <div>
+              {[1,2,3,4,5].map(i => (
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 70px 140px 100px 130px 1fr 110px", padding: "13px 16px", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}>
+                  <div className="skeleton" style={{ height: 13, width: "60%" }} />
+                  <div className="skeleton" style={{ height: 22, borderRadius: 4 }} />
+                  <div className="skeleton" style={{ height: 6, borderRadius: 3 }} />
+                  <div className="skeleton" style={{ height: 20, borderRadius: 20 }} />
+                  <div className="skeleton" style={{ height: 11 }} />
+                  <div className="skeleton" style={{ height: 11, width: "70%" }} />
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <div className="skeleton" style={{ height: 28, width: 40, borderRadius: 8 }} />
+                    <div className="skeleton" style={{ height: 28, width: 52, borderRadius: 8 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : clients.length === 0 ? (
-            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>No clients yet</div>
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <svg width="22" height="22" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <div className="empty-state-title">No clients to score yet</div>
+              <div className="empty-state-subtitle">Add clients first, then health scores will calculate automatically from their activity.</div>
+            </div>
           ) : (
             clients.map(client => (
               <div key={client.id}>
@@ -221,3 +244,4 @@ export default function HealthPage() {
     </>
   );
 }
+
