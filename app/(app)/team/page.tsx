@@ -19,6 +19,9 @@ const ROLE_LABEL: Record<string, string> = {
   sales_manager: "Sales Manager",
   project_manager: "Project Manager",
   key_accounts: "Key Accounts Manager",
+  finance_admin: "Finance Administrator",
+  visuals: "Visuals",
+  executive_partner: "Executive Partner",
   readonly: "Read Only",
 };
 
@@ -29,6 +32,9 @@ const ROLE_COLOR: Record<string, string> = {
   sales_manager: "badge-purple",
   project_manager: "badge-blue",
   key_accounts: "badge-amber",
+  finance_admin: "badge-amber",
+  visuals: "badge-purple",
+  executive_partner: "badge-red",
   readonly: "badge-gray",
 };
 
@@ -120,6 +126,9 @@ export default function TeamPage() {
                   <option value="sales_manager">Sales Manager</option>
                   <option value="project_manager">Project Manager</option>
                   <option value="manager">Delivery Manager</option>
+                  <option value="finance_admin">Finance Administrator</option>
+                  <option value="visuals">Visuals</option>
+                  <option value="executive_partner">Executive Partner</option>
                   <option value="admin">Administrator</option>
                   <option value="readonly">Read Only</option>
                 </select>
@@ -163,5 +172,6 @@ export default function TeamPage() {
     </>
   );
 }
+
 
 
