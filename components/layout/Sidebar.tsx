@@ -76,19 +76,29 @@ export default function Sidebar() {
             <span style={{ fontSize: 13 }}>{item.label}</span>
           </Link>
         ))}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginTop: 4, background: "var(--bg-dark-elevated)", borderRadius: 8 }}>
+        <Link href="/settings" style={{ textDecoration: "none" }}>
           <div style={{
-            width: 26, height: 26, borderRadius: "50%", background: "var(--accent-green)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0,
-          }}>JV</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Jonathan</div>
-            <div style={{ fontSize: 10, color: "#7a827e" }}>CSM</div>
+            display: "flex", alignItems: "center", gap: 10, padding: "8px 12px",
+            marginTop: 4, background: "var(--bg-dark-elevated)", borderRadius: 8,
+            cursor: "pointer", transition: "background 0.15s",
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: "50%", background: "var(--accent-green)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0,
+            }}>JV</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Jonathan</div>
+              <div style={{ fontSize: 10, color: "#7a827e" }}>Client Success Manager</div>
+            </div>
+            <svg width="12" height="12" fill="none" stroke="#7a827e" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
           </div>
-        </div>
+        </Link>
       </div>
     </aside>
   );
 }
+
 
