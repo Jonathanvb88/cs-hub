@@ -54,6 +54,17 @@ export default function DocumentsPage() {
   const [search, setSearch] = useState("");
   const [pickerType, setPickerType] = useState<string | null>(null);
   const [showAddTemplate, setShowAddTemplate] = useState(false);
+
+  const updateStatus = async (id: string, status: string) => {
+    setDocuments(p => p.map(d => d.id === id ? { ...d, status } : d));
+    try {
+      await fetch("/api/db/documents", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+    } catch { fetchDocuments(); }
+  };
   const [newTplType, setNewTplType] = useState("quote");
   const [newTplName, setNewTplName] = useState("");
   const [newTplDesc, setNewTplDesc] = useState("");
@@ -318,7 +329,21 @@ export default function DocumentsPage() {
                 </div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{doc.client_name || "—"}</div>
                 <div><span className="badge badge-gray" style={{ fontSize: 10 }}>{doc.type.toUpperCase()}</span></div>
-                <div><span className={`badge ${statusBadge[doc.status] || "badge-gray"}`}>{doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</span></div>
+                <div>
+                  <select
+                    value={doc.status}
+                    onChange={e => updateStatus(doc.id, e.target.value)}
+                    className={`badge ${statusBadge[doc.status] || "badge-gray"}`}
+                    style={{ border: "none", cursor: "pointer", appearance: "none", paddingRight: 6 }}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="review">Review</option>
+                    <option value="sent">Sent</option>
+                    <option value="approved">Approved</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: Number(doc.total_value) > 0 ? "var(--text-primary)" : "var(--text-muted)" }}>
                   {Number(doc.total_value) > 0 ? `R ${Number(doc.total_value).toLocaleString("en-ZA")}` : "—"}
                 </div>
@@ -338,6 +363,7 @@ export default function DocumentsPage() {
     </>
   );
 }
+
 
 
 
