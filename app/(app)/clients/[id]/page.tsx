@@ -5,13 +5,15 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { mockClients, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 
+interface ProjectRow { id: string; name: string; status: string; priority: string; target_date: string | null; client_id: string | null; }
+
 function RealProjectsTab({ clientId }: { clientId: string }) {
-  const [projects, setProjects] = useState<Record<string, unknown>[]>([]);
+  const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetch(`/api/db/projects?clientId=${clientId}`)
       .then(r => r.json())
-      .then(d => setProjects(d.projects?.filter((p: Record<string, unknown>) => p.client_id === clientId) || []))
+      .then(d => setProjects((d.projects || []).filter((p: ProjectRow) => p.client_id === clientId)))
       .catch(() => setProjects([]))
       .finally(() => setLoading(false));
   }, [clientId]);
@@ -27,14 +29,14 @@ function RealProjectsTab({ clientId }: { clientId: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {projects.map(p => (
-        <div key={p.id as string} className="card" style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 20px" }}>
+        <div key={p.id} className="card" style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 20px" }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{p.name as string}</span>
-              <span className={`badge ${p.status === "active" ? "badge-green" : p.status === "completed" ? "badge-blue" : "badge-gray"}`}>{String(p.status).charAt(0).toUpperCase() + String(p.status).slice(1)}</span>
-              <span className={`badge ${p.priority === "high" || p.priority === "critical" ? "badge-red" : p.priority === "medium" ? "badge-amber" : "badge-gray"}`}>{String(p.priority).charAt(0).toUpperCase() + String(p.priority).slice(1)}</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{p.name}</span>
+              <span className={`badge ${p.status === "active" ? "badge-green" : p.status === "completed" ? "badge-blue" : "badge-gray"}`}>{p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
+              <span className={`badge ${p.priority === "high" || p.priority === "critical" ? "badge-red" : p.priority === "medium" ? "badge-amber" : "badge-gray"}`}>{p.priority.charAt(0).toUpperCase() + p.priority.slice(1)}</span>
             </div>
-            {p.target_date && <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Target: {new Date(p.target_date as string).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
+            {p.target_date && <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Target: {new Date(p.target_date).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
           </div>
           <Link href={`/projects/${p.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open</button></Link>
         </div>
@@ -43,13 +45,15 @@ function RealProjectsTab({ clientId }: { clientId: string }) {
   );
 }
 
+interface DocRow { id: string; title: string; type: string; version: string; status: string; total_value: number; client_id: string | null; created_at: string; }
+
 function RealDocumentsTab({ clientId }: { clientId: string }) {
-  const [docs, setDocs] = useState<Record<string, unknown>[]>([]);
+  const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetch("/api/db/documents")
       .then(r => r.json())
-      .then(d => setDocs(d.documents?.filter((doc: Record<string, unknown>) => doc.client_id === clientId) || []))
+      .then(d => setDocs((d.documents || []).filter((doc: DocRow) => doc.client_id === clientId)))
       .catch(() => setDocs([]))
       .finally(() => setLoading(false));
   }, [clientId]);
@@ -65,13 +69,13 @@ function RealDocumentsTab({ clientId }: { clientId: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {docs.map(doc => (
-        <div key={doc.id as string} className="card" style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 18px" }}>
+        <div key={doc.id} className="card" style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 18px" }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>{doc.title as string}</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{String(doc.type).toUpperCase()} · {doc.version as string} · {new Date(doc.created_at as string).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>{doc.title}</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{doc.type.toUpperCase()} · {doc.version} · {new Date(doc.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>
           </div>
-          {Number(doc.total_value) > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: "var(--accent-green)" }}>R {Number(doc.total_value).toLocaleString("en-ZA")}</span>}
-          <span className={`badge ${doc.status === "accepted" ? "badge-green" : doc.status === "draft" ? "badge-gray" : "badge-amber"}`}>{String(doc.status).charAt(0).toUpperCase() + String(doc.status).slice(1)}</span>
+          {doc.total_value > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: "var(--accent-green)" }}>R {Number(doc.total_value).toLocaleString("en-ZA")}</span>}
+          <span className={`badge ${doc.status === "accepted" ? "badge-green" : doc.status === "draft" ? "badge-gray" : "badge-amber"}`}>{doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</span>
           <Link href={`/documents/view?id=${doc.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>View</button></Link>
         </div>
       ))}
@@ -502,6 +506,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
