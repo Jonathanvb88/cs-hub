@@ -38,7 +38,7 @@ export default function DashboardPage() {
             { label: "Follow-ups Due", value: pendingFollowUps.length, color: "var(--accent-green)", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
             { label: "At Risk / Quiet", value: atRiskClients.length, color: "var(--accent-red)", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
           ].map((stat) => (
-            <div key={stat.label} className="card" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div key={stat.label} className="stat-card" style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 10,
                 background: stat.color + "18",
@@ -50,8 +50,8 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>{stat.value}</div>
-                <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>{stat.label}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "var(--text-primary)", lineHeight: 1, letterSpacing: "-0.02em" }}>{stat.value}</div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3, fontWeight: 500 }}>{stat.label}</div>
               </div>
             </div>
           ))}
@@ -228,3 +228,4 @@ export default function DashboardPage() {
     </>
   );
 }
+
