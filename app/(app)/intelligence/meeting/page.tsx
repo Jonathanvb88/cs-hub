@@ -235,7 +235,7 @@ Produce a structured meeting summary.`;
                 <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>Feature Requests ({result.featureRequests.length})</span>
                   <Link href="/intelligence/capture">
-                    <button className="btn-secondary" style={{ fontSize: 11, padding: "3px 8px" }}>Extract Requirements</button>
+                    <Link href="/intelligence/capture"><button className="btn-secondary" style={{ fontSize: 11, padding: "3px 8px" }}>Extract Requirements</button></Link>
                   </Link>
                 </div>
                 {result.featureRequests.map((f, i) => (
@@ -266,3 +266,4 @@ Produce a structured meeting summary.`;
     </>
   );
 }
+
