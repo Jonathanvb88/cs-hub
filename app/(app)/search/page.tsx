@@ -79,17 +79,19 @@ export default function SearchPage() {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {results.projects.map(p => (
-                    <div key={p.id} className="card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="14" height="14" fill="none" stroke="var(--accent-green)" strokeWidth={2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
+                    <Link key={p.id} href={`/projects/${p.id}`} style={{ textDecoration: "none" }}>
+                      <div className="card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg width="14" height="14" fill="none" stroke="var(--accent-green)" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{p.name}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Project · {p.status}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{p.name}</div>
-                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Project · {p.status}</div>
-                      </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -102,10 +104,12 @@ export default function SearchPage() {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {results.emails.map(e => (
-                    <div key={e.id} className="card" style={{ padding: "12px 16px", cursor: "pointer" }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>{e.subject}</div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{e.clientName} · {e.receivedAt}</div>
-                    </div>
+                    <Link key={e.id} href="/communications" style={{ textDecoration: "none" }}>
+                      <div className="card" style={{ padding: "12px 16px", cursor: "pointer" }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>{e.subject}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{e.clientName} · {e.receivedAt}</div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -116,3 +120,4 @@ export default function SearchPage() {
     </>
   );
 }
+
