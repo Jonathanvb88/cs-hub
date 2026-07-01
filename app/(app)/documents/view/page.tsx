@@ -126,7 +126,7 @@ export default function DocumentViewPage() {
                 <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Subtotal</span>
                 <span style={{ fontSize: 13, fontWeight: 600 }}>R {(doc.total_value / (content.includeVat ? 1.15 : 1)).toLocaleString("en-ZA", { maximumFractionDigits: 0 })}</span>
               </div>
-              {content.includeVat && (
+              {(content.includeVat as boolean) && (
                 <div style={{ display: "flex", gap: 24 }}>
                   <span style={{ fontSize: 12, color: "var(--text-muted)" }}>VAT (15%)</span>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>R {(doc.total_value - doc.total_value / 1.15).toLocaleString("en-ZA", { maximumFractionDigits: 0 })}</span>
@@ -148,7 +148,7 @@ export default function DocumentViewPage() {
         {/* SOW view */}
         {doc.type === "sow" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {content.scope && (
+            {(content.scope as string) && (
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>Scope</div>
                 <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{content.scope as string}</div>
@@ -176,7 +176,7 @@ export default function DocumentViewPage() {
                 ))}
               </div>
             )}
-            {content.paymentTerms && (
+            {(content.paymentTerms as string) && (
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>Payment Terms</div>
                 <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{content.paymentTerms as string}</div>
@@ -188,7 +188,7 @@ export default function DocumentViewPage() {
         {/* POC view */}
         {doc.type === "poc" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {content.objective && (
+            {(content.objective as string) && (
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>Objective</div>
                 <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{content.objective as string}</div>
@@ -221,7 +221,7 @@ export default function DocumentViewPage() {
         {/* UAT view */}
         {doc.type === "uat" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {content.testSummary && (
+            {(content.testSummary as string) && (
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>Test Summary</div>
                 <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{content.testSummary as string}</div>
@@ -260,7 +260,7 @@ export default function DocumentViewPage() {
                 ))}
               </div>
             )}
-            {content.signOffDeclaration && (
+            {(content.signOffDeclaration as string) && (
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>Sign-off Declaration</div>
                 <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: 20 }}>{content.signOffDeclaration as string}</div>
@@ -282,3 +282,4 @@ export default function DocumentViewPage() {
     </>
   );
 }
+
