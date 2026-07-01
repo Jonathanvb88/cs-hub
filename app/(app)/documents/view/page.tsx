@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
@@ -28,7 +28,7 @@ const TYPE_LABEL: Record<string, string> = {
   quote: "Quote", sow: "Statement of Work", poc: "Proof of Concept", uat: "UAT Sign-off",
 };
 
-export default function DocumentViewPage() {
+function DocumentViewInner() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [doc, setDoc] = useState<DocumentDetail | null>(null);
@@ -283,4 +283,17 @@ export default function DocumentViewPage() {
   );
 }
 
-
+export default function DocumentViewPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <Header title="Document" subtitle="Loading..." />
+        <div style={{ padding: 24 }}>
+          {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 40, marginBottom: 12, borderRadius: 8 }} />)}
+        </div>
+      </>
+    }>
+      <DocumentViewInner />
+    </Suspense>
+  );
+}
