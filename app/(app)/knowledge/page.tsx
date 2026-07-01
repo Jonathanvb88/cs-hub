@@ -124,8 +124,14 @@ export default function KnowledgePage() {
               );
             })}
             {filtered.length === 0 && (
-              <div style={{ gridColumn: "1/-1", padding: 40, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
-                No assets match your search
+              <div className="empty-state" style={{ gridColumn: "1/-1" }}>
+                <div className="empty-state-icon">
+                  <svg width="22" height="22" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div className="empty-state-title">No assets match your search</div>
+                <div className="empty-state-subtitle">Try adjusting your filters or search terms.</div>
               </div>
             )}
           </div>
@@ -179,4 +185,5 @@ export default function KnowledgePage() {
     </>
   );
 }
+
 
