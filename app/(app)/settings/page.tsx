@@ -74,15 +74,20 @@ export default function SettingsPage() {
 
           {!isConnected ? (
             <div>
-              <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 16 }}>
-                Connect your Microsoft 365 account to sync real Outlook emails, Teams meetings, and calendar events into CS Hub. You&apos;ll be asked to sign in and approve access — only your own mailbox and calendar data will be accessed.
-              </div>
-              <button className="btn-primary" onClick={() => signIn("azure-ad")}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              <div style={{ padding: "14px 16px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
+                <svg width="18" height="18" fill="none" stroke="var(--accent-amber)" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                Connect Microsoft Account
-              </button>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-amber)", marginBottom: 4 }}>Pending Admin Consent Approval</div>
+                  <div style={{ fontSize: 12, color: "#92400e", lineHeight: 1.6 }}>
+                    The Microsoft 365 integration is fully built and ready. Connection is blocked until the URUP Connect Global Administrator approves the app in Azure Active Directory. Once approved, Outlook emails, Teams meetings, and Calendar events will sync automatically into CS Hub.
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                To activate: the Global Administrator needs to visit the admin consent URL and click Approve. Contact your IT administrator to complete this step.
+              </div>
             </div>
           ) : (
             <div>
@@ -171,4 +176,5 @@ export default function SettingsPage() {
     </>
   );
 }
+
 
