@@ -29,14 +29,25 @@ export default function ReportsPage() {
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [range, setRange] = useState("all");
+
+  const RANGES = [
+    { value: "all", label: "All time" },
+    { value: "30", label: "Last 30 days" },
+    { value: "90", label: "Last 90 days" },
+    { value: "180", label: "Last 6 months" },
+    { value: "365", label: "Last 12 months" },
+  ];
 
   useEffect(() => {
-    fetch("/api/db/reports")
+    setLoading(true);
+    const url = range === "all" ? "/api/db/reports" : `/api/db/reports?days=${range}`;
+    fetch(url)
       .then(res => { if (!res.ok) throw new Error("Failed to load reports"); return res.json(); })
       .then(setData)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [range]);
 
   const fmtCurrency = (val: string | number) => `R ${Number(val).toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`;
 
@@ -84,7 +95,20 @@ export default function ReportsPage() {
 
   return (
     <>
-      <Header title="Reports" subtitle="Analytics across your client portfolio — computed from live data" />
+      <Header
+        title="Reports"
+        subtitle="Analytics across your client portfolio — computed from live data"
+        actions={
+          <select
+            value={range}
+            onChange={e => setRange(e.target.value)}
+            className="input"
+            style={{ background: "var(--bg-elevated)", fontSize: 12, width: "auto", minWidth: 140 }}
+          >
+            {RANGES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+          </select>
+        }
+      />
 
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
@@ -190,4 +214,5 @@ export default function ReportsPage() {
     </>
   );
 }
+
 
