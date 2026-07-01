@@ -347,7 +347,7 @@ IT Manager, ABC Retail Group`;
                 <button className="btn-primary" style={{ fontSize: 12 }} onClick={() => navigator.clipboard.writeText(result.clarificationEmailDraft || "")}>
                   Copy Email Draft
                 </button>
-                <button className="btn-secondary" style={{ fontSize: 12 }}>Send via Outlook</button>
+                <Link href="/communications"><button className="btn-secondary" style={{ fontSize: 12 }}>Send via Outlook</button></Link>
               </div>
             </div>
           )}
@@ -541,7 +541,7 @@ IT Manager, ABC Retail Group`;
                 {copied ? "Copied!" : "Copy Ticket Package"}
               </button>
               <button className="btn-secondary" style={{ fontSize: 12 }}>Export as Word</button>
-              <button className="btn-secondary" style={{ fontSize: 12 }}>Save to Project</button>
+              <Link href="/projects"><button className="btn-secondary" style={{ fontSize: 12 }}>Save to Project</button></Link>
               <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-muted)" }}>
                 {result.userStories.filter(s => s.approved).length} stories · {result.developerTasks.filter(t => t.approved).length} tasks approved
               </span>
@@ -556,4 +556,5 @@ IT Manager, ABC Retail Group`;
     </>
   );
 }
+
 
