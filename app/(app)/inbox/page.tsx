@@ -1,41 +1,51 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import { mockEmails } from "@/lib/mockData";
 
 export default function InboxPage() {
+  const router = useRouter();
   const [actioned, setActioned] = useState<string[]>([]);
-
   const pending = mockEmails.filter(e => !actioned.includes(e.id));
-
   const priorityColor = (p: string) =>
     p === "high" ? "var(--accent-red)" : p === "medium" ? "var(--accent-amber)" : "var(--accent-green)";
 
   return (
     <>
-          <Header
+      <Header
         title="Work Inbox"
         subtitle="Emails requiring your action"
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <span className="badge badge-amber">{pending.length} pending</span>
-            <button className="btn-secondary" style={{ fontSize: 12 }}>Mark all actioned</button>
+            <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setActioned(mockEmails.map(e => e.id))}>
+              Mark all actioned
+            </button>
           </div>
         }
       />
       <div style={{ padding: 24, maxWidth: 860 }}>
         {pending.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 64 }}>
-            <svg width="48" height="48" fill="none" stroke="var(--accent-green)" strokeWidth={1.5} viewBox="0 0 24 24" style={{ margin: "0 auto 16px", display: "block" }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>All clear</div>
-            <div style={{ fontSize: 13, color: "var(--text-muted)" }}>No emails require your action right now</div>
+          <div className="empty-state" style={{ padding: 64 }}>
+            <div className="empty-state-icon">
+              <svg width="22" height="22" fill="none" stroke="var(--accent-green)" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="empty-state-title">All clear</div>
+            <div className="empty-state-subtitle">No emails require your action right now</div>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {pending.map(email => (
-              <div key={email.id} className="card" style={{ padding: 0, overflow: "hidden" }}>
+              <div
+                key={email.id}
+                className="card"
+                style={{ padding: 0, overflow: "hidden", cursor: "pointer" }}
+                onClick={() => router.push("/communications")}
+              >
                 <div style={{ padding: "16px 20px" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: priorityColor(email.priority), marginTop: 5, flexShrink: 0 }} />
@@ -49,10 +59,10 @@ export default function InboxPage() {
                       <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 8, lineHeight: 1.5 }}>{email.preview}</div>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
-                    <button className="btn-primary" style={{ fontSize: 12 }}>Reply</button>
-                    <button className="btn-secondary" style={{ fontSize: 12 }}>Extract Requirements</button>
-                    <button className="btn-secondary" style={{ fontSize: 12 }}>Link to Project</button>
+                  <div style={{ display: "flex", gap: 8, paddingTop: 12, borderTop: "1px solid var(--border)" }} onClick={e => e.stopPropagation()}>
+                    <Link href="/communications"><button className="btn-primary" style={{ fontSize: 12 }}>Reply</button></Link>
+                    <Link href="/intelligence/capture"><button className="btn-secondary" style={{ fontSize: 12 }}>Extract Requirements</button></Link>
+                    <Link href="/projects"><button className="btn-secondary" style={{ fontSize: 12 }}>Link to Project</button></Link>
                     <button
                       onClick={() => setActioned(p => [...p, email.id])}
                       style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer" }}
