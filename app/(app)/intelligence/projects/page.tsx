@@ -238,12 +238,12 @@ Assess similarity and estimate reuse potential.`;
                     </div>
 
                     <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                      <button className="btn-secondary" style={{ fontSize: 12 }}>View Project</button>
-                      <button className="btn-secondary" style={{ fontSize: 12 }}>Reuse SOW</button>
-                      <button className="btn-secondary" style={{ fontSize: 12 }}>Reuse Quote</button>
-                      <button className="btn-primary" style={{ fontSize: 12, marginLeft: "auto" }}>
+                      <Link href="/projects"><button className="btn-secondary" style={{ fontSize: 12 }}>View Project</button></Link>
+                      <Link href="/documents/sow/new"><button className="btn-secondary" style={{ fontSize: 12 }}>Reuse SOW</button></Link>
+                      <Link href="/documents/quote/new"><button className="btn-secondary" style={{ fontSize: 12 }}>Reuse Quote</button></Link>
+                      <Link href="/projects"><button className="btn-primary" style={{ fontSize: 12, marginLeft: "auto" }}>
                         Start New Project from This
-                      </button>
+                      </button></Link>
                     </div>
                   </div>
                 ))}
@@ -259,3 +259,4 @@ Assess similarity and estimate reuse potential.`;
     </>
   );
 }
+
