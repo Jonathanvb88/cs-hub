@@ -264,20 +264,15 @@ export default function ClientProfilePage() {
                 <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{client.notes}</div>
               </div>
 
-              {/* Recent emails */}
-              {clientEmails.length > 0 && (
-                <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
-                    Recent Emails
-                  </div>
-                  {clientEmails.map(email => (
-                    <div key={email.id} style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", marginBottom: 2 }}>{email.subject}</div>
-                      <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{email.from} · {email.receivedAt}</div>
-                    </div>
-                  ))}
+              {/* Recent communications */}
+              <div className="card" style={{ textAlign: "center", padding: "20px" }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-secondary)", marginBottom: 12 }}>
+                  View all logged communications for this client
                 </div>
-              )}
+                <Link href="/communications">
+                  <button className="btn-secondary" style={{ fontSize: 12 }}>Open Communications</button>
+                </Link>
+              </div>
             </div>
 
             {/* Right sidebar */}
@@ -506,6 +501,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
