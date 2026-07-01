@@ -326,7 +326,7 @@ export default function DocumentsPage() {
                   {new Date(doc.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
                 </div>
                 <div>
-                  <Link href={`/documents/${doc.type}/new`}>
+                  <Link href={`/documents/view?id=${doc.id}`}>
                     <button className="btn-secondary" style={{ fontSize: 11, padding: "3px 8px" }}>View</button>
                   </Link>
                 </div>
@@ -338,5 +338,6 @@ export default function DocumentsPage() {
     </>
   );
 }
+
 
 
