@@ -89,6 +89,30 @@ export default function ClientProfilePage() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("Overview");
   const [timelineEvents, setTimelineEvents] = useState<{ type: string; title: string; date: string; meta: string }[]>([]);
+  const [showQuickFollowUp, setShowQuickFollowUp] = useState(false);
+  const [quickFollowUpTitle, setQuickFollowUpTitle] = useState("");
+  const [quickFollowUpDate, setQuickFollowUpDate] = useState("");
+  const [savingFollowUp, setSavingFollowUp] = useState(false);
+
+  const saveQuickFollowUp = async () => {
+    if (!quickFollowUpTitle.trim()) return;
+    setSavingFollowUp(true);
+    try {
+      await fetch("/api/db/followups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: id,
+          clientName: client?.name || "",
+          title: quickFollowUpTitle,
+          dueDate: quickFollowUpDate || null,
+          priority: "medium",
+        }),
+      });
+      setQuickFollowUpTitle(""); setQuickFollowUpDate(""); setShowQuickFollowUp(false);
+    } catch {}
+    finally { setSavingFollowUp(false); }
+  };
   const [timelineLoading, setTimelineLoading] = useState(false);
   const client = mockClients.find(c => c.id === id);
 
@@ -313,19 +337,58 @@ export default function ClientProfilePage() {
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12 }}>Quick Actions</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {[
-                    { label: "Draft Follow-up Email", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
-                    { label: "Create SOW", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
-                    { label: "Add Follow-up", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
-                    { label: "Extract Requirements", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
-                  ].map(action => (
-                    <button key={action.label} className="btn-secondary" style={{ justifyContent: "flex-start", fontSize: 12 }}>
+                  <Link href={`/clients/${id}/conversations`}>
+                    <button className="btn-secondary" style={{ justifyContent: "flex-start", fontSize: 12, width: "100%" }}>
                       <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d={action.icon} />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      {action.label}
+                      Draft Follow-up Email
                     </button>
-                  ))}
+                  </Link>
+                  <Link href={`/documents/sow/new`}>
+                    <button className="btn-secondary" style={{ justifyContent: "flex-start", fontSize: 12, width: "100%" }}>
+                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Create SOW
+                    </button>
+                  </Link>
+                  <button
+                    className="btn-secondary"
+                    style={{ justifyContent: "flex-start", fontSize: 12 }}
+                    onClick={() => setShowQuickFollowUp(p => !p)}
+                  >
+                    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    Add Follow-up
+                  </button>
+                  {showQuickFollowUp && (
+                    <div style={{ background: "var(--bg-elevated)", borderRadius: 8, padding: 12, border: "1px solid var(--border)" }}>
+                      <input
+                        className="input"
+                        style={{ marginBottom: 8, fontSize: 12 }}
+                        placeholder="Follow-up title..."
+                        value={quickFollowUpTitle}
+                        onChange={e => setQuickFollowUpTitle(e.target.value)}
+                      />
+                      <input className="input" type="date" style={{ marginBottom: 8, fontSize: 12 }} value={quickFollowUpDate} onChange={e => setQuickFollowUpDate(e.target.value)} />
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button className="btn-primary" style={{ fontSize: 11 }} onClick={saveQuickFollowUp} disabled={savingFollowUp}>
+                          {savingFollowUp ? "Saving..." : "Save"}
+                        </button>
+                        <button className="btn-secondary" style={{ fontSize: 11 }} onClick={() => setShowQuickFollowUp(false)}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                  <Link href="/intelligence/capture">
+                    <button className="btn-secondary" style={{ justifyContent: "flex-start", fontSize: 12, width: "100%" }}>
+                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                      Extract Requirements
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
