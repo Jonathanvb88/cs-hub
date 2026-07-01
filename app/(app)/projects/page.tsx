@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
+import { useToast } from "@/components/Toast";
 
 interface Project {
   id: string;
@@ -52,6 +53,7 @@ export default function ProjectsPage() {
 
   const getPriorityColor = (key: string) => priorities.find(p => p.key === key)?.color || "#94a3b8";
   const getPriorityLabel = (key: string) => priorities.find(p => p.key === key)?.label || key;
+  const { showToast } = useToast();
 
   const fetchPriorities = async () => {
     try {
@@ -98,6 +100,7 @@ export default function ProjectsPage() {
       if (!res.ok) throw new Error("Failed to save project");
       await fetchProjects();
       setNewName(""); setNewType("new_build"); setNewPriority("medium"); setNewTargetDate(""); setNewAssignedUserId(""); setShowAdd(false);
+      showToast(`Project "${newName}" created`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save project");
     } finally {
@@ -207,10 +210,29 @@ export default function ProjectsPage() {
             ))}
           </div>
           {loading ? (
-            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Loading from database...</div>
+            <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+              {[1,2,3].map(i => (
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px", gap: 16, alignItems: "center" }}>
+                  <div className="skeleton" style={{ height: 13 }} />
+                  <div className="skeleton" style={{ height: 11 }} />
+                  <div className="skeleton" style={{ height: 22, borderRadius: 20 }} />
+                  <div className="skeleton" style={{ height: 22, borderRadius: 20 }} />
+                  <div className="skeleton" style={{ height: 11 }} />
+                  <div className="skeleton" style={{ height: 11 }} />
+                  <div className="skeleton" style={{ height: 28, borderRadius: 8 }} />
+                </div>
+              ))}
+            </div>
           ) : projects.length === 0 ? (
-            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
-              No projects yet — create one above to get started
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <svg width="22" height="22" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div className="empty-state-title">No projects yet</div>
+              <div className="empty-state-subtitle">Create your first project to start tracking delivery and status.</div>
+              <button className="btn-primary" onClick={() => setShowAdd(true)}>New Project</button>
             </div>
           ) : (
             projects.map(project => (
@@ -269,4 +291,5 @@ export default function ProjectsPage() {
     </>
   );
 }
+
 
