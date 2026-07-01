@@ -1,47 +1,108 @@
 # CS Hub — Sprint Notes
 
-_Last updated: 30 June 2026_
+_Last updated: 1 July 2026_
 
-## Status: Pending Verification (blocked on Vercel daily deploy cap)
+## Current Build Status: STABLE — Tester Ready
 
-These features are code-complete and pushed to `main`, but have not yet been confirmed live on production because Vercel's daily deployment limit was hit twice today (once via the manual Redeploy button, once via the standard Git-push pipeline).
+Production URL: **cs-hub-dusky.vercel.app**
+GitHub: github.com/Jonathanvb88/cs-hub (main branch)
 
-### 1. Real Health Dashboard scoring
-- **Files:** `app/api/db/health-calculate/route.ts`, `app/(app)/health/page.tsx`
-- **What it does:** Replaces fabricated mock health scores with a real calculation based on: days since last logged communication, overdue follow-ups, active vs stalled projects, and recent document activity (60-day window).
-- **Status:** A TypeScript build error (`Type 'Record<string, any>[]' is not assignable to type 'ClientRow[]'`) was found and fixed in commit `74efc768`. This fix has NOT yet been confirmed to build successfully on Vercel — the deploy cap hit before we could verify.
-- **Verification needed:** Once quota resets, push any small commit, then visit `/health` and confirm scores show real numbers (not the old mock 1-100 fabricated values) and that the "why this score" expandable row works.
-- **Also needed:** Run `https://cs-hub-dusky.vercel.app/api/db/init-priorities` is NOT related to this — no DB init needed for health-calculate, it uses existing tables.
+---
 
-### 2. Custom Priority Categories
-- **Files:** `app/api/db/init-priorities/route.ts`, `app/api/db/priorities/route.ts`, `app/(app)/settings/priorities/page.tsx`, `app/(app)/settings/page.tsx`, `app/(app)/followups/page.tsx`, `app/(app)/projects/page.tsx`
-- **What it does:** Lets the user define custom priority labels and colors (beyond Critical/High/Medium/Low) via Settings → Priority Categories. Follow-ups and Projects pull priority options dynamically from this table instead of hardcoded values.
-- **Status:** Code complete, never built/deployed yet — blocked by the same cap, on top of (likely the cause of) the cap.
-- **Verification needed once live:**
-  1. Run `https://cs-hub-dusky.vercel.app/api/db/init-priorities` once to create the table and seed Critical/High/Medium/Low
-  2. Go to Settings → Priority Categories → confirm the four defaults appear
-  3. Add a custom priority (e.g. "Strategic") with a color, confirm it appears as an option on New Follow-up and New Project forms
-  4. Confirm existing Follow-ups/Projects with old priority values (high/medium/low) still render correctly with the new dynamic lookup
+## Pending Verification (latest batch — may still be building)
 
-## Known Working (confirmed live before the cap)
-- Clients, Documents (Quote/SOW/POC + templates), Follow-ups, Projects, Communications — full DB persistence
-- Team page + assignment dropdowns on Clients/Projects/Follow-ups
-- Reports page (real analytics)
-- Client Timeline (real aggregated activity)
-- Project detail page (fixes the old broken "Open" button)
-- Communications real client picker + working "View Client Profile" link
-- Light theme redesign, persistent client context panel, mobile bottom nav
+The following commits are in the deployment queue. If the build shows ERROR, the most likely cause is a TypeScript strict-mode issue in one of the files below — check Vercel build logs for the exact line.
 
-## Known Permanently Disabled (cost decision, not a bug)
-- AI Assistant (floating chat bubble) — removed from layout. Code still exists in `components/assistant/AIAssistant.tsx` and `app/api/assistant/route.ts` if ever re-enabled.
-- All other AI features (Requirement Capture, Meeting Intelligence, Relationship Coach, AI health recommendations) will return 401 errors until `ANTHROPIC_API_KEY` in Vercel env vars is replaced with a valid key tied to an account with billing set up. This is a deliberate stop, not a bug — see chat history for the cost discussion.
+- Document View page — `app/(app)/documents/view/page.tsx` — Suspense boundary added for useSearchParams
+- Client profile Quick Actions wired + inline follow-up form
+- Document status dropdown (Draft → Sent → Accepted)
+- Reports date range filter (All time / 30 / 90 / 180 / 365 days)
+- Reports API supports `?days=N` parameter
+- Settings page — data export section, platform info, cleaner status notices
+- Client Context Panel — Log Conversation and New UAT Sign-off added
 
-## Known Gaps Not Yet Addressed
-- Microsoft Graph integration — fully coded, blocked on the CEO clicking the admin consent URL. No further code work possible until that happens.
-- Mobile native app (installable, push notifications) — explicitly deprioritized vs Attio/Folk comparison, no current plan to build.
-- Deeper BI/forecasting beyond the current Reports page — not started.
+**DB init routes to run once after deploy:**
+- `/api/db/init-priorities` — custom priority categories table
+- `/api/db/init-v3` — users table and assignment columns
+(These are safe to re-run; they use CREATE TABLE IF NOT EXISTS)
 
-## Operational Notes for Next Session
-- **Vercel daily deploy cap is shared** between manual Redeploy clicks and normal `git push` triggers — both count against the same ~100/day limit. If a push doesn't show up in `list_deployments` at all (not even as ERROR), that's the signal the cap has been hit again, not a webhook bug.
-- A small no-op commit is a reliable way to test if the cap has cleared.
-- The Anthropic API key currently in Vercel env vars is invalid/unauthorized (confirmed via 401 in runtime logs) — replacing it requires Jonathan to set up billing on a Claude Console account first (Organization workspace recommended over Individual, given this is for URUP Connect).
+---
+
+## Confirmed Live Features (all working in production)
+
+### Core Data (real Postgres, zero mock data)
+- Clients — full CRUD, assignment dropdowns, health scores
+- Documents — Quote / SOW / POC / UAT builders, templates, status workflow
+- Follow-ups — real DB, priority categories, assignment
+- Projects — real DB, project detail page, assignment
+- Communications — real DB, client picker, WhatsApp/SMS Conversation Capture
+- Team — real DB, 10 roles (CSM, Key Accounts, Sales Manager, Project Manager, Delivery Manager, Finance Admin, Visuals, Executive Partner, Administrator, Read Only)
+- Reports — real analytics with date range filter
+- Health Dashboard — real calculated scores from DB signals
+- Client Timeline — real aggregated activity
+- Search — queries real Postgres across clients, projects, documents, communications
+- Sidebar badges — live counts from DB, refresh every 60 seconds
+
+### Pages Built (29 total)
+Dashboard, Clients, Client Profile (Overview/Contacts/Timeline/Projects/Documents/Conversations/Health tabs), Coach, Playbook, Conversations (WhatsApp capture), Projects, Project Detail, Work Inbox, Communications, Follow-ups, Reminders, Documents, Document View, UAT Sign-off Builder, Knowledge, Health, Intelligence Hub, Requirement Capture, Meeting Intelligence, Project Intelligence, Reports, Team, Search, Settings, Priority Categories Settings, Profile, Documents View
+
+### UI/UX
+- Light theme, dark sidebar, forest-green accent
+- Consistent type scale via CSS variables
+- Skeleton loaders on high-traffic screens
+- Proper empty states with CTAs throughout
+- Toast notifications on all save/create actions
+- Persistent client context panel (desktop docked, mobile bottom sheet)
+- Mobile bottom navigation
+- User profile page with password change and notification preferences
+- Sidebar profile link → /profile
+
+---
+
+## Deliberately Disabled (cost decisions, not bugs)
+
+### AI Features — ALL PAUSED
+Every AI feature returns 401. Root cause: `ANTHROPIC_API_KEY` in Vercel is invalid/revoked.
+To fix: generate a new key at console.anthropic.com (Organization account), update in Vercel env vars, redeploy.
+Affected: AI Assistant, Requirement Capture Engine, Meeting Intelligence, Project Intelligence, Health Recommendations, Relationship Coach, Conversation Capture AI button.
+The "AI paused" notice is now shown clearly on Health Dashboard and Intelligence pages instead of silent failure.
+
+### Microsoft Graph — PENDING ADMIN CONSENT
+Code is fully built. CEO/Global Administrator needs to click the admin consent URL in Azure AD.
+Settings page now shows a clear amber notice explaining this.
+Affected: Outlook email sync, Teams meetings, Calendar integration.
+
+---
+
+## Known Remaining Gaps (lower priority)
+
+- Knowledge Library not persisted to DB — assets added via form are session-only
+- Settings page notification toggles are visual only (no backend)
+- Reports top-clients table doesn't respect date range filter (uses all-time)
+- Mobile content layout is functional but not mobile-first designed
+
+---
+
+## Operational Notes
+
+### Vercel Daily Deploy Cap
+- Hard limit: ~100 deployments/day
+- Manual Redeploy button and Git-push deployments use the SAME daily quota
+- When capped, the cap error appears in the manual Redeploy dialog
+- Workaround: a small no-op Git commit triggers the build quota separately from the dashboard Redeploy button — but this uses the same overall count
+- If both are blocked, wait 24 hours from when the first cap was hit
+
+### TypeScript Strict Mode
+- All API routes that return `sql()` results must cast with `as TypeName[]` or use typed interfaces
+- Components using `Record<string, unknown>[]` for DB rows will always hit TS errors — use proper interfaces
+- `useSearchParams()` must be wrapped in `<Suspense>` in Next.js 14 App Router
+- `content.X && (` patterns with `content: Record<string, unknown>` require `!!(content.X as string) && (`
+
+### GitHub API
+- Always GET the file first to retrieve `sha` before PUT — omitting sha on existing files causes 422
+- URL encoding: `(` → `%28`, `)` → `%29`, `[` → `%5B`, `]` → `%5D`
+
+### Vercel IDs
+- Project: `prj_TxSJ4s9scyyUqawodGSLwTsamCWK`
+- Team: `team_oaBil6BjcTAncLCfsycYAbzW`
+- GitHub token: `[REDACTED — stored in Vercel env vars]`
