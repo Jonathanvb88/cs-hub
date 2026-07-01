@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
+import { useToast } from "@/components/Toast";
 
 interface Communication {
   id: string;
@@ -27,6 +28,7 @@ export default function CommunicationsPage() {
   const [comms, setComms] = useState<Communication[]>([]);
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [newOpen, setNewOpen] = useState(false);
@@ -110,6 +112,7 @@ export default function CommunicationsPage() {
       if (!res.ok) throw new Error("Failed to save");
       await fetchComms();
       setSelectedClientId(""); setSubject(""); setBodyText(""); setAiSummary(""); setNewOpen(false);
+      showToast("Communication saved");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save communication");
     } finally {
@@ -135,10 +138,27 @@ export default function CommunicationsPage() {
       <div style={{ display: "flex", height: "calc(100vh - 60px)" }}>
         <div style={{ width: 340, borderRight: "1px solid var(--border)", overflowY: "auto", flexShrink: 0 }}>
           {loading ? (
-            <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Loading...</div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {[1,2,3].map(i => (
+                <div key={i} style={{ padding: "14px 18px", borderBottom: "1px solid var(--border)", display: "flex", gap: 10 }}>
+                  <div className="skeleton" style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div className="skeleton" style={{ height: 12, width: "55%", marginBottom: 6 }} />
+                    <div className="skeleton" style={{ height: 13, width: "80%" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : comms.length === 0 ? (
-            <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
-              No communications logged yet
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <svg width="22" height="22" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="empty-state-title">No communications logged yet</div>
+              <div className="empty-state-subtitle">Log your first email or meeting note to start building the client history.</div>
+              <button className="btn-primary" onClick={() => setNewOpen(true)}>Log Communication</button>
             </div>
           ) : (
             comms.map(comm => (
@@ -259,3 +279,4 @@ export default function CommunicationsPage() {
     </>
   );
 }
+
