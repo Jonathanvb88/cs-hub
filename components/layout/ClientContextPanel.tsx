@@ -115,6 +115,16 @@ export default function ClientContextPanel() {
             Prepare Meeting Brief
           </button>
         </Link>
+        <Link href={`/clients/${activeClient.id}/conversations`} onClick={() => setMobileSheetOpen(false)}>
+          <button className="btn-secondary" style={{ width: "100%", fontSize: 12, justifyContent: "flex-start" }}>
+            Log Conversation
+          </button>
+        </Link>
+        <Link href="/documents/uat/new" onClick={() => setMobileSheetOpen(false)}>
+          <button className="btn-secondary" style={{ width: "100%", fontSize: 12, justifyContent: "flex-start" }}>
+            New UAT Sign-off
+          </button>
+        </Link>
       </div>
     </>
   );
@@ -173,3 +183,4 @@ export default function ClientContextPanel() {
     </>
   );
 }
+
