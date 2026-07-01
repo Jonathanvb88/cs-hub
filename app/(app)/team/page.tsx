@@ -14,15 +14,21 @@ interface User {
 
 const ROLE_LABEL: Record<string, string> = {
   admin: "Administrator",
-  manager: "Delivery Manager",
   csm: "Client Success Manager",
+  manager: "Delivery Manager",
+  sales_manager: "Sales Manager",
+  project_manager: "Project Manager",
+  key_accounts: "Key Accounts Manager",
   readonly: "Read Only",
 };
 
 const ROLE_COLOR: Record<string, string> = {
   admin: "badge-red",
-  manager: "badge-blue",
   csm: "badge-green",
+  manager: "badge-blue",
+  sales_manager: "badge-purple",
+  project_manager: "badge-blue",
+  key_accounts: "badge-amber",
   readonly: "badge-gray",
 };
 
@@ -110,6 +116,9 @@ export default function TeamPage() {
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Role</label>
                 <select className="input" value={newRole} onChange={e => setNewRole(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
                   <option value="csm">Client Success Manager</option>
+                  <option value="key_accounts">Key Accounts Manager</option>
+                  <option value="sales_manager">Sales Manager</option>
+                  <option value="project_manager">Project Manager</option>
                   <option value="manager">Delivery Manager</option>
                   <option value="admin">Administrator</option>
                   <option value="readonly">Read Only</option>
@@ -154,4 +163,5 @@ export default function TeamPage() {
     </>
   );
 }
+
 
