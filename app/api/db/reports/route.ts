@@ -1,13 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const days = req.nextUrl.searchParams.get("days");
+    const dateFilter = days ? `AND created_at > now() - interval '${parseInt(days)} days'` : "";
+    const dateFilterComms = days ? `AND received_at > now() - interval '${parseInt(days)} days'` : "";
+
     // Revenue pipeline by document status
     const pipeline = await sql(`
       SELECT type, status, COUNT(*) as count, COALESCE(SUM(total_value), 0) as total_value
       FROM documents
-      WHERE deleted_at IS NULL
+      WHERE deleted_at IS NULL ${dateFilter}
       GROUP BY type, status
       ORDER BY type, status
     `);
@@ -32,7 +36,7 @@ export async function GET() {
     const quoteConversion = await sql(`
       SELECT status, COUNT(*) as count, COALESCE(SUM(total_value), 0) as total_value
       FROM documents
-      WHERE deleted_at IS NULL AND type = 'quote'
+      WHERE deleted_at IS NULL AND type = 'quote' ${dateFilter}
       GROUP BY status
     `);
 
@@ -77,3 +81,4 @@ export async function GET() {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
+
