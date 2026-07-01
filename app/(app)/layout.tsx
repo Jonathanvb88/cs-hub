@@ -3,6 +3,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import ClientContextPanel from "@/components/layout/ClientContextPanel";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { ClientContextProvider, useActiveClient } from "@/lib/clientContext";
+import { ToastProvider } from "@/components/Toast";
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
   const { activeClient } = useActiveClient();
@@ -31,8 +32,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClientContextProvider>
-      <LayoutInner>{children}</LayoutInner>
-    </ClientContextProvider>
+    <ToastProvider>
+      <ClientContextProvider>
+        <LayoutInner>{children}</LayoutInner>
+      </ClientContextProvider>
+    </ToastProvider>
   );
 }
