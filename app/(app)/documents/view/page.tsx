@@ -137,7 +137,7 @@ export default function DocumentViewPage() {
                 <span style={{ fontSize: 16, fontWeight: 800, color: "var(--accent-green)" }}>R {Number(doc.total_value).toLocaleString("en-ZA")}</span>
               </div>
             </div>
-            {content.notes && (
+            {!!(content.notes as string) && (
               <div style={{ padding: "14px 20px", background: "var(--bg-elevated)", borderTop: "1px solid var(--border)", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
                 <strong>Notes:</strong> {content.notes as string}
               </div>
@@ -282,4 +282,5 @@ export default function DocumentViewPage() {
     </>
   );
 }
+
 
