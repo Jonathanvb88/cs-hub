@@ -123,13 +123,11 @@ export default function HealthPage() {
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>All Clients by Health Score</div>
-            <button
-              className="btn-secondary"
-              style={{ fontSize: 12 }}
-              onClick={() => clients.forEach(c => !recommendations[c.id] && getAIRecommendation(c))}
-            >
-              Generate All AI Recommendations
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 11, color: "var(--accent-amber)", background: "#fffbeb", border: "1px solid #fde68a", padding: "3px 10px", borderRadius: 20, fontWeight: 500 }}>
+                AI paused — API key required to enable recommendations
+              </span>
+            </div>
           </div>
           <div style={{
             display: "grid",
@@ -193,12 +191,9 @@ export default function HealthPage() {
                     ) : recommendations[client.id] ? (
                       <span style={{ color: "var(--text-secondary)" }}>{recommendations[client.id]}</span>
                     ) : (
-                      <button
-                        onClick={() => getAIRecommendation(client)}
-                        style={{ background: "none", border: "none", color: "var(--accent-blue)", fontSize: 12, cursor: "pointer", padding: 0 }}
-                      >
-                        Get AI recommendation
-                      </button>
+                      <span style={{ fontSize: 11, color: "var(--accent-amber)", fontStyle: "italic" }}>
+                        AI paused
+                      </span>
                     )}
                   </div>
                   <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
@@ -244,4 +239,5 @@ export default function HealthPage() {
     </>
   );
 }
+
 
