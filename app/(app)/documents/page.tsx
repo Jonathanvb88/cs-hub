@@ -38,11 +38,12 @@ const typeColor: Record<string, string> = {
   quote: "var(--accent-green)",
   sow: "var(--accent-blue)",
   poc: "var(--accent-purple)",
+  uat: "var(--accent-amber)",
   proposal: "var(--accent-amber)",
 };
 
-const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "POC" };
-const typeRoute: Record<string, string> = { quote: "/documents/quote/new", sow: "/documents/sow/new", poc: "/documents/poc/new" };
+const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "POC", uat: "UAT Sign-off" };
+const typeRoute: Record<string, string> = { quote: "/documents/quote/new", sow: "/documents/sow/new", poc: "/documents/poc/new", uat: "/documents/uat/new" };
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -146,9 +147,9 @@ export default function DocumentsPage() {
           <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
             Create New Document
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
-            {["quote", "sow", "poc"].map((type, i) => (
-              <div key={type} style={{ padding: 20, borderRight: i < 2 ? "1px solid var(--border)" : "none", position: "relative" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+            {["quote", "sow", "poc", "uat"].map((type, i) => (
+              <div key={type} style={{ padding: 20, borderRight: i < 3 ? "1px solid var(--border)" : "none", position: "relative" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: typeColor[type] + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="15" height="15" fill="none" stroke={typeColor[type]} strokeWidth={2} viewBox="0 0 24 24">
@@ -220,6 +221,7 @@ export default function DocumentsPage() {
                   <option value="quote">Quote</option>
                   <option value="sow">SOW</option>
                   <option value="poc">POC</option>
+                  <option value="uat">UAT Sign-off</option>
                 </select>
               </div>
               <div>
@@ -334,3 +336,4 @@ export default function DocumentsPage() {
     </>
   );
 }
+
