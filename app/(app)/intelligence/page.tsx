@@ -85,14 +85,22 @@ export default function IntelligencePage() {
           </div>
         </div>
 
+        {/* AI notice banner */}
+        <div style={{ padding: "12px 16px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, display: "flex", alignItems: "center", gap: 10 }}>
+          <svg width="16" height="16" fill="none" stroke="var(--accent-amber)" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span style={{ fontSize: 12, color: "var(--accent-amber)", fontWeight: 500 }}>
+            AI features are currently paused — add a valid Anthropic API key in Vercel environment variables to re-enable them.
+          </span>
+        </div>
+
         {/* Module cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
           {modules.map(mod => (
             <Link key={mod.href} href={mod.href} style={{ textDecoration: "none" }}>
               <div className="card" style={{
-                cursor: "pointer", transition: "border-color 0.15s, transform 0.15s",
-                height: "100%",
-              }}
+                cursor: "pointer", borderLeft: `3px solid ${mod.color}`,
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border-light)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
@@ -160,3 +168,4 @@ export default function IntelligencePage() {
     </>
   );
 }
+
