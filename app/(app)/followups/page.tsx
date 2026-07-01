@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
+import { useToast } from "@/components/Toast";
 
 interface FollowUp {
   id: string;
@@ -25,6 +26,7 @@ export default function FollowUpsPage() {
   const [priorities, setPriorities] = useState<PriorityOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
   const [filter, setFilter] = useState("pending");
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -88,6 +90,7 @@ export default function FollowUpsPage() {
       if (!res.ok) throw new Error("Failed to save");
       await fetchFollowUps();
       setNewTitle(""); setNewClient(""); setNewDue(""); setNewPriority("medium"); setShowAdd(false);
+      showToast("Follow-up added");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save follow-up");
     } finally {
@@ -165,7 +168,17 @@ export default function FollowUpsPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)", fontSize: 13 }}>Loading from database...</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[1,2,3].map(i => (
+              <div key={i} className="card" style={{ padding: "14px 18px", display: "flex", gap: 14 }}>
+                <div className="skeleton" style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="skeleton" style={{ height: 13, width: "60%", marginBottom: 8 }} />
+                  <div className="skeleton" style={{ height: 11, width: "35%" }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.length === 0 && (
@@ -215,5 +228,6 @@ export default function FollowUpsPage() {
     </>
   );
 }
+
 
 
