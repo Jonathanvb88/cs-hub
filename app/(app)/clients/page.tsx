@@ -4,6 +4,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 import { useActiveClient } from "@/lib/clientContext";
+import { useToast } from "@/components/Toast";
 
 interface Client {
   id: string;
@@ -26,6 +27,7 @@ interface TeamMember {
 
 export default function ClientsPage() {
   const { setActiveClient } = useActiveClient();
+  const { showToast } = useToast();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -76,6 +78,7 @@ export default function ClientsPage() {
       if (!res.ok) throw new Error("Failed to save client");
       await fetchClients();
       setNewName(""); setNewIndustry(""); setNewWebsite(""); setNewAssignedUserId(""); setShowAdd(false);
+      showToast(`${newName} added successfully`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save client");
     } finally {
@@ -182,12 +185,31 @@ export default function ClientsPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)", fontSize: 13 }}>Loading from database...</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            {[1,2,3,4,5,6].map(i => (
+              <div key={i} className="card">
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                  <div className="skeleton" style={{ width: 40, height: 40, borderRadius: 10 }} />
+                  <div style={{ flex: 1 }}>
+                    <div className="skeleton" style={{ height: 14, width: "70%", marginBottom: 6 }} />
+                    <div className="skeleton" style={{ height: 11, width: "45%" }} />
+                  </div>
+                </div>
+                <div className="skeleton" style={{ height: 6, borderRadius: 3, marginBottom: 12 }} />
+                <div className="skeleton" style={{ height: 11, width: "40%" }} />
+              </div>
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}>
-            <div style={{ fontSize: 14, marginBottom: 8 }}>
-              {clients.length === 0 ? "No clients yet — add your first client above" : "No clients match your filters"}
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg width="22" height="22" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
             </div>
+            <div className="empty-state-title">{clients.length === 0 ? "No clients yet" : "No clients match your filters"}</div>
+            <div className="empty-state-subtitle">{clients.length === 0 ? "Add your first client to get started tracking relationships and health." : "Try adjusting your search or filters."}</div>
+            {clients.length === 0 && <button className="btn-primary" onClick={() => setShowAdd(true)}>Add First Client</button>}
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
@@ -260,5 +282,6 @@ export default function ClientsPage() {
     </>
   );
 }
+
 
 
