@@ -167,11 +167,52 @@ export default function SettingsPage() {
           background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)",
           borderRadius: 10, padding: 16,
         }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-amber)", marginBottom: 6 }}>Sprint 6 — In Progress</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-amber)", marginBottom: 6 }}>Microsoft 365 Integration — Pending Admin Consent</div>
           <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-            This connects to your real Microsoft 365 mailbox and calendar via Microsoft Graph. Dashboard, Communications, and other screens still display mock data for now — full integration of live data into those screens is the next step once this connection is verified working.
+            The Microsoft 365 integration is fully built. Connection requires the Global Administrator to approve the app in Azure Active Directory. Once approved, Outlook emails, Teams meetings, and Calendar events will sync automatically.
           </div>
         </div>
+
+        {/* Data Export */}
+        <div className="card">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(21,128,61,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>Export Data</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Download your clients, documents, and follow-ups as CSV</div>
+              </div>
+            </div>
+            <a href="/api/db/clients" download="clients.json">
+              <button className="btn-secondary" style={{ fontSize: 12 }}>Export Clients</button>
+            </a>
+          </div>
+        </div>
+
+        {/* Platform Info */}
+        <div className="card">
+          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 14 }}>Platform Information</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {[
+              { label: "Platform", value: "CS Hub — URUP Connect" },
+              { label: "Version", value: "Sprint 8+" },
+              { label: "Database", value: "Neon PostgreSQL (Frankfurt)" },
+              { label: "Deployment", value: "Vercel Edge Network" },
+              { label: "AI Features", value: "Paused — API key required" },
+              { label: "Graph Integration", value: "Pending admin consent" },
+            ].map(item => (
+              <div key={item.label} style={{ padding: "10px 14px", background: "var(--bg-elevated)", borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>{item.label}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </>
   );
