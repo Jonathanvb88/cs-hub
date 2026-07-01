@@ -3,7 +3,81 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients, mockProjects, mockEmails, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
+import { mockClients, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
+
+function RealProjectsTab({ clientId }: { clientId: string }) {
+  const [projects, setProjects] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch(`/api/db/projects?clientId=${clientId}`)
+      .then(r => r.json())
+      .then(d => setProjects(d.projects?.filter((p: Record<string, unknown>) => p.client_id === clientId) || []))
+      .catch(() => setProjects([]))
+      .finally(() => setLoading(false));
+  }, [clientId]);
+  if (loading) return <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 10 }}>{[1,2].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 10 }} />)}</div>;
+  if (projects.length === 0) return (
+    <div className="empty-state">
+      <div className="empty-state-icon"><svg width="20" height="20" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></div>
+      <div className="empty-state-title">No projects yet</div>
+      <div className="empty-state-subtitle">Create a project and link it to this client.</div>
+      <Link href="/projects"><button className="btn-primary" style={{ fontSize: 12 }}>New Project</button></Link>
+    </div>
+  );
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {projects.map(p => (
+        <div key={p.id as string} className="card" style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 20px" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{p.name as string}</span>
+              <span className={`badge ${p.status === "active" ? "badge-green" : p.status === "completed" ? "badge-blue" : "badge-gray"}`}>{String(p.status).charAt(0).toUpperCase() + String(p.status).slice(1)}</span>
+              <span className={`badge ${p.priority === "high" || p.priority === "critical" ? "badge-red" : p.priority === "medium" ? "badge-amber" : "badge-gray"}`}>{String(p.priority).charAt(0).toUpperCase() + String(p.priority).slice(1)}</span>
+            </div>
+            {p.target_date && <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Target: {new Date(p.target_date as string).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
+          </div>
+          <Link href={`/projects/${p.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open</button></Link>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RealDocumentsTab({ clientId }: { clientId: string }) {
+  const [docs, setDocs] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch("/api/db/documents")
+      .then(r => r.json())
+      .then(d => setDocs(d.documents?.filter((doc: Record<string, unknown>) => doc.client_id === clientId) || []))
+      .catch(() => setDocs([]))
+      .finally(() => setLoading(false));
+  }, [clientId]);
+  if (loading) return <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 10 }}>{[1,2].map(i => <div key={i} className="skeleton" style={{ height: 56, borderRadius: 10 }} />)}</div>;
+  if (docs.length === 0) return (
+    <div className="empty-state">
+      <div className="empty-state-icon"><svg width="20" height="20" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+      <div className="empty-state-title">No documents yet</div>
+      <div className="empty-state-subtitle">Create a Quote, SOW, POC, or UAT Sign-off for this client.</div>
+      <Link href="/documents"><button className="btn-primary" style={{ fontSize: 12 }}>Create Document</button></Link>
+    </div>
+  );
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {docs.map(doc => (
+        <div key={doc.id as string} className="card" style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 18px" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>{doc.title as string}</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{String(doc.type).toUpperCase()} · {doc.version as string} · {new Date(doc.created_at as string).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>
+          </div>
+          {Number(doc.total_value) > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: "var(--accent-green)" }}>R {Number(doc.total_value).toLocaleString("en-ZA")}</span>}
+          <span className={`badge ${doc.status === "accepted" ? "badge-green" : doc.status === "draft" ? "badge-gray" : "badge-amber"}`}>{String(doc.status).charAt(0).toUpperCase() + String(doc.status).slice(1)}</span>
+          <Link href={`/documents/view?id=${doc.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>View</button></Link>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const TABS = ["Overview", "Contacts", "Timeline", "Projects", "Documents", "Conversations", "Health"];
 
@@ -33,8 +107,6 @@ export default function ClientProfilePage() {
     );
   }
 
-  const clientProjects = mockProjects.filter(p => p.clientId === id);
-  const clientEmails = mockEmails.filter(e => e.clientId === id);
 
   return (
     <>
@@ -352,54 +424,21 @@ export default function ClientProfilePage() {
         {activeTab === "Projects" && (
           <div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-              <button className="btn-primary" style={{ fontSize: 12 }}>
-                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                New Project
-              </button>
+              <Link href="/projects">
+                <button className="btn-primary" style={{ fontSize: 12 }}>
+                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  New Project
+                </button>
+              </Link>
             </div>
-            {clientProjects.length === 0 ? (
-              <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}>No projects yet</div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {clientProjects.map(project => (
-                  <div key={project.id} className="card" style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 20px" }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{project.name}</span>
-                        <span className={`badge ${project.status === "active" ? "badge-green" : project.status === "completed" ? "badge-blue" : "badge-gray"}`}>
-                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                        </span>
-                        <span className={`badge ${project.priority === "high" ? "badge-red" : project.priority === "medium" ? "badge-amber" : "badge-gray"}`}>
-                          {project.priority.charAt(0).toUpperCase() + project.priority.slice(1)}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-                        Target: {new Date(project.targetDate).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
-                      </div>
-                    </div>
-                    <button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open</button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <RealProjectsTab clientId={id as string} />
           </div>
         )}
 
         {activeTab === "Documents" && (
-          <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}>
-            <svg width="40" height="40" fill="none" stroke="var(--text-muted)" strokeWidth={1.5} viewBox="0 0 24 24" style={{ margin: "0 auto 12px", display: "block" }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <div style={{ fontSize: 14, marginBottom: 8 }}>No documents yet</div>
-            <div style={{ fontSize: 12, marginBottom: 16 }}>Create a Quote, SOW, or POC for this client</div>
-            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-              <button className="btn-secondary" style={{ fontSize: 12 }}>New Quote</button>
-              <button className="btn-secondary" style={{ fontSize: 12 }}>New SOW</button>
-              <button className="btn-secondary" style={{ fontSize: 12 }}>New POC</button>
-            </div>
-          </div>
+          <RealDocumentsTab clientId={id as string} />
         )}
 
         {activeTab === "Conversations" && (
@@ -463,5 +502,6 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
