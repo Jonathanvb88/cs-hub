@@ -220,17 +220,17 @@ export default function ClientsPage() {
                 style={{ cursor: "pointer", position: "relative" }}
                 onClick={() => setActiveClient({ id: client.id, name: client.name, industry: client.industry || undefined, health_score: client.health_score, health_status: client.health_status })}
               >
-                <button
-                  onClick={(e) => { e.stopPropagation(); window.location.href = `/clients/${client.id}`; }}
-                  style={{
-                    position: "absolute", top: 12, right: 12,
-                    background: "var(--bg-elevated)", border: "1px solid var(--border)",
-                    borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 600,
-                    color: "var(--text-secondary)", cursor: "pointer", zIndex: 2,
-                  }}
-                >
-                  Open →
-                </button>
+                <Link href={`/clients/${client.id}`} onClick={e => e.stopPropagation()} style={{ position: "absolute", top: 12, right: 12, zIndex: 2, textDecoration: "none" }}>
+                  <button
+                    style={{
+                      background: "var(--bg-elevated)", border: "1px solid var(--border)",
+                      borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 600,
+                      color: "var(--text-secondary)", cursor: "pointer",
+                    }}
+                  >
+                    Open →
+                  </button>
+                </Link>
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <div style={{
@@ -282,6 +282,7 @@ export default function ClientsPage() {
     </>
   );
 }
+
 
 
 
