@@ -95,6 +95,16 @@ export default function RemindersPage() {
       <div style={{ padding: 24, display: "grid", gridTemplateColumns: selectedMilestone ? "1fr 400px" : "1fr", gap: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
+          {/* Sample data notice */}
+          <div style={{ padding: "12px 16px", background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, display: "flex", alignItems: "center", gap: 10 }}>
+            <svg width="16" height="16" fill="none" stroke="var(--accent-blue)" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span style={{ fontSize: 12, color: "var(--accent-blue)", fontWeight: 500 }}>
+              Showing sample milestone data. In the live version, reminders are generated automatically from your real client activity.
+            </span>
+          </div>
+
           {/* Milestones */}
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>
@@ -273,6 +283,7 @@ export default function RemindersPage() {
     </>
   );
 }
+
 
 
 
