@@ -1,20 +1,70 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { mockEmails, mockFollowUps, mockMeetings, mockClients, getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
+import { mockFollowUps, mockClients, getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
+
+interface Communication {
+  id: string;
+  client_id: string | null;
+  client_name: string;
+  subject: string;
+  body: string | null;
+  received_at: string;
+  action_required: boolean;
+  action_status: string;
+  type: string;
+}
+
+interface FollowUp {
+  id: string;
+  client_name: string;
+  title: string;
+  due_date: string | null;
+  priority: string;
+  status: string;
+}
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [completedFollowUps, setCompletedFollowUps] = useState<string[]>([]);
-  const [dismissedEmails, setDismissedEmails] = useState<string[]>([]);
-
-  const pendingEmails = mockEmails.filter(e => !dismissedEmails.includes(e.id));
-  const pendingFollowUps = mockFollowUps.filter(f => !completedFollowUps.includes(f.id));
-  const atRiskClients = mockClients.filter(c => c.healthStatus === "at_risk" || c.healthStatus === "quiet");
+  const [comms, setComms] = useState<Communication[]>([]);
+  const [followUps, setFollowUps] = useState<FollowUp[]>([]);
+  const [clients, setClients] = useState<typeof mockClients>([]);
+  const [loadingComms, setLoadingComms] = useState(true);
+  const [dismissed, setDismissed] = useState<string[]>([]);
 
   const today = new Date().toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  useEffect(() => {
+    // Load real communications
+    fetch("/api/db/communications")
+      .then(r => r.json())
+      .then(d => setComms(d.communications || []))
+      .catch(() => setComms([]))
+      .finally(() => setLoadingComms(false));
+
+    // Load real follow-ups
+    fetch("/api/db/followups")
+      .then(r => r.json())
+      .then(d => setFollowUps((d.followUps || []).filter((f: FollowUp) => f.status === "pending")))
+      .catch(() => setFollowUps([]));
+
+    // Load real clients for at-risk section
+    fetch("/api/db/clients")
+      .then(r => r.json())
+      .then(d => setClients(d.clients || []))
+      .catch(() => setClients(mockClients));
+  }, []);
+
+  const pendingComms = comms.filter(c => !dismissed.includes(c.id) && c.action_required && c.action_status === "pending");
+  const atRiskClients = clients.filter((c: { health_status?: string; healthStatus?: string }) =>
+    (c.health_status || c.healthStatus) === "at_risk" || (c.health_status || c.healthStatus) === "quiet"
+  );
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const dueTodayFollowUps = followUps.filter(f => f.due_date === todayStr);
+  const overdueFollowUps = followUps.filter(f => f.due_date && f.due_date < todayStr);
 
   return (
     <>
@@ -35,22 +85,17 @@ export default function DashboardPage() {
 
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
-        {/* Quick Stats — all clickable */}
+        {/* Quick Stats — real data */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
-            { label: "Active Clients", value: mockClients.length, color: "var(--accent-blue)", href: "/clients", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
-            { label: "Emails to Action", value: pendingEmails.length, color: "var(--accent-amber)", href: "/inbox", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
-            { label: "Follow-ups Due", value: pendingFollowUps.length, color: "var(--accent-green)", href: "/followups", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
+            { label: "Active Clients", value: clients.length || mockClients.length, color: "var(--accent-blue)", href: "/clients", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
+            { label: "Comms to Action", value: pendingComms.length, color: "var(--accent-amber)", href: "/communications", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
+            { label: "Follow-ups Due", value: followUps.length, color: "var(--accent-green)", href: "/followups", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
             { label: "At Risk / Quiet", value: atRiskClients.length, color: "var(--accent-red)", href: "/health", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
           ].map((stat) => (
             <Link key={stat.label} href={stat.href} style={{ textDecoration: "none" }}>
               <div className="stat-card" style={{ display: "flex", alignItems: "center", gap: 16, cursor: "pointer" }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 10,
-                  background: stat.color + "18",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
-                }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: stat.color + "18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="20" height="20" fill="none" stroke={stat.color} strokeWidth={1.8} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d={stat.icon} />
                   </svg>
@@ -69,163 +114,129 @@ export default function DashboardPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
 
-          {/* Work Inbox */}
+          {/* Work Inbox — real Communications from DB */}
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
             <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Work Inbox</div>
-                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Emails requiring your action</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Communications</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Logged emails and meeting notes</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span className="badge badge-amber">{pendingEmails.length} pending</span>
-                <Link href="/inbox" style={{ fontSize: 12, color: "var(--accent-green)", fontWeight: 500, textDecoration: "none" }}>View all →</Link>
+                {pendingComms.length > 0 && <span className="badge badge-amber">{pendingComms.length} action required</span>}
+                <Link href="/communications" style={{ fontSize: 12, color: "var(--accent-green)", fontWeight: 500, textDecoration: "none" }}>View all →</Link>
               </div>
             </div>
-            <div>
-              {pendingEmails.length === 0 ? (
-                <div className="empty-state" style={{ padding: 24 }}>
-                  <div style={{ fontSize: 13, color: "var(--text-muted)" }}>All clear — no emails require action</div>
-                </div>
-              ) : (
-                pendingEmails.map((email) => (
-                  <div
-                    key={email.id}
-                    style={{
-                      padding: "14px 20px",
-                      borderBottom: "1px solid var(--border)",
-                      display: "flex", flexDirection: "column", gap: 6,
-                      cursor: "pointer", transition: "background 0.1s",
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                    onClick={() => router.push("/communications")}
-                  >
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                          <span style={{
-                            width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-                            background: email.priority === "high" ? "var(--accent-red)" : email.priority === "medium" ? "var(--accent-amber)" : "var(--accent-green)",
-                          }} />
-                          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {email.clientName}
-                          </span>
-                          <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: "auto", flexShrink: 0 }}>{email.receivedAt}</span>
-                        </div>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", marginBottom: 2 }}>{email.subject}</div>
-                        <div style={{ fontSize: 12, color: "var(--text-secondary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{email.preview}</div>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
-                      <Link href="/communications">
-                        <button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Reply</button>
-                      </Link>
-                      <Link href="/intelligence/capture">
-                        <button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Extract Requirements</button>
-                      </Link>
-                      <button
-                        onClick={() => setDismissedEmails(p => [...p, email.id])}
-                        style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", padding: "4px 8px" }}
-                      >
-                        Dismiss
-                      </button>
+            {loadingComms ? (
+              <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+                {[1,2,3].map(i => (
+                  <div key={i} style={{ display: "flex", gap: 10 }}>
+                    <div className="skeleton" style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div className="skeleton" style={{ height: 12, width: "55%", marginBottom: 6 }} />
+                      <div className="skeleton" style={{ height: 13, width: "80%" }} />
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            ) : comms.length === 0 ? (
+              <div className="empty-state" style={{ padding: "24px 20px" }}>
+                <div className="empty-state-icon">
+                  <svg width="20" height="20" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="empty-state-title" style={{ fontSize: 13 }}>No communications logged yet</div>
+                <div className="empty-state-subtitle">Log emails and meeting notes under Communications to see them here.</div>
+                <Link href="/communications"><button className="btn-primary" style={{ fontSize: 12 }}>Log Communication</button></Link>
+              </div>
+            ) : (
+              comms.slice(0, 4).map((comm) => (
+                <div
+                  key={comm.id}
+                  style={{ padding: "12px 20px", borderBottom: "1px solid var(--border)", cursor: "pointer", transition: "background 0.1s" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  onClick={() => router.push("/communications")}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                    {comm.action_required && comm.action_status === "pending" && (
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent-amber)", flexShrink: 0 }} />
+                    )}
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-blue)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{comm.client_name || "—"}</span>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{new Date(comm.received_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}</span>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{comm.subject}</div>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Right column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-            {/* Today's meetings */}
+            {/* Microsoft Graph — meetings pending */}
             <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Today&apos;s Meetings</div>
-                  <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{today}</div>
-                </div>
-                <Link href="/communications" style={{ fontSize: 12, color: "var(--accent-green)", fontWeight: 500, textDecoration: "none" }}>View all →</Link>
+              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Today&apos;s Meetings</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{today}</div>
               </div>
-              {mockMeetings.length === 0 ? (
-                <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>No meetings scheduled today</div>
-              ) : (
-                mockMeetings.map((meeting) => (
-                  <Link key={meeting.id} href="/communications" style={{ textDecoration: "none" }}>
-                    <div style={{
-                      padding: "12px 20px",
-                      borderBottom: "1px solid var(--border)",
-                      display: "flex", alignItems: "center", gap: 14,
-                      cursor: "pointer", transition: "background 0.1s",
-                    }}
-                      onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
-                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                    >
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 8,
-                        background: "var(--accent-purple)" + "18",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        flexShrink: 0,
-                      }}>
-                        <svg width="16" height="16" fill="none" stroke="var(--accent-purple)" strokeWidth={1.8} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>{meeting.title}</div>
-                        <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{meeting.clientName} · {meeting.time}</div>
-                      </div>
-                      <span className="badge badge-purple">{meeting.platform}</span>
+              <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(245,158,11,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="18" height="18" fill="none" stroke="var(--accent-amber)" strokeWidth={1.8} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>Microsoft 365 Calendar</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+                      Live calendar sync is pending admin consent approval. Once enabled, your Teams meetings and Outlook calendar will appear here automatically.
                     </div>
-                  </Link>
-                ))
-              )}
+                    <Link href="/settings">
+                      <button className="btn-secondary" style={{ fontSize: 11, marginTop: 10 }}>View Integration Status</button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Follow-ups */}
+            {/* Follow-ups — real data */}
             <div className="card" style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Follow-ups</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span className="badge badge-blue">{pendingFollowUps.length}</span>
+                  {followUps.length > 0 && <span className="badge badge-blue">{followUps.length}</span>}
                   <Link href="/followups" style={{ fontSize: 12, color: "var(--accent-green)", fontWeight: 500, textDecoration: "none" }}>View all →</Link>
                 </div>
               </div>
-              {pendingFollowUps.map((fu) => (
-                <div
-                  key={fu.id}
-                  style={{
-                    padding: "12px 20px",
-                    borderBottom: "1px solid var(--border)",
-                    display: "flex", alignItems: "center", gap: 12,
-                    cursor: "pointer", transition: "background 0.1s",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                  onClick={() => router.push("/followups")}
-                >
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setCompletedFollowUps(p => [...p, fu.id]); }}
-                    style={{
-                      width: 18, height: 18, borderRadius: 4, border: "2px solid var(--border-light)",
-                      background: "none", cursor: "pointer", flexShrink: 0,
-                    }}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fu.title}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>{fu.clientName}</div>
-                  </div>
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ fontSize: 11, color: fu.dueDate === "Today" ? "var(--accent-red)" : "var(--text-secondary)", fontWeight: fu.dueDate === "Today" ? 600 : 400 }}>{fu.dueDate}</div>
-                  </div>
+              {followUps.length === 0 ? (
+                <div style={{ padding: "16px 20px", textAlign: "center", color: "var(--text-muted)", fontSize: 12 }}>
+                  No pending follow-ups — all clear!
                 </div>
-              ))}
+              ) : (
+                followUps.slice(0, 4).map((fu) => (
+                  <div
+                    key={fu.id}
+                    style={{ padding: "12px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12, cursor: "pointer", transition: "background 0.1s" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    onClick={() => router.push("/followups")}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fu.title}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>{fu.client_name}</div>
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: fu.due_date === todayStr ? "var(--accent-red)" : fu.due_date && fu.due_date < todayStr ? "var(--accent-amber)" : "var(--text-muted)", flexShrink: 0 }}>
+                      {fu.due_date === todayStr ? "Today" : fu.due_date && fu.due_date < todayStr ? "Overdue" : fu.due_date ? new Date(fu.due_date).toLocaleDateString("en-ZA", { day: "numeric", month: "short" }) : "No date"}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
 
-        {/* At Risk Clients — fully clickable */}
+        {/* At Risk Clients — real data */}
         {atRiskClients.length > 0 && (
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
             <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -238,39 +249,24 @@ export default function DashboardPage() {
               <Link href="/health" style={{ fontSize: 12, color: "var(--accent-green)", fontWeight: 500, textDecoration: "none" }}>View Health Dashboard →</Link>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
-              {atRiskClients.map((client, i) => (
+              {atRiskClients.slice(0, 3).map((client: Record<string, unknown>, i: number) => (
                 <div
-                  key={client.id}
-                  style={{
-                    padding: "16px 20px",
-                    borderRight: i < atRiskClients.length - 1 ? "1px solid var(--border)" : "none",
-                    cursor: "pointer", transition: "background 0.1s",
-                  }}
+                  key={client.id as string}
+                  style={{ padding: "16px 20px", borderRight: i < 2 ? "1px solid var(--border)" : "none", cursor: "pointer", transition: "background 0.1s" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   onClick={() => router.push(`/clients/${client.id}`)}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{client.name}</span>
-                    <span className={getHealthBadgeClass(client.healthStatus)}>{getHealthLabel(client.healthStatus)}</span>
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 12 }}>
-                    Last contact: {client.lastContact}
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{client.name as string}</span>
+                    <span className={getHealthBadgeClass((client.health_status || client.healthStatus) as string)}>{getHealthLabel((client.health_status || client.healthStatus) as string)}</span>
                   </div>
                   <div style={{ height: 4, borderRadius: 2, background: "var(--bg-elevated)", marginBottom: 12 }}>
-                    <div style={{
-                      height: "100%", borderRadius: 2,
-                      width: `${client.healthScore}%`,
-                      background: client.healthStatus === "at_risk" ? "var(--accent-red)" : "var(--accent-amber)",
-                    }} />
+                    <div style={{ height: "100%", borderRadius: 2, width: `${client.health_score || client.healthScore}%`, background: (client.health_status || client.healthStatus) === "at_risk" ? "var(--accent-red)" : "var(--accent-amber)" }} />
                   </div>
                   <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
-                    <Link href={`/clients/${client.id}`}>
-                      <button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open Profile</button>
-                    </Link>
-                    <Link href="/intelligence/capture">
-                      <button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Draft Check-in</button>
-                    </Link>
+                    <Link href={`/clients/${client.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open Profile</button></Link>
+                    <Link href="/intelligence/capture"><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Draft Check-in</button></Link>
                   </div>
                 </div>
               ))}
