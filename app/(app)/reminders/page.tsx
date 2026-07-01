@@ -225,8 +225,8 @@ export default function RemindersPage() {
                 />
               </div>
               <div style={{ padding: "12px 18px", borderTop: "1px solid var(--border)", display: "flex", gap: 8 }}>
-                <button className="btn-primary" style={{ fontSize: 12 }}>Send via Outlook</button>
-                <button className="btn-secondary" style={{ fontSize: 12 }}>Save as Draft</button>
+                <Link href="/communications"><button className="btn-primary" style={{ fontSize: 12 }}>Send via Outlook</button></Link>
+                <Link href="/communications"><button className="btn-secondary" style={{ fontSize: 12 }}>Save as Draft</button></Link>
                 <button
                   onClick={() => { setDismissed(p => [...p, selectedMilestone.clientId + selectedMilestone.type]); setSelectedMilestone(null); }}
                   style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer" }}
@@ -273,5 +273,6 @@ export default function RemindersPage() {
     </>
   );
 }
+
 
 
