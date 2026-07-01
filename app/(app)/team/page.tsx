@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import AppLayout from "@/app/(app)/layout";
+
 import Header from "@/components/layout/Header";
 
 interface User {
@@ -73,7 +73,7 @@ export default function TeamPage() {
   };
 
   return (
-    <AppLayout>
+    <>
       <Header
         title="Team"
         subtitle={`${users.length} team member${users.length !== 1 ? "s" : ""}`}
@@ -151,6 +151,7 @@ export default function TeamPage() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }
+
