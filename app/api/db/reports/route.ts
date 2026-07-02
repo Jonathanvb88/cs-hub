@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     const topClients = await sql(`
       SELECT c.name, COALESCE(SUM(d.total_value), 0) as total_value, COUNT(d.id) as doc_count
       FROM clients c
-      LEFT JOIN documents d ON d.client_id = c.id AND d.deleted_at IS NULL
+      LEFT JOIN documents d ON d.client_id = c.id AND d.deleted_at IS NULL ${dateFilter.replace('AND created_at', 'AND d.created_at')}
       WHERE c.deleted_at IS NULL
       GROUP BY c.id, c.name
       ORDER BY total_value DESC
@@ -81,4 +81,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
+
 
