@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { useToast } from "@/components/Toast";
@@ -62,11 +62,34 @@ export default function ProfilePage() {
     showToast("Password updated successfully");
   };
 
+  // Load preferences from DB on mount
+  useEffect(() => {
+    fetch("/api/db/user-preferences")
+      .then(r => r.json())
+      .then(d => {
+        if (d.preferences) {
+          setEmailNotifications(d.preferences.email_notifications ?? true);
+          setFollowUpReminders(d.preferences.followup_reminders ?? true);
+          setHealthAlerts(d.preferences.health_alerts ?? true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const savePreferences = async () => {
     setSavingPrefs(true);
-    await new Promise(r => setTimeout(r, 400));
-    setSavingPrefs(false);
-    showToast("Preferences saved");
+    try {
+      await fetch("/api/db/user-preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailNotifications, followupReminders: followUpReminders, healthAlerts }),
+      });
+      showToast("Preferences saved");
+    } catch {
+      showToast("Failed to save preferences", "error");
+    } finally {
+      setSavingPrefs(false);
+    }
   };
 
   const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
@@ -244,3 +267,4 @@ export default function ProfilePage() {
     </>
   );
 }
+
