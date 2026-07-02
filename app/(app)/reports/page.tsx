@@ -110,10 +110,10 @@ export default function ReportsPage() {
         }
       />
 
-      <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+      <div className="page-content-pad" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
         {/* Top-level totals */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <div className="stat-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
             { label: "Total Clients", value: data.totals.total_clients, color: "var(--accent-green)" },
             { label: "Active Projects", value: data.totals.active_projects, color: "var(--accent-blue)" },
@@ -127,7 +127,7 @@ export default function ReportsPage() {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="two-col-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
 
           {/* Health distribution */}
           <div className="card">
@@ -214,5 +214,6 @@ export default function ReportsPage() {
     </>
   );
 }
+
 
 
