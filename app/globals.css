@@ -398,7 +398,47 @@ body {
   .ai-assistant-bubble { bottom: 76px !important; }
   .ai-assistant-panel { bottom: 140px !important; left: 12px !important; right: 12px !important; width: auto !important; }
   .page-header { padding: 12px 16px; }
+
+  /* Stat card grids — 2×2 on phone */
+  .stat-grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .stat-grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Two-column layouts — stack vertically */
+  .two-col-layout { grid-template-columns: 1fr !important; }
+  .three-col-layout { grid-template-columns: 1fr !important; }
+  .four-col-layout { grid-template-columns: 1fr !important; }
+
+  /* Tables — horizontal scroll container */
+  .table-scroll-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Cards — reduce padding */
+  .card { padding: 14px !important; }
+  .stat-card { padding: 14px 16px !important; }
+
+  /* Form grids — stack to single column */
+  .form-grid { grid-template-columns: 1fr !important; }
+
+  /* Typography adjustments */
+  .page-title { font-size: 15px !important; }
+
+  /* Hide non-essential table columns on small screens */
+  .hide-mobile { display: none !important; }
+
+  /* Full-width buttons on mobile */
+  .btn-mobile-full { width: 100% !important; justify-content: center !important; }
+
+  /* Reduce page padding */
+  .page-content-pad { padding: 16px !important; }
 }
+
+/* ─── Tablet overrides (iPad mini, Android tablets) ─── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .three-col-layout { grid-template-columns: repeat(2, 1fr); }
+  .table-scroll-wrapper { overflow-x: auto; }
+}
+
 @media (min-width: 769px) {
   .mobile-bottom-nav { display: none !important; }
 }
+
