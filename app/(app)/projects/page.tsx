@@ -149,7 +149,7 @@ export default function ProjectsPage() {
           </button>
         }
       />
-      <div style={{ padding: 24 }}>
+      <div className="page-content-pad" style={{ padding: 24 }}>
         {error && (
           <div style={{ padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, fontSize: 13, color: "var(--accent-red)", marginBottom: 16 }}>
             {error}
@@ -159,7 +159,7 @@ export default function ProjectsPage() {
         {showAdd && (
           <div className="card" style={{ border: "1px solid var(--accent-blue)", marginBottom: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Project</div>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.2fr", gap: 12, marginBottom: 12 }}>
+            <div className="four-col-layout" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.2fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Project Name</label>
                 <input className="input" placeholder="e.g. Loyalty Programme Phase 2" value={newName} onChange={e => setNewName(e.target.value)} />
@@ -200,7 +200,7 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="table-scroll-wrapper"><div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{
             display: "grid", gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px",
             padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)",
@@ -287,9 +287,10 @@ export default function ProjectsPage() {
             ))
           )}
         </div>
-      </div>
+      </div></div>
     </>
   );
 }
+
 
 
