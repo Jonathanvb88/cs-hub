@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
+import OneDriveFiles from "@/components/OneDriveFiles";
 
 interface ProjectRow { id: string; name: string; status: string; priority: string; target_date: string | null; client_id: string | null; }
 
@@ -83,7 +84,7 @@ function RealDocumentsTab({ clientId }: { clientId: string }) {
   );
 }
 
-const TABS = ["Overview", "Contacts", "Timeline", "Projects", "Documents", "Conversations", "Health"];
+const TABS = ["Overview", "Contacts", "Timeline", "Projects", "Documents", "Conversations", "Files", "Health"];
 
 export default function ClientProfilePage() {
   const { id } = useParams();
@@ -541,6 +542,39 @@ export default function ClientProfilePage() {
           </div>
         )}
 
+        {activeTab === "Files" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ padding: "14px 16px", background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, display: "flex", gap: 10, alignItems: "center" }}>
+              <svg width="16" height="16" fill="none" stroke="var(--accent-blue)" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+              <span style={{ fontSize: 12, color: "var(--accent-blue)", fontWeight: 500 }}>
+                Showing OneDrive and SharePoint files matching this client name. Open any file directly or link it to this client record.
+              </span>
+            </div>
+            <OneDriveFiles
+              clientName={(client?.name as string) || ""}
+              showSearch={true}
+              onLinkFile={(file) => {
+                // Save to knowledge assets linked to this client
+                fetch("/api/db/knowledge", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    label: file.name,
+                    type: "onedrive",
+                    clientName: (client?.name as string) || "",
+                    url: file.webUrl,
+                    notes: `Linked from OneDrive — ${file.parentPath || ""}`,
+                    tags: [file.extension || "file"],
+                  }),
+                });
+                alert(`"${file.name}" linked to ${(client?.name as string) || "client"} in Knowledge Library`);
+              }}
+            />
+          </div>
+        )}
+
         {activeTab === "Health" && (
           <div style={{ maxWidth: 600 }}>
             <div className="card" style={{ marginBottom: 16 }}>
@@ -585,6 +619,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
