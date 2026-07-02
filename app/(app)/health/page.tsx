@@ -97,7 +97,7 @@ export default function HealthPage() {
           </button>
         }
       />
-      <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+      <div className="page-content-pad" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
         {error && (
           <div style={{ padding: "10px 14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, fontSize: 13, color: "var(--accent-red)" }}>
@@ -105,7 +105,7 @@ export default function HealthPage() {
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <div className="stat-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
             { key: "active", label: "Active", desc: "Strong recent engagement", color: "#15803d" },
             { key: "steady", label: "Steady", desc: "Healthy, regular contact", color: "#2563eb" },
@@ -211,7 +211,7 @@ export default function HealthPage() {
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
                       Why this score — calculated from real activity
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+                    <div className="stat-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
                       <div>
                         <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Last Contact</div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{lastContactLabel(client.daysSinceLastContact)}</div>
@@ -239,5 +239,6 @@ export default function HealthPage() {
     </>
   );
 }
+
 
 
