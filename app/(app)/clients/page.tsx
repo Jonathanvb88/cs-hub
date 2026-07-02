@@ -122,7 +122,7 @@ export default function ClientsPage() {
         }
       />
 
-      <div style={{ padding: 24 }}>
+      <div className="page-content-pad" style={{ padding: 24 }}>
         {error && (
           <div style={{ padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, fontSize: 13, color: "var(--accent-red)", marginBottom: 16 }}>
             {error}
@@ -132,7 +132,7 @@ export default function ClientsPage() {
         {showAdd && (
           <div className="card" style={{ border: "1px solid var(--accent-blue)", marginBottom: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Client</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1.2fr 1.2fr", gap: 12, marginBottom: 12 }}>
+            <div className="four-col-layout" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1.2fr 1.2fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Client Name</label>
                 <input className="input" placeholder="e.g. ABC Retail Group" value={newName} onChange={e => setNewName(e.target.value)} />
@@ -185,7 +185,7 @@ export default function ClientsPage() {
         </div>
 
         {loading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          <div className="three-col-layout" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
             {[1,2,3,4,5,6].map(i => (
               <div key={i} className="card">
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
@@ -212,7 +212,7 @@ export default function ClientsPage() {
             {clients.length === 0 && <button className="btn-primary" onClick={() => setShowAdd(true)}>Add First Client</button>}
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          <div className="three-col-layout" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
             {filtered.map(client => (
               <div
                 key={client.id}
@@ -282,6 +282,7 @@ export default function ClientsPage() {
     </>
   );
 }
+
 
 
 
