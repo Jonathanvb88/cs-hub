@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
+import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 
 interface ProjectRow { id: string; name: string; status: string; priority: string; target_date: string | null; client_id: string | null; }
 
@@ -103,7 +103,7 @@ export default function ClientProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientId: id,
-          clientName: client?.name || "",
+          clientName: (client?.name as string) || "",
           title: quickFollowUpTitle,
           dueDate: quickFollowUpDate || null,
           priority: "medium",
@@ -114,7 +114,20 @@ export default function ClientProfilePage() {
     finally { setSavingFollowUp(false); }
   };
   const [timelineLoading, setTimelineLoading] = useState(false);
-  const client = mockClients.find(c => c.id === id);
+  const [client, setClient] = useState<Record<string, unknown> | null>(null);
+  const [clientLoading, setClientLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    fetch("/api/db/clients")
+      .then(r => r.json())
+      .then(d => {
+        const found = (d.clients || []).find((c: Record<string, unknown>) => c.id === id);
+        setClient(found || null);
+      })
+      .catch(() => setClient(null))
+      .finally(() => setClientLoading(false));
+  }, [id]);
 
   useEffect(() => {
     if (activeTab === "Timeline" && id) {
@@ -127,11 +140,19 @@ export default function ClientProfilePage() {
     }
   }, [activeTab, id]);
 
+  if (clientLoading) {
+    return (
+      <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
+        Loading client...
+      </div>
+    );
+  }
+
   if (!client) {
     return (
-              <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
-          Client not found. <Link href="/clients" style={{ color: "var(--accent-blue)" }}>Back to clients</Link>
-        </div>
+      <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
+        Client not found. <Link href="/clients" style={{ color: "var(--accent-blue)" }}>Back to clients</Link>
+      </div>
     );
   }
 
@@ -139,8 +160,8 @@ export default function ClientProfilePage() {
   return (
     <>
       <Header
-        title={client.name}
-        subtitle={client.industry}
+        title={(client.name as string)}
+        subtitle={(client.industry as string | null)}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn-secondary">
@@ -177,15 +198,15 @@ export default function ClientProfilePage() {
             {client.name.charAt(0)}
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{client.name}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{(client.name as string)}</div>
             <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {new Date(client.clientSince).getFullYear()}</div>
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 24, flex: 1, flexWrap: "wrap" }}>
           {[
-            { label: "Health", value: <span className={getHealthBadgeClass(client.healthStatus)}>{getHealthLabel(client.healthStatus)}</span> },
-            { label: "Score", value: <span style={{ color: getHealthColor(client.healthStatus), fontWeight: 700 }}>{client.healthScore}/100</span> },
+            { label: "Health", value: <span className={getHealthBadgeClass(client.health_status as string)}>{getHealthLabel(client.health_status as string)}</span> },
+            { label: "Score", value: <span style={{ color: getHealthColor(client.health_status as string), fontWeight: 700 }}>{(client.health_score as number)}/100</span> },
             { label: "Active Projects", value: client.activeProjects },
             { label: "Last Contact", value: client.lastContact },
             { label: "Assigned CSM", value: client.assignedCsm },
@@ -244,7 +265,7 @@ export default function ClientProfilePage() {
                   <div style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-blue)", marginBottom: 4 }}>AI Insight</div>
                   {client.healthStatus === "at_risk" ? (
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                      {client.name} has had no meaningful contact in over 30 days and no active projects. This client is at risk of disengagement. Consider scheduling a check-in call this week.
+                      {(client.name as string)} has had no meaningful contact in over 30 days and no active projects. This client is at risk of disengagement. Consider scheduling a check-in call this week.
                     </div>
                   ) : client.healthStatus === "quiet" ? (
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
@@ -252,7 +273,7 @@ export default function ClientProfilePage() {
                     </div>
                   ) : (
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                      {client.name} is an actively engaged client with {client.activeProjects} ongoing project{client.activeProjects !== 1 ? "s" : ""}. Last contact was {client.lastContact}. Relationship is healthy.
+                      {(client.name as string)} is an actively engaged client with {client.activeProjects} ongoing project{client.activeProjects !== 1 ? "s" : ""}. Last contact was {client.lastContact}. Relationship is healthy.
                     </div>
                   )}
                 </div>
@@ -285,7 +306,7 @@ export default function ClientProfilePage() {
               {/* Notes */}
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>Notes</div>
-                <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{client.notes}</div>
+                <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{(client.notes as string | null)}</div>
               </div>
 
               {/* Recent communications */}
@@ -306,13 +327,13 @@ export default function ClientProfilePage() {
                 <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>Health Score</div>
                 <div style={{
                   width: 80, height: 80, borderRadius: "50%",
-                  border: `6px solid ${getHealthColor(client.healthStatus)}`,
+                  border: `6px solid ${getHealthColor(client.health_status as string)}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   margin: "0 auto 12px",
                 }}>
-                  <span style={{ fontSize: 22, fontWeight: 800, color: getHealthColor(client.healthStatus) }}>{client.healthScore}</span>
+                  <span style={{ fontSize: 22, fontWeight: 800, color: getHealthColor(client.health_status as string) }}>{(client.health_score as number)}</span>
                 </div>
-                <span className={getHealthBadgeClass(client.healthStatus)}>{getHealthLabel(client.healthStatus)}</span>
+                <span className={getHealthBadgeClass(client.health_status as string)}>{getHealthLabel(client.health_status as string)}</span>
               </div>
 
               {/* Quick stats */}
@@ -564,6 +585,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
