@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
@@ -31,6 +31,30 @@ export default function KnowledgePage() {
   const [selected, setSelected] = useState<typeof mockAssets[0] | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [assets, setAssets] = useState(mockAssets);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/db/knowledge")
+      .then(r => r.json())
+      .then(d => {
+        if (d.assets && d.assets.length > 0) {
+          setAssets(d.assets.map((a: Record<string, unknown>) => ({
+            id: a.id as string,
+            clientId: "db",
+            clientName: (a.client_name as string) || "—",
+            type: a.type as string,
+            label: a.label as string,
+            url: (a.url as string) || "",
+            notes: (a.notes as string) || "",
+            tags: (a.tags as string[]) || [],
+            createdAt: new Date(a.created_at as string).toISOString().split("T")[0],
+          })));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
   const [newLabel, setNewLabel] = useState("");
   const [newType, setNewType] = useState("journey_url");
   const [newClientName, setNewClientName] = useState("");
@@ -38,23 +62,34 @@ export default function KnowledgePage() {
   const [newNotes, setNewNotes] = useState("");
   const [newTags, setNewTags] = useState("");
 
-  const addAsset = () => {
+  const addAsset = async () => {
     if (!newLabel.trim()) return;
-    const asset = {
-      id: Date.now().toString(),
-      clientId: "custom",
-      clientName: newClientName || "—",
-      type: newType,
-      label: newLabel,
-      url: newUrl,
-      notes: newNotes,
-      tags: newTags.split(",").map(t => t.trim()).filter(Boolean),
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setAssets(p => [asset, ...p]);
-    setNewLabel(""); setNewType("journey_url"); setNewClientName("");
-    setNewUrl(""); setNewNotes(""); setNewTags("");
-    setShowAdd(false);
+    setSaving(true);
+    try {
+      const res = await fetch("/api/db/knowledge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          label: newLabel, type: newType, clientName: newClientName,
+          url: newUrl, notes: newNotes,
+          tags: newTags.split(",").map((t: string) => t.trim()).filter(Boolean),
+        }),
+      });
+      const data = await res.json();
+      if (data.asset) {
+        const a = data.asset;
+        setAssets(p => [{
+          id: a.id, clientId: "db", clientName: a.client_name || "—",
+          type: a.type, label: a.label, url: a.url || "",
+          notes: a.notes || "", tags: a.tags || [],
+          createdAt: new Date(a.created_at).toISOString().split("T")[0],
+        }, ...p]);
+      }
+      setNewLabel(""); setNewType("journey_url"); setNewClientName("");
+      setNewUrl(""); setNewNotes(""); setNewTags("");
+      setShowAdd(false);
+    } catch {}
+    finally { setSaving(false); }
   };
 
   const filtered = assets.filter(a => {
@@ -124,7 +159,7 @@ export default function KnowledgePage() {
                 <textarea className="input" rows={2} placeholder="Describe the asset and how to reuse it..." value={newNotes} onChange={e => setNewNotes(e.target.value)} />
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button className="btn-primary" style={{ fontSize: 12 }} onClick={addAsset}>Save Asset</button>
+                <button className="btn-primary" style={{ fontSize: 12, opacity: saving ? 0.7 : 1 }} onClick={addAsset} disabled={saving}>{saving ? "Saving..." : "Save Asset"}</button>
                 <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowAdd(false)}>Cancel</button>
               </div>
             </div>
@@ -133,7 +168,7 @@ export default function KnowledgePage() {
           {/* Stats */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
             {[
-              { label: "Total Assets", value: mockAssets.length, color: "var(--accent-blue)" },
+              { label: "Total Assets", value: assets.length, color: "var(--accent-blue)" },
               { label: "Journey URLs", value: assets.filter(a => a.type === "journey_url").length, color: "var(--accent-green)" },
               { label: "Templates", value: assets.filter(a => a.type === "import_template" || a.type === "email_template").length, color: "var(--accent-purple)" },
               { label: "Lessons Learned", value: assets.filter(a => a.type === "lessons_learned").length, color: "var(--accent-amber)" },
@@ -264,6 +299,7 @@ export default function KnowledgePage() {
     </>
   );
 }
+
 
 
 
