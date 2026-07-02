@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import OneDriveFiles from "@/components/OneDriveFiles";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { mockClients } from "@/lib/mockData";
@@ -295,10 +296,45 @@ export default function KnowledgePage() {
             </div>
           );
         })()}
+        {/* OneDrive / SharePoint section */}
+        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="16" height="16" fill="none" stroke="#2563eb" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>OneDrive & SharePoint</div>
+              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Search your Microsoft 365 files and link them to this library</div>
+            </div>
+          </div>
+          <div style={{ padding: 20 }}>
+            <OneDriveFiles
+              showSearch={true}
+              onLinkFile={(file) => {
+                fetch("/api/db/knowledge", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    label: file.name,
+                    type: "onedrive",
+                    clientName: "",
+                    url: file.webUrl,
+                    notes: `Linked from OneDrive — ${file.parentPath || ""}`,
+                    tags: [file.extension || "file", "onedrive"],
+                  }),
+                }).then(() => window.location.reload());
+              }}
+            />
+          </div>
+        </div>
+
       </div>
     </>
   );
 }
+
 
 
 
