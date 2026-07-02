@@ -83,10 +83,10 @@ export default function DashboardPage() {
         }
       />
 
-      <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+      <div className="page-content-pad" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
 
         {/* Quick Stats — real data */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <div className="stat-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
             { label: "Active Clients", value: clients.length || mockClients.length, color: "var(--accent-blue)", href: "/clients", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
             { label: "Comms to Action", value: pendingComms.length, color: "var(--accent-amber)", href: "/communications", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
@@ -112,7 +112,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        <div className="two-col-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
 
           {/* Work Inbox — real Communications from DB */}
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
@@ -248,7 +248,7 @@ export default function DashboardPage() {
               </div>
               <Link href="/health" style={{ fontSize: 12, color: "var(--accent-green)", fontWeight: 500, textDecoration: "none" }}>View Health Dashboard →</Link>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+            <div className="three-col-layout" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
               {atRiskClients.slice(0, 3).map((client: Record<string, unknown>, i: number) => (
                 <div
                   key={client.id as string}
@@ -278,3 +278,4 @@ export default function DashboardPage() {
     </>
   );
 }
+
