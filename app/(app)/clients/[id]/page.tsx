@@ -229,7 +229,7 @@ export default function ClientProfilePage() {
 
         <div style={{ display: "flex", gap: 24, flex: 1, flexWrap: "wrap" }}>
           {[
-            { label: "Health", value: <span className={getHealthBadgeClassclient.health_status}>{getHealthLabelclient.health_status}</span> },
+            { label: "Health", value: <span className={getHealthBadgeClass(client.health_status)}>{getHealthLabel(client.health_status)}</span> },
             { label: "Score", value: <span style={{ color: getHealthColor(client.health_status), fontWeight: 700 }}>{client.health_score}/100</span> },
             { label: "Active Projects", value: String(client.activeProjects || "—") },
             { label: "Last Contact", value: String(client.lastContact || "—") },
@@ -351,13 +351,13 @@ export default function ClientProfilePage() {
                 <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>Health Score</div>
                 <div style={{
                   width: 80, height: 80, borderRadius: "50%",
-                  border: `6px solid ${getHealthColorclient.health_status}`,
+                  border: `6px solid ${getHealthColor(client.health_status)}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   margin: "0 auto 12px",
                 }}>
-                  <span style={{ fontSize: 22, fontWeight: 800, color: getHealthColorclient.health_status }}>{client.health_score}</span>
+                  <span style={{ fontSize: 22, fontWeight: 800, color: getHealthColor(client.health_status) }}>{client.health_score}</span>
                 </div>
-                <span className={getHealthBadgeClassclient.health_status}>{getHealthLabelclient.health_status}</span>
+                <span className={getHealthBadgeClass(client.health_status)}>{getHealthLabel(client.health_status)}</span>
               </div>
 
               {/* Quick stats */}
@@ -642,6 +642,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
