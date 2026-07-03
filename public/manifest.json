@@ -1,0 +1,26 @@
+{
+  "name": "CS Hub — URUP Connect",
+  "short_name": "CS Hub",
+  "description": "AI-powered Client Success Operating System by URUP Connect",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#14171a",
+  "theme_color": "#15803d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en-ZA"
+}
