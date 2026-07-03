@@ -11,9 +11,13 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
   const { openDrawer } = useDrawer();
 
   return (
-    <div className="page-header">
+    <div className="page-header" style={{
+      borderTop: "2px solid var(--accent-green)",
+      background: "white",
+      boxShadow: "0 1px 0 var(--border), 0 4px 12px rgba(0,0,0,0.03)",
+    }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {/* Hamburger — shown only on mobile via CSS */}
+        {/* Hamburger — mobile only */}
         <button
           onClick={openDrawer}
           className="mobile-menu-btn"
@@ -29,8 +33,8 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
           </svg>
         </button>
         <div>
-          <h1 className="page-title">{title}</h1>
-          {subtitle && <p className="page-subtitle">{subtitle}</p>}
+          <h1 className="page-title" style={{ color: "var(--text-primary)", fontWeight: 700 }}>{title}</h1>
+          {subtitle && <p className="page-subtitle" style={{ color: "var(--text-muted)" }}>{subtitle}</p>}
         </div>
       </div>
       {actions && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>{actions}</div>}
