@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Header from "@/components/layout/Header";
 
@@ -26,6 +28,7 @@ const statusColor: Record<string, string> = {
 };
 
 export default function ReportsPage() {
+  const router = useRouter();
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -115,23 +118,30 @@ export default function ReportsPage() {
         {/* Top-level totals */}
         <div className="stat-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
-            { label: "Total Clients", value: data.totals.total_clients, color: "var(--accent-green)" },
-            { label: "Active Projects", value: data.totals.active_projects, color: "var(--accent-blue)" },
-            { label: "Pending Follow-ups", value: data.totals.pending_followups, color: "var(--accent-amber)" },
-            { label: "Won Value", value: fmtCurrency(data.totals.won_value), color: "var(--accent-green)" },
+            { label: "Total Clients", value: data.totals.total_clients, color: "var(--accent-green)", href: "/clients" },
+            { label: "Active Projects", value: data.totals.active_projects, color: "var(--accent-blue)", href: "/projects" },
+            { label: "Pending Follow-ups", value: data.totals.pending_followups, color: "var(--accent-amber)", href: "/followups" },
+            { label: "Won Value", value: fmtCurrency(data.totals.won_value), color: "var(--accent-green)", href: "/documents" },
           ].map(stat => (
-            <div key={stat.label} className="card" style={{ padding: "18px 20px" }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 4 }}>{stat.label}</div>
-            </div>
+            <Link key={stat.label} href={stat.href} style={{ textDecoration: "none" }}>
+              <div className="stat-card" style={{ padding: "18px 20px", cursor: "pointer" }}>
+                <div style={{ fontSize: 24, fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 4 }}>{stat.label}</div>
+                <div style={{ fontSize: 10, color: stat.color, marginTop: 6, fontWeight: 600 }}>View all →</div>
+              </div>
+            </Link>
           ))}
         </div>
 
         <div className="two-col-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
 
           {/* Health distribution */}
-          <div className="card">
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>Client Health Distribution</div>
+          <Link href="/health" style={{ textDecoration: "none" }}>
+          <div className="card" style={{ cursor: "pointer" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Client Health Distribution</div>
+              <span style={{ fontSize: 11, color: "var(--accent-green)", fontWeight: 600 }}>View Health →</span>
+            </div>
             {data.healthDistribution.length === 0 ? (
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>No client data yet</div>
             ) : (
@@ -140,10 +150,15 @@ export default function ReportsPage() {
               ))
             )}
           </div>
+          </Link>
 
           {/* Follow-up completion */}
-          <div className="card">
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>Follow-up Status</div>
+          <Link href="/followups" style={{ textDecoration: "none" }}>
+          <div className="card" style={{ cursor: "pointer" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Follow-up Status</div>
+              <span style={{ fontSize: 11, color: "var(--accent-green)", fontWeight: 600 }}>View Follow-ups →</span>
+            </div>
             {data.followUpStats.length === 0 ? (
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>No follow-ups yet</div>
             ) : (
@@ -152,10 +167,15 @@ export default function ReportsPage() {
               ))
             )}
           </div>
+          </Link>
 
           {/* Project status */}
-          <div className="card">
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>Project Status</div>
+          <Link href="/projects" style={{ textDecoration: "none" }}>
+          <div className="card" style={{ cursor: "pointer" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Project Status</div>
+              <span style={{ fontSize: 11, color: "var(--accent-green)", fontWeight: 600 }}>View Projects →</span>
+            </div>
             {data.projectStats.length === 0 ? (
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>No projects yet</div>
             ) : (
@@ -164,10 +184,15 @@ export default function ReportsPage() {
               ))
             )}
           </div>
+          </Link>
 
           {/* Quote conversion */}
-          <div className="card">
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>Quote Conversion</div>
+          <Link href="/documents" style={{ textDecoration: "none" }}>
+          <div className="card" style={{ cursor: "pointer" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Quote Conversion</div>
+              <span style={{ fontSize: 11, color: "var(--accent-green)", fontWeight: 600 }}>View Documents →</span>
+            </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 16 }}>By status and value</div>
             {data.quoteConversion.length === 0 ? (
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>No quotes yet</div>
@@ -183,6 +208,7 @@ export default function ReportsPage() {
               ))
             )}
           </div>
+          </Link>
         </div>
 
         {/* Top clients by value */}
@@ -201,12 +227,19 @@ export default function ReportsPage() {
           {data.topClients.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>No client data yet</div>
           ) : (
-            data.topClients.map(c => (
-              <div key={c.name} className="table-row" style={{ gridTemplateColumns: "2fr 100px 150px", alignItems: "center" }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{c.name}</div>
-                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{c.doc_count}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent-green)" }}>{fmtCurrency(c.total_value)}</div>
-              </div>
+            data.topClients.map((c, i) => (
+              <Link key={c.name} href="/clients" style={{ textDecoration: "none" }}>
+                <div className="table-row" style={{ gridTemplateColumns: "2fr 100px 150px", alignItems: "center", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-green-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "var(--accent-green)", flexShrink: 0 }}>
+                      {i + 1}
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{c.name}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{c.doc_count} docs</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent-green)" }}>{fmtCurrency(c.total_value)}</div>
+                </div>
+              </Link>
             ))
           )}
         </div>
@@ -214,6 +247,7 @@ export default function ReportsPage() {
     </>
   );
 }
+
 
 
 
