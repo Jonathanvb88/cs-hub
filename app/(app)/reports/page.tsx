@@ -126,7 +126,7 @@ export default function ReportsPage() {
             <Link key={stat.label} href={stat.href} style={{ textDecoration: "none" }}>
               <div className="stat-card" style={{ padding: "18px 20px", cursor: "pointer" }}>
                 <div style={{ fontSize: 24, fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
-                <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 4 }}>{stat.label}</div>
+                <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{stat.label}</div>
                 <div style={{ fontSize: 10, color: stat.color, marginTop: 6, fontWeight: 600 }}>View all →</div>
               </div>
             </Link>
@@ -247,6 +247,7 @@ export default function ReportsPage() {
     </>
   );
 }
+
 
 
 
