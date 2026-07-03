@@ -85,22 +85,16 @@ function LoginContent() {
 
         <div style={{ padding: "40px 40px 36px" }}>
 
-          {/* Logo */}
-          <div style={{ textAlign: "center", marginBottom: 8 }}>
+          {/* Logo — full, centred */}
+          <div style={{ textAlign: "center", marginBottom: 16 }}>
             <img
               src="/logo.png"
               alt="CS Hub"
-              style={{ width: 100, height: 100, objectFit: "contain" }}
+              style={{ width: 140, height: 140, objectFit: "contain", display: "block", margin: "0 auto" }}
             />
           </div>
 
-          {/* CS HUB text */}
-          <div style={{ textAlign: "center", marginBottom: 4 }}>
-            <span style={{ fontSize: 28, fontWeight: 800, color: "#15803d", letterSpacing: "-0.02em" }}>CS </span>
-            <span style={{ fontSize: 28, fontWeight: 800, color: "#14171a", letterSpacing: "-0.02em" }}>HUB</span>
-          </div>
-
-          {/* Tagline */}
+          {/* Tagline only — CS HUB already in the logo */}
           <div style={{ textAlign: "center", marginBottom: 36 }}>
             <span style={{ fontSize: 12, color: "#15803d", fontWeight: 600 }}>Work Smarter. </span>
             <span style={{ fontSize: 12, color: "#5b6460", fontWeight: 500 }}>Deliver Better.</span>
@@ -238,3 +232,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+
