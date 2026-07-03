@@ -208,8 +208,8 @@ export default function ClientProfilePage() {
           {[
             { label: "Health", value: <span className={getHealthBadgeClass(client.health_status as string)}>{getHealthLabel(client.health_status as string)}</span> },
             { label: "Score", value: <span style={{ color: getHealthColor((client.health_status as string)), fontWeight: 700 }}>{(client.health_score as number)}/100</span> },
-            { label: "Active Projects", value: String(client.activeProjects || "—") },
-            { label: "Last Contact", value: String(client.lastContact || "—") },
+            { label: "Active Projects", value: String((client.activeProjects as number) || "—") },
+            { label: "Last Contact", value: String((client.lastContact as string) || "—") },
             { label: "Assigned CSM", value: String(client.assignedCsm || "—") },
           ].map(item => (
             <div key={item.label}>
@@ -264,17 +264,17 @@ export default function ClientProfilePage() {
                 </div>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-blue)", marginBottom: 4 }}>AI Insight</div>
-                  {client.healthStatus === "at_risk" ? (
+                  {(client.health_status as string) === "at_risk" ? (
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
                       {(client.name as string)} has had no meaningful contact in over 30 days and no active projects. This client is at risk of disengagement. Consider scheduling a check-in call this week.
                     </div>
-                  ) : client.healthStatus === "quiet" ? (
+                  ) : (client.health_status as string) === "quiet" ? (
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
                       Engagement has dropped over the past 18 days. No new requests have come through. A proactive reach-out is recommended before the relationship goes cold.
                     </div>
                   ) : (
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                      {(client.name as string)} is an actively engaged client with {client.activeProjects} ongoing project{client.activeProjects !== 1 ? "s" : ""}. Last contact was {client.lastContact}. Relationship is healthy.
+                      {(client.name as string)} is an actively engaged client with {(client.activeProjects as number)} ongoing project{(client.activeProjects as number) !== 1 ? "s" : ""}. Last contact was {(client.lastContact as string)}. Relationship is healthy.
                     </div>
                   )}
                 </div>
@@ -285,8 +285,8 @@ export default function ClientProfilePage() {
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>Environment URLs</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[
-                    { label: "Production", url: client.productionUrl, color: "var(--accent-green)" },
-                    { label: "UAT", url: client.uatUrl, color: "var(--accent-amber)" },
+                    { label: "Production", url: (client.production_url as string), color: "var(--accent-green)" },
+                    { label: "UAT", url: (client.uat_url as string), color: "var(--accent-amber)" },
                     { label: "Website", url: (client.website as string), color: "var(--accent-blue)" },
                   ].map(env => (
                     <div key={env.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -342,9 +342,9 @@ export default function ClientProfilePage() {
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>Quick Stats</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[
-                    { label: "Active Projects", value: client.activeProjects },
+                    { label: "Active Projects", value: (client.activeProjects as number) },
                     { label: "Contacts", value: client.contacts.length },
-                    { label: "Last Contact", value: client.lastContact },
+                    { label: "Last Contact", value: (client.lastContact as string) },
                     { label: "Client Since", value: new Date((client.clientSince as string)).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
                   ].map(stat => (
                     <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -581,11 +581,11 @@ export default function ClientProfilePage() {
               <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>Health Score Breakdown</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {[
-                  { label: "Last email contact", value: client.lastContact, score: client.healthScore > 70 ? 90 : 50, weight: "25%" },
-                  { label: "Last meeting", value: "28 Jun 2026", score: client.healthScore > 70 ? 85 : 40, weight: "25%" },
-                  { label: "Active projects", value: String(client.activeProjects), score: client.activeProjects > 0 ? 80 : 0, weight: "20%" },
+                  { label: "Last email contact", value: (client.lastContact as string), score: (client.health_score as number) > 70 ? 90 : 50, weight: "25%" },
+                  { label: "Last meeting", value: "28 Jun 2026", score: (client.health_score as number) > 70 ? 85 : 40, weight: "25%" },
+                  { label: "Active projects", value: String((client.activeProjects as number)), score: (client.activeProjects as number) > 0 ? 80 : 0, weight: "20%" },
                   { label: "Overdue follow-ups", value: "0", score: 100, weight: "15%" },
-                  { label: "Completed projects (90d)", value: client.healthScore > 70 ? "2" : "0", score: client.healthScore > 70 ? 80 : 20, weight: "15%" },
+                  { label: "Completed projects (90d)", value: (client.health_score as number) > 70 ? "2" : "0", score: (client.health_score as number) > 70 ? 80 : 20, weight: "15%" },
                 ].map(row => (
                   <div key={row.label}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
@@ -606,9 +606,9 @@ export default function ClientProfilePage() {
             <div className="card" style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.2)" }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-blue)", marginBottom: 8 }}>AI Recommendation</div>
               <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-                {client.healthStatus === "at_risk"
+                {(client.health_status as string) === "at_risk"
                   ? "This client has been silent for over 30 days with no active work. Schedule a check-in call this week and consider sending a brief project showcase to re-engage interest."
-                  : client.healthStatus === "quiet"
+                  : (client.health_status as string) === "quiet"
                   ? "Engagement has cooled over the past few weeks. A proactive touchpoint — a short email or a Teams message — would be enough to maintain the relationship score."
                   : "This client is healthy and engaged. Continue regular communication and consider proposing the next phase of work to maintain momentum."}
               </div>
@@ -619,6 +619,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
