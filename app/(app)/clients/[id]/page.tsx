@@ -200,7 +200,7 @@ export default function ClientProfilePage() {
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{(client.name as string)}</div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {new Date((client.clientSince as string)).getFullYear()}</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {new Date((client.client_since as string)).getFullYear()}</div>
           </div>
         </div>
 
@@ -343,9 +343,9 @@ export default function ClientProfilePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[
                     { label: "Active Projects", value: (client.activeProjects as number) },
-                    { label: "Contacts", value: client.contacts.length },
+                    { label: "Contacts", value: ((client.contacts as unknown[]) || []).length },
                     { label: "Last Contact", value: (client.lastContact as string) },
-                    { label: "Client Since", value: new Date((client.clientSince as string)).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
+                    { label: "Client Since", value: new Date((client.client_since as string)).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
                   ].map(stat => (
                     <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{stat.label}</span>
@@ -619,6 +619,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
