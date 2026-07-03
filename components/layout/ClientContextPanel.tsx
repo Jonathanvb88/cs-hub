@@ -137,6 +137,7 @@ export default function ClientContextPanel() {
         background: "var(--bg-surface)", borderLeft: "1px solid var(--border)",
         position: "fixed", right: 0, top: 0, zIndex: 40,
         padding: 20, overflowY: "auto",
+        paddingTop: "calc(20px + env(safe-area-inset-top, 0px))",
       }}>
         <PanelContent />
       </aside>

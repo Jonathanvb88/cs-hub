@@ -80,6 +80,8 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         width: 260,
         background: "var(--bg-dark)",
         display: "flex", flexDirection: "column",
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
         transform: open ? "translateX(0)" : "translateX(-100%)",
         transition: "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
         boxShadow: open ? "4px 0 24px rgba(0,0,0,0.3)" : "none",

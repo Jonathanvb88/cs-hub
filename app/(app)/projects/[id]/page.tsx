@@ -112,8 +112,8 @@ export default function ProjectDetailPage() {
   return (
     <>
       <div style={{
-        height: 60, display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 24px", borderBottom: "1px solid var(--border)", background: "var(--bg-base)",
+        minHeight: 60, display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 24px", paddingTop: "env(safe-area-inset-top, 0px)", borderBottom: "1px solid var(--border)", background: "var(--bg-base)",
         position: "sticky", top: 0, zIndex: 40,
       }}>
         <div>

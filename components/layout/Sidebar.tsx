@@ -62,6 +62,7 @@ export default function Sidebar() {
       borderRight: "1px solid #1a2e1a",
       display: "flex", flexDirection: "column",
       position: "fixed", left: 0, top: 0, zIndex: 50,
+      paddingTop: "env(safe-area-inset-top, 0px)",
       boxShadow: "2px 0 20px rgba(0,0,0,0.3)",
     }}>
       <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid #1a2e1a", borderTop: "3px solid #15803d" }}>
