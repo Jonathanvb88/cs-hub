@@ -65,7 +65,7 @@ export default function Sidebar() {
     }}>
       <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid #1a2e1a", borderTop: "3px solid #15803d" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="/logo-dark.png" alt="CS Hub" style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }} />
+          <img src="/icon-192.png" alt="CS Hub" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", flexShrink: 0 }} />
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-on-dark)", lineHeight: 1.2 }}>CS Hub</div>
             <div style={{ fontSize: 10, color: "#7a827e", lineHeight: 1.2 }}>URUP Connect</div>
