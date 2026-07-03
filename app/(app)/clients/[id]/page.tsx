@@ -23,8 +23,14 @@ interface ClientRecord {
   activeProjects: number;
   lastContact: string | null;
   assignedCsm: string | null;
-  contacts: unknown[];
-  [key: string]: unknown;
+  contacts: {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  role?: string | null;
+}[];
+[key: string]: unknown;
 }
 
 
