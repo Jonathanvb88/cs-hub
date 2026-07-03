@@ -467,7 +467,7 @@ export default function ClientProfilePage() {
               </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {client.contacts.map(contact => (
+              {client.contacts.map((contact: Contact) => (
                 <div key={contact.id} className="card" style={{ display: "flex", alignItems: "center", gap: 16 }}>
                   <div style={{
                     width: 44, height: 44, borderRadius: "50%",
