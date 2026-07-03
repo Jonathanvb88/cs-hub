@@ -85,19 +85,13 @@ function LoginContent() {
 
         <div style={{ padding: "40px 40px 36px" }}>
 
-          {/* Logo — full, centred */}
-          <div style={{ textAlign: "center", marginBottom: 16 }}>
+          {/* Logo — full brand mark with CS HUB + tagline already included */}
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
             <img
               src="/logo.png"
               alt="CS Hub"
-              style={{ width: 140, height: 140, objectFit: "contain", display: "block", margin: "0 auto" }}
+              style={{ width: 200, objectFit: "contain", display: "block", margin: "0 auto" }}
             />
-          </div>
-
-          {/* Tagline only — CS HUB already in the logo */}
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <span style={{ fontSize: 12, color: "#15803d", fontWeight: 600 }}>Work Smarter. </span>
-            <span style={{ fontSize: 12, color: "#5b6460", fontWeight: 500 }}>Deliver Better.</span>
           </div>
 
           {/* Welcome text */}
