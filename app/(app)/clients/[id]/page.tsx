@@ -6,6 +6,16 @@ import Header from "@/components/layout/Header";
 import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 import OneDriveFiles from "@/components/OneDriveFiles";
 
+interface Contact {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  role?: string | null;
+  title?: string | null;
+  isPrimary?: boolean;
+}
+
 interface ClientRecord {
   id: string;
   name: string;
@@ -474,7 +484,7 @@ export default function ClientProfilePage() {
                       <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{contact.name}</span>
                       {contact.isPrimary && <span className="badge badge-blue">Primary</span>}
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{contact.title}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{(contact as Contact).title || (contact as Contact).role || '—'}</div>
                     <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{contact.email}</div>
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
@@ -648,6 +658,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
