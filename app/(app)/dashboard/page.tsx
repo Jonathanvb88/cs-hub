@@ -66,6 +66,27 @@ export default function DashboardPage() {
   const dueTodayFollowUps = followUps.filter(f => f.due_date === todayStr);
   const overdueFollowUps = followUps.filter(f => f.due_date && f.due_date < todayStr);
 
+  type FocusItem = { key: string; icon: "red" | "amber" | "blue"; label: string; sub: string; href: string; weight: number };
+  const focusItems: FocusItem[] = [
+    ...overdueFollowUps.map((f): FocusItem => ({
+      key: `fu-${f.id}`, icon: "red", label: f.title, sub: `${f.client_name} · Overdue follow-up`, href: "/followups", weight: 100,
+    })),
+    ...dueTodayFollowUps.map((f): FocusItem => ({
+      key: `fu-${f.id}`, icon: "amber", label: f.title, sub: `${f.client_name} · Due today`, href: "/followups", weight: 80,
+    })),
+    ...pendingComms.slice(0, 5).map((c): FocusItem => ({
+      key: `comm-${c.id}`, icon: "blue", label: c.subject, sub: `${c.client_name || "—"} · Needs a response`, href: "/communications", weight: 60,
+    })),
+    ...atRiskClients.slice(0, 5).map((c: Record<string, unknown>): FocusItem => ({
+      key: `client-${c.id}`,
+      icon: "red",
+      label: c.name as string,
+      sub: `${(c.health_status || c.healthStatus) === "at_risk" ? "At risk" : "Gone quiet"} · Health score ${c.health_score || c.healthScore}`,
+      href: `/clients/${c.id}`,
+      weight: 40,
+    })),
+  ].sort((a, b) => b.weight - a.weight).slice(0, 5);
+
   return (
     <>
       <Header
@@ -84,6 +105,48 @@ export default function DashboardPage() {
       />
 
       <div className="page-content-pad" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+
+        {/* Today's Focus — smart digest, top priorities across comms/follow-ups/at-risk clients */}
+        {focusItems.length > 0 && (
+          <div className="card" style={{ padding: 0, overflow: "hidden", border: "1px solid var(--accent-green)" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
+              <svg width="16" height="16" fill="none" stroke="var(--accent-green)" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Today&apos;s Focus</div>
+              <div style={{ fontSize: 12, color: "var(--text-secondary)", marginLeft: "auto" }}>
+                Top {focusItems.length} {focusItems.length === 1 ? "priority" : "priorities"} right now
+              </div>
+            </div>
+            <div>
+              {focusItems.map((item, i) => (
+                <div
+                  key={item.key}
+                  onClick={() => router.push(item.href)}
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: i < focusItems.length - 1 ? "1px solid var(--border)" : "none",
+                    display: "flex", alignItems: "center", gap: 12, cursor: "pointer", transition: "background 0.1s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <span style={{
+                    width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+                    background: item.icon === "red" ? "var(--accent-red)" : item.icon === "amber" ? "var(--accent-amber)" : "var(--accent-blue)",
+                  }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>{item.sub}</div>
+                  </div>
+                  <svg width="12" height="12" fill="none" stroke="var(--text-muted)" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Quick Stats — real data */}
         <div className="stat-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
