@@ -17,7 +17,7 @@ interface GraphEmail {
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
-  const { hiddenItems, setHiddenItems } = useNav();
+  const { hiddenItems, setHiddenItems, lockSidebarOpen, setLockSidebarOpen } = useNav();
   const { showToast } = useToast();
   const [navSaving, setNavSaving] = useState(false);
   const [emails, setEmails] = useState<GraphEmail[] | null>(null);
@@ -195,6 +195,35 @@ export default function SettingsPage() {
             <a href="/api/db/clients" download="clients.json">
               <button className="btn-secondary" style={{ fontSize: 12 }}>Export Clients</button>
             </a>
+          </div>
+        </div>
+
+        {/* Mobile Menu Behaviour */}
+        <div className="card">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>Mobile Menu Behaviour</div>
+              <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
+                {lockSidebarOpen
+                  ? "The menu stays open after you tap a page — dismiss it manually when you're done navigating."
+                  : "The menu closes automatically each time you tap a page, and re-opens from the hamburger icon."}
+              </div>
+            </div>
+            <button
+              onClick={() => setLockSidebarOpen(!lockSidebarOpen)}
+              style={{
+                position: "relative", width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", flexShrink: 0,
+                background: lockSidebarOpen ? "var(--accent-green)" : "var(--border)",
+                transition: "background 0.15s",
+              }}
+              aria-label="Toggle lock sidebar open"
+            >
+              <span style={{
+                position: "absolute", top: 2, left: lockSidebarOpen ? 22 : 2,
+                width: 20, height: 20, borderRadius: "50%", background: "white",
+                transition: "left 0.15s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+              }} />
+            </button>
           </div>
         </div>
 

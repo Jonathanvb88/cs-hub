@@ -32,7 +32,7 @@ interface MobileDrawerProps {
 
 export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
   const pathname = usePathname();
-  const { hiddenItems } = useNav();
+  const { hiddenItems, lockSidebarOpen } = useNav();
   const { data: session } = useSession();
   const [counts, setCounts] = useState<Record<string, number>>({});
 
@@ -49,8 +49,10 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
       .catch(() => {});
   }, []);
 
-  // Note: intentionally does NOT auto-close on route change — stays open across
-  // navigations until the user explicitly dismisses it (backdrop, X, or hamburger).
+  // Auto-close on route change, unless the user has locked the sidebar open in Settings
+  useEffect(() => {
+    if (!lockSidebarOpen) onClose();
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Prevent body scroll when open
   useEffect(() => {

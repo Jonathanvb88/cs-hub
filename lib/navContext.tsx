@@ -25,17 +25,22 @@ export { NAV_ITEMS };
 interface NavContextType {
   hiddenItems: string[];
   setHiddenItems: (items: string[]) => void;
+  lockSidebarOpen: boolean;
+  setLockSidebarOpen: (locked: boolean) => void;
   loaded: boolean;
 }
 
 const NavContext = createContext<NavContextType>({
   hiddenItems: [],
   setHiddenItems: () => {},
+  lockSidebarOpen: false,
+  setLockSidebarOpen: () => {},
   loaded: false,
 });
 
 export function NavProvider({ children }: { children: React.ReactNode }) {
   const [hiddenItems, setHiddenItemsState] = useState<string[]>([]);
+  const [lockSidebarOpen, setLockSidebarOpenState] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -43,6 +48,7 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
       .then(r => r.json())
       .then(d => {
         setHiddenItemsState(d.hiddenItems || []);
+        setLockSidebarOpenState(d.lockSidebarOpen || false);
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
@@ -59,8 +65,19 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
+  const setLockSidebarOpen = async (locked: boolean) => {
+    setLockSidebarOpenState(locked);
+    try {
+      await fetch("/api/db/nav-preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lockSidebarOpen: locked }),
+      });
+    } catch {}
+  };
+
   return (
-    <NavContext.Provider value={{ hiddenItems, setHiddenItems, loaded }}>
+    <NavContext.Provider value={{ hiddenItems, setHiddenItems, lockSidebarOpen, setLockSidebarOpen, loaded }}>
       {children}
     </NavContext.Provider>
   );
