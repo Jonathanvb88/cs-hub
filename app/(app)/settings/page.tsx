@@ -1,4 +1,6 @@
 "use client";
+import { useNav, NAV_ITEMS } from "@/lib/navContext";
+import { useToast } from "@/components/Toast";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -15,6 +17,9 @@ interface GraphEmail {
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
+  const { hiddenItems, setHiddenItems } = useNav();
+  const { showToast } = useToast();
+  const [navSaving, setNavSaving] = useState(false);
   const [emails, setEmails] = useState<GraphEmail[] | null>(null);
   const [loadingEmails, setLoadingEmails] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -193,6 +198,87 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Navigation Manager */}
+        <div className="card">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>Navigation Manager</div>
+              <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>Show or hide items in the sidebar. Dashboard and Clients are always visible.</div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                className="btn-secondary"
+                style={{ fontSize: 12 }}
+                onClick={() => setHiddenItems([])}
+              >
+                Show All
+              </button>
+              <button
+                className="btn-primary"
+                style={{ fontSize: 12, opacity: navSaving ? 0.7 : 1 }}
+                onClick={async () => {
+                  setNavSaving(true);
+                  await new Promise(r => setTimeout(r, 300));
+                  setNavSaving(false);
+                  showToast("Navigation preferences saved");
+                }}
+                disabled={navSaving}
+              >
+                {navSaving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+            {NAV_ITEMS.map(item => {
+              const isHidden = hiddenItems.includes(item.href);
+              const isRequired = item.required;
+              return (
+                <div
+                  key={item.href}
+                  onClick={() => {
+                    if (isRequired) return;
+                    if (isHidden) {
+                      setHiddenItems(hiddenItems.filter(h => h !== item.href));
+                    } else {
+                      setHiddenItems([...hiddenItems, item.href]);
+                    }
+                  }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "10px 14px", borderRadius: 10,
+                    border: "1px solid var(--border)",
+                    background: isHidden ? "var(--bg-elevated)" : "var(--bg-surface)",
+                    cursor: isRequired ? "default" : "pointer",
+                    opacity: isHidden ? 0.5 : 1,
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: isHidden ? "var(--text-muted)" : "var(--text-primary)" }}>
+                      {item.label}
+                    </span>
+                    {isRequired && (
+                      <span style={{ fontSize: 9, background: "var(--accent-green-bg)", color: "var(--accent-green)", padding: "1px 6px", borderRadius: 8, fontWeight: 700 }}>Required</span>
+                    )}
+                  </div>
+                  <div style={{
+                    width: 36, height: 20, borderRadius: 10, border: "none", cursor: isRequired ? "default" : "pointer",
+                    background: !isHidden ? "var(--accent-green)" : "var(--border-light)",
+                    position: "relative", transition: "background 0.2s", flexShrink: 0,
+                  }}>
+                    <span style={{
+                      position: "absolute", top: 3, left: !isHidden ? 18 : 3,
+                      width: 14, height: 14, borderRadius: "50%",
+                      background: "white", transition: "left 0.2s",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                    }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Platform Info */}
         <div className="card">
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 14 }}>Platform Information</div>
@@ -217,5 +303,6 @@ export default function SettingsPage() {
     </>
   );
 }
+
 
 
