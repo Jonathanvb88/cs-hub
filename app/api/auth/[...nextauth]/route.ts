@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
+import { sql } from "@/lib/db";
 
 const handler = NextAuth({
   providers: [
@@ -31,11 +32,23 @@ const handler = NextAuth({
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
       }
+      if (token.email) {
+        try {
+          const rows = await sql(`SELECT is_developer FROM users WHERE email = $1`, [token.email]);
+          token.isDeveloper = rows[0]?.is_developer === true;
+        } catch {
+          // DB lookup failed (e.g. column not yet migrated) — fall back to a known developer email
+          token.isDeveloper = token.email === "jonathanvb@urupconnect.com";
+        }
+      }
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;
       session.error = token.error as string | undefined;
+      if (session.user) {
+        session.user.isDeveloper = !!token.isDeveloper;
+      }
       return session;
     },
   },
