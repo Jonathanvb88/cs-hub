@@ -110,6 +110,7 @@ body {
   padding: 20px;
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base);
+  isolation: isolate;
 }
 .card:hover { box-shadow: var(--shadow-md); }
 .card-flat {
@@ -126,11 +127,14 @@ body {
   border-radius: 14px;
   padding: 18px 20px;
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-base);
+  transition: box-shadow var(--transition-base), border-left-color var(--transition-base);
   min-height: 88px;
   box-sizing: border-box;
+  isolation: isolate;
+  will-change: box-shadow;
 }
-.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); border-left: 3px solid var(--accent-green); }
+.stat-card { border-left: 3px solid transparent; }
+.stat-card:hover { box-shadow: var(--shadow-md); border-left: 3px solid var(--accent-green); }
 
 /* ─── Badges ─── */
 .badge {
@@ -511,4 +515,5 @@ body {
   border-radius: 0 2px 2px 0;
 }
 .sidebar-link { position: relative; }
+
 
