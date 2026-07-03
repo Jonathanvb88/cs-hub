@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useNav } from "@/lib/navContext";
+import { signOut, useSession } from "next-auth/react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
@@ -29,6 +30,7 @@ const bottomItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { hiddenItems } = useNav();
+  const { data: session } = useSession();
   const [counts, setCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -60,11 +62,7 @@ export default function Sidebar() {
     }}>
       <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid #2a2e32" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 32, height: 32, background: "var(--accent-green)", borderRadius: 8,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 14, fontWeight: 700, color: "white", flexShrink: 0,
-          }}>C</div>
+          <img src="/logo.png" alt="CS Hub" style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }} />
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-on-dark)", lineHeight: 1.2 }}>CS Hub</div>
             <div style={{ fontSize: 10, color: "#7a827e", lineHeight: 1.2 }}>URUP Connect</div>
@@ -101,30 +99,50 @@ export default function Sidebar() {
             <span style={{ fontSize: 13 }}>{item.label}</span>
           </Link>
         ))}
-        <Link href="/profile" style={{ textDecoration: "none" }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10, padding: "8px 12px",
-            marginTop: 4, background: "var(--bg-dark-elevated)", borderRadius: 8,
-            cursor: "pointer", transition: "background 0.15s",
-          }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+          <Link href="/profile" style={{ textDecoration: "none", flex: 1 }}>
             <div style={{
-              width: 28, height: 28, borderRadius: "50%", background: "var(--accent-green)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0,
-            }}>JV</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Jonathan</div>
-              <div style={{ fontSize: 10, color: "#7a827e" }}>Client Success Manager</div>
+              display: "flex", alignItems: "center", gap: 10, padding: "8px 12px",
+              background: "var(--bg-dark-elevated)", borderRadius: 8,
+              cursor: "pointer", transition: "background 0.15s",
+            }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: "50%", background: "var(--accent-green)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0,
+              }}>
+                {session?.user?.name?.charAt(0)?.toUpperCase() || "J"}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {session?.user?.name || "Jonathan"}
+                </div>
+                <div style={{ fontSize: 10, color: "#7a827e" }}>Client Success Manager</div>
+              </div>
             </div>
-            <svg width="12" height="12" fill="none" stroke="#7a827e" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            title="Sign out"
+            style={{
+              background: "var(--bg-dark-elevated)", border: "none", borderRadius: 8,
+              padding: "8px 10px", cursor: "pointer", color: "#7a827e",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.15s", flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#3a1212"; e.currentTarget.style.color = "#ef4444"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-dark-elevated)"; e.currentTarget.style.color = "#7a827e"; }}
+          >
+            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-          </div>
-        </Link>
+          </button>
+        </div>
       </div>
     </aside>
   );
 }
+
 
 
 
