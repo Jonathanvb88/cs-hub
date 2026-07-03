@@ -75,14 +75,19 @@ export default function UATBuilderPage() {
   useEffect(() => {
     fetch("/api/db/clients").then(r => r.json()).then(d => setClients(d.clients || []));
     fetch("/api/db/projects").then(r => r.json()).then(d => setProjects(d.projects || []));
-    const prefill = sessionStorage.getItem("cshub_template_prefill");
+    const prefill = (() => {
+      try { return sessionStorage.getItem("cshub_template_prefill"); } catch {}
+      try { return localStorage.getItem("cshub_template_prefill"); } catch {}
+      return null;
+    })();
     if (prefill) {
       try {
         const data = JSON.parse(prefill);
         if (data.scenarios) setScenarios(data.scenarios);
         if (data.signOffDeclaration) setSignOffDeclaration(data.signOffDeclaration);
       } catch {}
-      sessionStorage.removeItem("cshub_template_prefill");
+      try { sessionStorage.removeItem("cshub_template_prefill"); } catch {}
+        try { localStorage.removeItem("cshub_template_prefill"); } catch {}
     }
   }, []);
 
@@ -362,3 +367,4 @@ export default function UATBuilderPage() {
     </>
   );
 }
+
