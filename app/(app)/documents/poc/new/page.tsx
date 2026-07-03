@@ -30,7 +30,11 @@ export default function NewPOCPage() {
   const selectedClient = mockClients.find(c => c.id === clientId);
 
   useEffect(() => {
-    const prefill = sessionStorage.getItem("cshub_template_prefill");
+    const prefill = (() => {
+      try { return sessionStorage.getItem("cshub_template_prefill"); } catch {}
+      try { return localStorage.getItem("cshub_template_prefill"); } catch {}
+      return null;
+    })();
     if (prefill) {
       try {
         const data = JSON.parse(prefill);
@@ -39,7 +43,8 @@ export default function NewPOCPage() {
         if (data.resources) setResources(data.resources);
         if (data.criteria) setCriteria(data.criteria);
       } catch {}
-      sessionStorage.removeItem("cshub_template_prefill");
+      try { sessionStorage.removeItem("cshub_template_prefill"); } catch {}
+        try { localStorage.removeItem("cshub_template_prefill"); } catch {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -199,5 +204,6 @@ export default function NewPOCPage() {
     </>
   );
 }
+
 
 
