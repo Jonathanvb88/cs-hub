@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 // Auto-create table if it doesn't exist
 async function ensureTable() {
@@ -22,6 +23,8 @@ async function ensureTable() {
 }
 
 export async function GET(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureTable();
     const from = req.nextUrl.searchParams.get("from");
@@ -55,6 +58,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureTable();
     const body = await req.json();
@@ -74,6 +79,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const body = await req.json();
     const { id, title, clientId, clientName, eventDate, startHour, startMin, durationMins, type, notes } = body;
@@ -101,6 +108,8 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const id = req.nextUrl.searchParams.get("id");
     await sql(`UPDATE calendar_events SET deleted_at = now() WHERE id = $1`, [id]);

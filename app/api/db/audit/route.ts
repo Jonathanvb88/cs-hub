@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 async function ensureTable() {
   await sql(`
@@ -19,6 +20,8 @@ async function ensureTable() {
 }
 
 export async function GET(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureTable();
     const search = req.nextUrl.searchParams.get("search") || "";
@@ -58,6 +61,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureTable();
     const body = await req.json();

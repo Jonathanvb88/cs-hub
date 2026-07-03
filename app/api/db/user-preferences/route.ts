@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 async function ensureTable() {
   await sql(`
@@ -18,7 +19,9 @@ async function ensureTable() {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureTable();
     const rows = await sql(`SELECT * FROM user_preferences WHERE user_key = 'jonathan'`);
@@ -29,6 +32,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureTable();
     const body = await req.json();

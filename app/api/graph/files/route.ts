@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/requireAuth";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     // Get the JWT token directly without needing authOptions
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });

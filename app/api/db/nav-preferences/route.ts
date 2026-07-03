@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 async function ensureColumn() {
   try {
@@ -7,7 +8,9 @@ async function ensureColumn() {
   } catch {}
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureColumn();
     const rows = await sql(`SELECT hidden_nav_items FROM user_preferences WHERE user_key = 'jonathan'`);
@@ -18,6 +21,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     await ensureColumn();
     const { hiddenItems } = await req.json();

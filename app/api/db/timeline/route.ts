@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 interface TimelineEvent {
   type: string;
@@ -9,6 +10,8 @@ interface TimelineEvent {
 }
 
 export async function GET(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const clientId = req.nextUrl.searchParams.get("clientId");
     if (!clientId) {
