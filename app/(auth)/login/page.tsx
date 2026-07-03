@@ -114,7 +114,7 @@ function LoginContent() {
               filter: "drop-shadow(0 0 20px rgba(34,197,94,0.4)) drop-shadow(0 0 40px rgba(21,128,61,0.2))",
               animation: "logoGlow 3s ease-in-out infinite alternate",
             }}>
-              <img src="/logo-dark.png" alt="CS Hub" style={{ width: 160, objectFit: "contain", display: "block" }} />
+              <img src="/logo-dark.png" alt="CS Hub" style={{ width: 170, objectFit: "contain", display: "block", filter: "drop-shadow(0 0 12px rgba(34,197,94,0.3))" }} />
             </div>
           </div>
 
@@ -277,4 +277,5 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+
 
