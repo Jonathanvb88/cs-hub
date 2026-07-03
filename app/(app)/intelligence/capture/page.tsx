@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients } from "@/lib/mockData";
+import { useRouter } from "next/navigation";
 
 interface UserStory {
   id: string;
@@ -57,6 +57,7 @@ const CLASS_BADGE: Record<string, string> = {
 };
 
 export default function RequirementCapturePage() {
+  const router = useRouter();
   const [clientId, setClientId] = useState("");
   const [sourceType, setSourceType] = useState("email");
   const [content, setContent] = useState("");
@@ -66,8 +67,18 @@ export default function RequirementCapturePage() {
   const [copied, setCopied] = useState(false);
   const [showClarification, setShowClarification] = useState(false);
   const [activeStory, setActiveStory] = useState<string | null>(null);
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const selectedClient = mockClients.find(c => c.id === clientId);
+  useEffect(() => {
+    fetch("/api/db/clients")
+      .then(r => r.json())
+      .then(d => setClients((d.clients || []).map((c: { id: string; name: string }) => ({ id: c.id, name: c.name }))))
+      .catch(() => setClients([]));
+  }, []);
+
+  const selectedClient = clients.find(c => c.id === clientId);
 
   const handleExtract = async () => {
     if (!content.trim()) { setError("Please paste the email or notes content first."); return; }
@@ -217,6 +228,40 @@ Extract all software requirements.`;
     });
   };
 
+  const handleSaveToQueue = async () => {
+    if (!result) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/db/ticket-packages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: clientId || null,
+          clientName: selectedClient?.name || null,
+          sourceType,
+          classification: result.classification,
+          priority: result.priority,
+          businessReason: result.businessReason,
+          modulesAffected: result.modulesAffected,
+          missingInformation: result.missingInformation,
+          clarificationEmailDraft: result.clarificationEmailDraft,
+          risks: result.risks,
+          assumptions: result.assumptions,
+          userStories: result.userStories,
+          developerTasks: result.developerTasks,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      const data = await res.json();
+      setSaved(true);
+      setTimeout(() => router.push(`/intelligence/tickets?id=${data.package.id}`), 800);
+    } catch {
+      setError("Failed to save ticket package. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const SAMPLE_EMAIL = `Hi Jonathan,
 
 We would like to add a multi-file upload feature to our portal. Currently users can only upload one file at a time, which is very time consuming when they need to submit monthly reports.
@@ -243,9 +288,14 @@ IT Manager, ABC Retail Group`;
           <div style={{ display: "flex", gap: 8 }}>
             <Link href="/intelligence"><button className="btn-secondary" style={{ fontSize: 12 }}>Back</button></Link>
             {result && (
-              <button className="btn-primary" style={{ fontSize: 12 }} onClick={handleCopy}>
-                {copied ? "Copied!" : "Copy Ticket Package"}
-              </button>
+              <>
+                <button className="btn-secondary" style={{ fontSize: 12 }} onClick={handleCopy}>
+                  {copied ? "Copied!" : "Copy Ticket Package"}
+                </button>
+                <button className="btn-primary" style={{ fontSize: 12, opacity: saving ? 0.7 : 1 }} onClick={handleSaveToQueue} disabled={saving || saved}>
+                  {saved ? "Saved — opening..." : saving ? "Saving..." : "Save to Ticket Queue"}
+                </button>
+              </>
             )}
           </div>
         }
@@ -264,7 +314,7 @@ IT Manager, ABC Retail Group`;
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 5 }}>Client</label>
                 <select className="input" value={clientId} onChange={e => setClientId(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
                   <option value="">Select client (optional)</option>
-                  {mockClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
