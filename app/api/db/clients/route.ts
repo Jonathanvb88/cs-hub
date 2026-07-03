@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/requireAuth";
 import { sql } from "@/lib/db";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const clients = await sql(`
       SELECT c.*, u.name as assigned_user_name, u.avatar_initials as assigned_user_initials
@@ -24,6 +27,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const body = await req.json();
     const { name, industry, website, productionUrl, uatUrl, notes, assignedCsm, assignedUserId } = body;
@@ -41,6 +46,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const body = await req.json();
     const { id, name, industry, notes, healthScore, healthStatus, assignedUserId } = body;
@@ -62,3 +69,4 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
+
