@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: "/health", label: "Health" },
   { href: "/intelligence", label: "Intelligence" },
   { href: "/reports", label: "Reports" },
+  { href: "/analytics", label: "Analytics" },
   { href: "/team", label: "Team" },
   { href: "/search", label: "Search" },
 ];

@@ -43,6 +43,7 @@ export const config = {
     "/health/:path*",
     "/intelligence/:path*",
     "/reports/:path*",
+    "/analytics/:path*",
     "/team/:path*",
     "/search/:path*",
     "/inbox/:path*",

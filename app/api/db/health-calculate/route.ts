@@ -64,6 +64,20 @@ export async function GET(req: NextRequest) {
         [client.id, score, status]
       );
 
+      // Record a daily snapshot for trend charting — one row per client per day.
+      // Isolated in its own try/catch: if the snapshots table hasn't been migrated
+      // yet, that must never break the core scoring/update logic above.
+      try {
+        await sql(
+          `INSERT INTO client_health_snapshots (client_id, score, status, snapshot_date)
+           VALUES ($1, $2, $3, CURRENT_DATE)
+           ON CONFLICT (client_id, snapshot_date) DO UPDATE SET score = $2, status = $3`,
+          [client.id, score, status]
+        );
+      } catch {
+        // Table not migrated yet — visit /api/db/init-health-history once to enable trend history.
+      }
+
       results.push({
         id: client.id,
         name: client.name,
