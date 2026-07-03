@@ -94,17 +94,17 @@ export default function DashboardPage() {
             { label: "At Risk / Quiet", value: atRiskClients.length, color: "var(--accent-red)", href: "/health", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
           ].map((stat) => (
             <Link key={stat.label} href={stat.href} style={{ textDecoration: "none" }}>
-              <div className="stat-card" style={{ display: "flex", alignItems: "center", gap: 16, cursor: "pointer" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 10, background: stat.color + "18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="20" height="20" fill="none" stroke={stat.color} strokeWidth={1.8} viewBox="0 0 24 24">
+              <div className="stat-card" style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer", minHeight: 88 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: stat.color + "18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="18" height="18" fill="none" stroke={stat.color} strokeWidth={1.8} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d={stat.icon} />
                   </svg>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: "var(--text-primary)", lineHeight: 1, letterSpacing: "-0.02em" }}>{stat.value}</div>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3, fontWeight: 500 }}>{stat.label}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: "var(--text-primary)", lineHeight: 1, letterSpacing: "-0.02em" }}>{stat.value}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{stat.label}</div>
                 </div>
-                <svg width="14" height="14" fill="none" stroke="var(--text-muted)" strokeWidth={2} viewBox="0 0 24 24">
+                <svg width="12" height="12" fill="none" stroke="var(--text-muted)" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -278,4 +278,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
 
