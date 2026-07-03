@@ -200,7 +200,7 @@ export default function ClientProfilePage() {
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{(client.name as string)}</div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {new Date(client.clientSince).getFullYear()}</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {new Date((client.clientSince as string)).getFullYear()}</div>
           </div>
         </div>
 
@@ -287,7 +287,7 @@ export default function ClientProfilePage() {
                   {[
                     { label: "Production", url: client.productionUrl, color: "var(--accent-green)" },
                     { label: "UAT", url: client.uatUrl, color: "var(--accent-amber)" },
-                    { label: "Website", url: client.website, color: "var(--accent-blue)" },
+                    { label: "Website", url: (client.website as string), color: "var(--accent-blue)" },
                   ].map(env => (
                     <div key={env.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ fontSize: 11, fontWeight: 600, color: env.color, width: 72, flexShrink: 0 }}>{env.label}</span>
@@ -345,7 +345,7 @@ export default function ClientProfilePage() {
                     { label: "Active Projects", value: client.activeProjects },
                     { label: "Contacts", value: client.contacts.length },
                     { label: "Last Contact", value: client.lastContact },
-                    { label: "Client Since", value: new Date(client.clientSince).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
+                    { label: "Client Since", value: new Date((client.clientSince as string)).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
                   ].map(stat => (
                     <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{stat.label}</span>
@@ -619,6 +619,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
