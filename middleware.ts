@@ -11,7 +11,17 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        // Vercel Cron calls this endpoint on a schedule and carries no session cookie —
+        // let it through by User-Agent, everything else on this path still needs a token.
+        if (
+          req.nextUrl.pathname === "/api/db/health-calculate" &&
+          (req.headers.get("user-agent") || "").includes("vercel-cron")
+        ) {
+          return true;
+        }
+        return !!token;
+      },
     },
     pages: {
       signIn: "/login",
