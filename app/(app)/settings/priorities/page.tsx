@@ -98,6 +98,7 @@ export default function PrioritiesSettingsPage() {
       <Header
         title="Priority Categories"
         subtitle="Customize the priority labels used across Follow-ups and Projects"
+        breadcrumbs={[{ label: "Settings", href: "/settings" }, { label: "Priority Categories" }]}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <Link href="/settings"><button className="btn-secondary" style={{ fontSize: 12 }}>Back to Settings</button></Link>

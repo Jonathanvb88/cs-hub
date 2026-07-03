@@ -141,6 +141,7 @@ export default function ConversationsPage() {
       <Header
         title={`${client?.name || "Client"} — Conversations`}
         subtitle="All communications in one threaded view"
+        breadcrumbs={[{ label: "Clients", href: "/clients" }, { label: client?.name || "Client", href: `/clients/${id}` }, { label: "Conversations" }]}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <Link href={`/clients/${id}`}>

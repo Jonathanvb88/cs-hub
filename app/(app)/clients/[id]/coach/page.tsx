@@ -104,6 +104,7 @@ Notes: ${client.notes}`;
       <Header
         title={`Relationship Coach — ${client.name}`}
         subtitle="AI-powered meeting preparation brief"
+        breadcrumbs={[{ label: "Clients", href: "/clients" }, { label: client.name, href: `/clients/${id}` }, { label: "Relationship Coach" }]}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <Link href={`/clients/${id}`}><button className="btn-secondary" style={{ fontSize: 12 }}>Back to Client</button></Link>

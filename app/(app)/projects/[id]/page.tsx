@@ -117,6 +117,11 @@ export default function ProjectDetailPage() {
         position: "sticky", top: 0, zIndex: 40,
       }}>
         <div>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 2 }}>
+            <Link href="/projects" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Projects</Link>
+            <span> / </span>
+            <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{project.name}</span>
+          </div>
           <h1 style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>{project.name}</h1>
           <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: 0 }}>{project.client_name || "No client linked"}</p>
         </div>

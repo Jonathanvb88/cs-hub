@@ -77,6 +77,7 @@ Generate a practical client playbook.`;
       <Header
         title={`Client Playbook — ${client.name}`}
         subtitle="Accumulated knowledge and best practices for this client relationship"
+        breadcrumbs={[{ label: "Clients", href: "/clients" }, { label: client.name, href: `/clients/${id}` }, { label: "Playbook" }]}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <Link href={`/clients/${id}`}><button className="btn-secondary" style={{ fontSize: 12 }}>Back to Client</button></Link>

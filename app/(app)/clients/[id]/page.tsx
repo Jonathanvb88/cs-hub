@@ -202,6 +202,7 @@ export default function ClientProfilePage() {
       <Header
         title={client.name}
         subtitle={client.industry || undefined}
+        breadcrumbs={[{ label: "Clients", href: "/clients" }, { label: client.name }]}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn-secondary">
