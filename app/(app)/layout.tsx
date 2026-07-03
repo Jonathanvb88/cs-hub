@@ -6,6 +6,7 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import MobileDrawer from "@/components/layout/MobileDrawer";
 import { ClientContextProvider, useActiveClient } from "@/lib/clientContext";
 import { ToastProvider } from "@/components/Toast";
+import { NavProvider } from "@/lib/navContext";
 import { createContext, useContext } from "react";
 
 // Context so any Header deep in the tree can open the drawer
@@ -45,9 +46,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ToastProvider>
-      <ClientContextProvider>
-        <LayoutInner>{children}</LayoutInner>
-      </ClientContextProvider>
+      <NavProvider>
+        <ClientContextProvider>
+          <LayoutInner>{children}</LayoutInner>
+        </ClientContextProvider>
+      </NavProvider>
     </ToastProvider>
   );
 }
+
