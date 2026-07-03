@@ -134,6 +134,33 @@ cs-hub/
 
 ---
 
+## Developer Setup
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in real values. Full list with descriptions and where to obtain each one is documented in `.env.example` itself. In production, these are set in Vercel → Project → Settings → Environment Variables, not committed to the repo.
+
+### Database Setup
+
+The database schema is applied via a set of one-off, idempotent GET endpoints rather than a formal migration tool. Each is safe to re-run (they use `IF NOT EXISTS` guards throughout). On a fresh database, run these once, in this order, by visiting each URL while signed in:
+
+1. `/api/db/init` — base schema
+2. `/api/db/init-v2` — schema additions (check route source for specifics)
+3. `/api/db/init-v3` — adds `users` table and `assigned_user_id` columns
+4. `/api/db/init-calendar` — calendar events table
+5. `/api/db/init-knowledge` — knowledge base tables
+6. `/api/db/init-priorities` — priorities table
+7. `/api/db/init-templates` — document templates table
+8. `/api/db/init-dev-mode` — adds the `is_developer` flag used by the developer mode panel
+
+**Known gap:** `DATABASE_SCHEMA.md` was written as an early design spec and has drifted from what these routes actually create (for example it documents `users.full_name`, `users.azure_oid`, and `users.avatar_url`, none of which exist — the real columns are `name`, `role`, and `avatar_initials`). Treat the `init-*` route source files as the source of truth until that document is reconciled.
+
+### Developer Mode
+
+Signed-in users with `is_developer = true` on their `users` row see a small `</>` toggle bottom-right on every page, showing the source file, known API calls, and live deployment info for the current screen. Route-to-file mappings live in `lib/devRegistry.ts` — add an entry there when building a new page.
+
+---
+
 ## Status
 
 Active development. Internal platform — URUP Connect (Pty) Ltd.
