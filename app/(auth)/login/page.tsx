@@ -24,7 +24,7 @@ function LoginContent() {
       <div style={{ width: "100%", maxWidth: 400, background: "white", borderRadius: 20, boxShadow: "0 24px 80px rgba(0,0,0,0.3)", overflow: "hidden" }}>
         <div style={{ background: "#14171a", padding: "32px 36px 28px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 40, background: "#15803d", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color: "white" }}>C</div>
+            <img src="/logo.png" alt="CS Hub" style={{ width: 48, height: 48, borderRadius: 10, objectFit: "contain", background: "white" }} />
             <div>
               <div style={{ fontSize: 18, fontWeight: 800, color: "white" }}>CS Hub</div>
               <div style={{ fontSize: 11, color: "#7a827e" }}>URUP Connect</div>
