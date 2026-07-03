@@ -239,7 +239,7 @@ export default function ClientProfilePage() {
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{client.name}</div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {client.client_since ? (client.client_since ? new Date(client.client_since).getFullYear() : "—") : "—"}</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {client.client_since ? new Date(client.client_since).getFullYear() : "—"}</div>
           </div>
         </div>
 
@@ -384,7 +384,7 @@ export default function ClientProfilePage() {
                     { label: "Active Projects", value: client.activeProjects },
                     { label: "Contacts", value: client.contacts.length },
                     { label: "Last Contact", value: client.lastContact },
-                    { label: "Client Since", value: (client.client_since ? new Date(client.client_since).toLocaleDateString : () => "—")("en-ZA", { month: "short", year: "numeric" }) },
+                    { label: "Client Since", value: client.client_since ? new Date(client.client_since).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) : "—" },
                   ].map(stat => (
                     <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{stat.label}</span>
