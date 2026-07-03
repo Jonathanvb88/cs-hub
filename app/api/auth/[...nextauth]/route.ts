@@ -30,7 +30,6 @@ const handler = NextAuth({
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
-        token.provider = account.provider;
       }
       return token;
     },
