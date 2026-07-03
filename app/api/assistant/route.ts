@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 interface AssistantRequest {
   message: string;
@@ -23,6 +24,8 @@ async function gatherContext(activeClientId?: string | null) {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const body: AssistantRequest = await req.json();
     const { message, activeClientId, activeClientName } = body;
