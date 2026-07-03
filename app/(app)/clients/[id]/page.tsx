@@ -60,7 +60,7 @@ function RealProjectsTab({ clientId }: { clientId: string }) {
               <span className={`badge ${p.status === "active" ? "badge-green" : p.status === "completed" ? "badge-blue" : "badge-gray"}`}>{p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
               <span className={`badge ${p.priority === "high" || p.priority === "critical" ? "badge-red" : p.priority === "medium" ? "badge-amber" : "badge-gray"}`}>{p.priority.charAt(0).toUpperCase() + p.priority.slice(1)}</span>
             </div>
-            {p.target_date && <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Target: {new Date(p.target_date).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
+            {p.target_date && <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Target: {new Date(p.target_date as string).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
           </div>
           <Link href={`/projects/${p.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open</button></Link>
         </div>
@@ -96,7 +96,7 @@ function RealDocumentsTab({ clientId }: { clientId: string }) {
         <div key={doc.id} className="card" style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 18px" }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>{doc.title}</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{doc.type.toUpperCase()} · {doc.version} · {new Date(doc.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{doc.type.toUpperCase()} · {doc.version} · {new Date(doc.created_at as string).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>
           </div>
           {doc.total_value > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: "var(--accent-green)" }}>R {Number(doc.total_value).toLocaleString("en-ZA")}</span>}
           <span className={`badge ${doc.status === "accepted" ? "badge-green" : doc.status === "draft" ? "badge-gray" : "badge-amber"}`}>{doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</span>
@@ -223,7 +223,7 @@ export default function ClientProfilePage() {
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{client.name}</div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {client.client_since ? new Date(client.client_since).getFullYear() : "—"}</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {client.client_since ? (client.client_since ? new Date(client.client_since).getFullYear() : "—") : "—"}</div>
           </div>
         </div>
 
@@ -368,7 +368,7 @@ export default function ClientProfilePage() {
                     { label: "Active Projects", value: client.activeProjects },
                     { label: "Contacts", value: client.contacts.length },
                     { label: "Last Contact", value: client.lastContact },
-                    { label: "Client Since", value: new Date(client.client_since).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
+                    { label: "Client Since", value: (client.client_since ? new Date(client.client_since).toLocaleDateString : () => "—")("en-ZA", { month: "short", year: "numeric" }) },
                   ].map(stat => (
                     <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{stat.label}</span>
@@ -517,7 +517,7 @@ export default function ClientProfilePage() {
                       <div className="card" style={{ flex: 1, padding: "12px 16px" }}>
                         <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", marginBottom: 4 }}>{item.title}</div>
                         <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                          {new Date(item.date).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })} · {item.meta}
+                          {new Date(item.date as string).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })} · {item.meta}
                         </div>
                       </div>
                     </div>
@@ -642,6 +642,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
