@@ -207,10 +207,10 @@ export default function ClientProfilePage() {
         <div style={{ display: "flex", gap: 24, flex: 1, flexWrap: "wrap" }}>
           {[
             { label: "Health", value: <span className={getHealthBadgeClass(client.health_status as string)}>{getHealthLabel(client.health_status as string)}</span> },
-            { label: "Score", value: <span style={{ color: getHealthColor(client.health_status as string), fontWeight: 700 }}>{(client.health_score as number)}/100</span> },
-            { label: "Active Projects", value: client.activeProjects },
-            { label: "Last Contact", value: client.lastContact },
-            { label: "Assigned CSM", value: client.assignedCsm },
+            { label: "Score", value: <span style={{ color: getHealthColor((client.health_status as string)), fontWeight: 700 }}>{(client.health_score as number)}/100</span> },
+            { label: "Active Projects", value: String(client.activeProjects || "—") },
+            { label: "Last Contact", value: String(client.lastContact || "—") },
+            { label: "Assigned CSM", value: String(client.assignedCsm || "—") },
           ].map(item => (
             <div key={item.label}>
               <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>{item.label}</div>
@@ -619,6 +619,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
