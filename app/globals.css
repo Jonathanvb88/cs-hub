@@ -76,8 +76,8 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #c0c5c0; }
+::-webkit-scrollbar-thumb { background: rgba(21,128,61,0.25); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(21,128,61,0.5); }
 
 /* ─── Sidebar ─── */
 .sidebar-link {
@@ -95,7 +95,11 @@ body {
   letter-spacing: -0.01em;
 }
 .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #d0d5d0; }
-.sidebar-link.active { background: var(--accent-green); color: white; }
+.sidebar-link.active {
+  background: linear-gradient(90deg, #15803d, #16a34a);
+  color: white;
+  box-shadow: 0 2px 8px rgba(21,128,61,0.35);
+}
 .sidebar-link.active svg { opacity: 1; }
 
 /* ─── Cards ─── */
@@ -126,7 +130,7 @@ body {
   min-height: 88px;
   box-sizing: border-box;
 }
-.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); border-left: 3px solid var(--accent-green); }
 
 /* ─── Badges ─── */
 .badge {
@@ -446,4 +450,65 @@ body {
   .mobile-menu-btn { display: none !important; }
 }
 
+/* ─── CS Hub Brand System ─── */
+
+/* Green accent top border on key sections */
+.brand-header {
+  border-top: 3px solid var(--accent-green);
+}
+
+/* Green glow card - for featured/key cards */
+.card-green {
+  background: var(--bg-surface);
+  border: 1px solid rgba(21,128,61,0.2);
+  border-left: 3px solid var(--accent-green);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(21,128,61,0.05);
+}
+
+/* Section label */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Green pill badge */
+.badge-brand {
+  background: rgba(21,128,61,0.1);
+  color: var(--accent-green);
+  border: 1px solid rgba(21,128,61,0.2);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Input focus green ring */
+.input:focus {
+  outline: none;
+  border-color: var(--accent-green) !important;
+  box-shadow: 0 0 0 3px rgba(21,128,61,0.12) !important;
+}
+
+/* Table row hover */
+.table-row:hover {
+  background: rgba(21,128,61,0.03);
+}
+
+/* Sidebar active indicator */
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 0 2px 2px 0;
+}
+.sidebar-link { position: relative; }
 
