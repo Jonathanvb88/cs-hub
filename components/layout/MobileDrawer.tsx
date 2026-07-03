@@ -83,7 +83,7 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         {/* Header */}
         <div style={{ padding: "16px 16px 14px", borderBottom: "1px solid #2a2e32", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 30, height: 30, background: "var(--accent-green)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "white" }}>C</div>
+            <img src="/logo.png" alt="CS Hub" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "white" }} />
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-on-dark)", lineHeight: 1.2 }}>CS Hub</div>
               <div style={{ fontSize: 10, color: "#7a827e" }}>URUP Connect</div>
@@ -145,5 +145,6 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
     </>
   );
 }
+
 
 
