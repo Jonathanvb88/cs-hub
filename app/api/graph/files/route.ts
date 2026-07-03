@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getToken } from "next-auth/jwt";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // Get the JWT token directly without needing authOptions
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-    if (!session?.accessToken) {
+    if (!token?.accessToken) {
       return NextResponse.json({
         files: [],
         pending: true,
@@ -22,13 +22,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ files: [], message: "No search term provided" });
     }
 
-    // Search OneDrive and SharePoint for files matching the term
     const searchRes = await fetch(
       `https://graph.microsoft.com/v1.0/search/query`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${token.accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -46,8 +45,7 @@ export async function GET(req: NextRequest) {
     );
 
     if (!searchRes.ok) {
-      const err = await searchRes.text();
-      return NextResponse.json({ files: [], error: err }, { status: searchRes.status });
+      return NextResponse.json({ files: [], pending: true });
     }
 
     const searchData = await searchRes.json();
@@ -61,7 +59,6 @@ export async function GET(req: NextRequest) {
         webUrl: resource.webUrl,
         lastModified: resource.lastModifiedDateTime,
         size: resource.size,
-        createdBy: (resource.createdBy as Record<string, unknown>)?.user,
         parentPath: (resource.parentReference as Record<string, unknown>)?.path,
         mimeType: (resource.file as Record<string, unknown>)?.mimeType,
         extension: (resource.name as string)?.split(".").pop()?.toLowerCase(),
@@ -70,6 +67,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ files, total: files.length });
   } catch (e) {
-    return NextResponse.json({ files: [], error: String(e) }, { status: 500 });
+    return NextResponse.json({ files: [], pending: true, error: String(e) });
   }
 }
