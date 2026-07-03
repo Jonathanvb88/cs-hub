@@ -223,7 +223,7 @@ export default function ClientProfilePage() {
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{client.name}</div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {new Date(client.client_since).getFullYear()}</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Client since {client.client_since ? new Date(client.client_since).getFullYear() : "—"}</div>
           </div>
         </div>
 
@@ -642,6 +642,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
