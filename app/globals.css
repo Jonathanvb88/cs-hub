@@ -442,6 +442,14 @@ body {
   .page-content-pad { padding: 16px !important; }
 }
 
+/* ─── Landscape phones — short viewport height, compact the mobile drawer chrome ─── */
+@media (max-width: 900px) and (orientation: landscape) {
+  .mobile-drawer-header { padding: 8px 16px 8px !important; }
+  .mobile-drawer-header img { width: 28px !important; height: 28px !important; }
+  .mobile-drawer-footer { padding: 4px 8px 8px !important; }
+  .sidebar-link { padding: 5px 10px !important; }
+}
+
 /* ─── Tablet overrides (iPad mini, Android tablets) ─── */
 @media (max-width: 1024px) and (min-width: 769px) {
   .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }

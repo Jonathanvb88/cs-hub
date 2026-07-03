@@ -215,14 +215,19 @@ export default function CalendarPage() {
 
       {/* Modal */}
       {modal.open && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
           <div onClick={closeModal} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
-          <div style={{ position: "relative", background: "var(--bg-surface)", borderRadius: 16, padding: 28, width: 440, maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", zIndex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <div style={{
+            position: "relative", background: "var(--bg-surface)", borderRadius: 16,
+            width: 440, maxWidth: "90vw", maxHeight: "90vh",
+            display: "flex", flexDirection: "column", overflow: "hidden",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.2)", zIndex: 1,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "28px 28px 0", flexShrink: 0 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{modal.editing ? "Edit Event" : "New Event"}</div>
               <button onClick={closeModal} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: 22, lineHeight: 1 }}>×</button>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "20px 28px", overflowY: "auto", minHeight: 0, flex: 1 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 5 }}>Title</label>
                 <input className="input" placeholder="Meeting title..." autoFocus value={modal.form.title} onChange={e => setForm({ title: e.target.value })} onKeyDown={e => e.key === "Enter" && handleSave()} />
@@ -263,7 +268,7 @@ export default function CalendarPage() {
                 <textarea className="input" rows={2} style={{ resize: "none" }} placeholder="Agenda, notes..." value={modal.form.notes} onChange={e => setForm({ notes: e.target.value })} />
               </div>
             </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 22, justifyContent: "space-between" }}>
+            <div style={{ display: "flex", gap: 8, justifyContent: "space-between", padding: "16px 28px 28px", borderTop: "1px solid var(--border)", flexShrink: 0 }}>
               <div>
                 {modal.editing && (
                   <button onClick={handleDelete} disabled={deleting} style={{ background: "none", border: "1px solid var(--accent-red)", color: "var(--accent-red)", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", opacity: deleting ? 0.7 : 1 }}>
@@ -278,6 +283,7 @@ export default function CalendarPage() {
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       )}

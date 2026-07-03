@@ -50,8 +50,8 @@ export default function DevBar() {
         title="Developer mode"
         style={{
           position: "fixed",
-          bottom: 16,
-          right: 16,
+          bottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
+          right: "calc(16px + env(safe-area-inset-right, 0px))",
           zIndex: 9999,
           width: 42,
           height: 42,
@@ -76,8 +76,8 @@ export default function DevBar() {
         <div
           style={{
             position: "fixed",
-            bottom: 66,
-            right: 16,
+            bottom: "calc(66px + env(safe-area-inset-bottom, 0px))",
+            right: "calc(16px + env(safe-area-inset-right, 0px))",
             zIndex: 9999,
             width: 320,
             maxWidth: "calc(100vw - 32px)",
