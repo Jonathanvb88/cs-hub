@@ -1,8 +1,11 @@
 // v2 - Gemini API key environment active
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
   try {
     const { query } = await req.json();
     if (!query?.trim()) {
