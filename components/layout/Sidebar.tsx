@@ -91,65 +91,68 @@ export default function Sidebar() {
       </nav>
 
       <div style={{ padding: "8px 8px 10px", borderTop: "1px solid #2a2e32" }}>
-        {/* Bottom row: Settings | Profile | Logout */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {/* Settings icon */}
-          <Link href="/settings" title="Settings" style={{ textDecoration: "none", flexShrink: 0 }}>
+
+        {/* Top row: Settings + Logout — half height, side by side */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+          <Link href="/settings" style={{ textDecoration: "none", flex: 1 }}>
             <div style={{
-              width: 36, height: 36, borderRadius: 8, background: "var(--bg-dark-elevated)",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              padding: "5px 10px", background: "var(--bg-dark-elevated)", borderRadius: 8,
               cursor: "pointer", color: "#7a827e", transition: "all 0.15s",
             }}
               onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "#1e2a1e"; (e.currentTarget as HTMLDivElement).style.color = "var(--accent-green)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "var(--bg-dark-elevated)"; (e.currentTarget as HTMLDivElement).style.color = "#7a827e"; }}
             >
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
+              <span style={{ fontSize: 11, fontWeight: 500 }}>Settings</span>
             </div>
           </Link>
-
-          {/* Profile — full width */}
-          <Link href="/profile" style={{ textDecoration: "none", flex: 1 }}>
-            <div style={{
-              display: "flex", alignItems: "center", gap: 8, padding: "5px 10px",
-              background: "var(--bg-dark-elevated)", borderRadius: 8,
-              cursor: "pointer", transition: "background 0.15s", height: 36,
-            }}>
-              <div style={{
-                width: 24, height: 24, borderRadius: "50%", background: "var(--accent-green)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 9, fontWeight: 700, color: "white", flexShrink: 0,
-              }}>
-                {session?.user?.name?.charAt(0)?.toUpperCase() || "J"}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {session?.user?.name || "Jonathan"}
-                </div>
-                <div style={{ fontSize: 9, color: "#7a827e" }}>Client Success Manager</div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Logout icon */}
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Sign out"
             style={{
-              width: 36, height: 36, background: "var(--bg-dark-elevated)", border: "none",
-              borderRadius: 8, cursor: "pointer", color: "#7a827e",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.15s", flexShrink: 0,
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              padding: "5px 10px", background: "var(--bg-dark-elevated)", border: "none",
+              borderRadius: 8, cursor: "pointer", color: "#7a827e", transition: "all 0.15s",
             }}
             onMouseEnter={e => { e.currentTarget.style.background = "#3a1212"; e.currentTarget.style.color = "#ef4444"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-dark-elevated)"; e.currentTarget.style.color = "#7a827e"; }}
           >
-            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
+            <span style={{ fontSize: 11, fontWeight: 500 }}>Logout</span>
           </button>
         </div>
+
+        {/* Profile card — full width, original size */}
+        <Link href="/profile" style={{ textDecoration: "none" }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+            background: "var(--bg-dark-elevated)", borderRadius: 8,
+            cursor: "pointer", transition: "background 0.15s",
+          }}
+            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "#1e2a1e"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "var(--bg-dark-elevated)"; }}
+          >
+            <div style={{
+              width: 30, height: 30, borderRadius: "50%", background: "var(--accent-green)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 11, fontWeight: 700, color: "white", flexShrink: 0,
+            }}>
+              {session?.user?.name?.charAt(0)?.toUpperCase() || "J"}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {session?.user?.name || "Jonathan"}
+              </div>
+              <div style={{ fontSize: 10, color: "#7a827e" }}>Client Success Manager</div>
+            </div>
+          </div>
+        </Link>
+
       </div>
     </aside>
   );
