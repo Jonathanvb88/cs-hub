@@ -55,12 +55,13 @@ export default function Sidebar() {
   return (
     <aside className="desktop-sidebar" style={{
       width: 220, minWidth: 220, height: "100vh",
-      background: "var(--bg-dark)",
-      borderRight: "1px solid #2a2e32",
+      background: "linear-gradient(180deg, #0d1a0d 0%, #14171a 40%, #111518 100%)",
+      borderRight: "1px solid #1a2e1a",
       display: "flex", flexDirection: "column",
       position: "fixed", left: 0, top: 0, zIndex: 50,
+      boxShadow: "2px 0 20px rgba(0,0,0,0.3)",
     }}>
-      <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid #2a2e32" }}>
+      <div style={{ padding: "18px 16px 14px", borderBottom: "1px solid #1a2e1a", borderTop: "3px solid #15803d" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img src="/logo.png" alt="CS Hub" style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }} />
           <div>
@@ -70,7 +71,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav style={{ flex: 1, padding: "10px 8px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 1 }}>
+      <nav style={{ flex: 1, padding: "10px 8px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 1, scrollbarWidth: "thin", scrollbarColor: "rgba(21,128,61,0.2) transparent" }}>
         {navItems.filter(item => !hiddenItems.includes(item.href)).map((item) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           return (
@@ -90,7 +91,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div style={{ padding: "8px 8px 10px", borderTop: "1px solid #2a2e32" }}>
+      <div style={{ padding: "8px 8px 10px", borderTop: "1px solid #1a2e1a", background: "rgba(0,0,0,0.2)" }}>
 
         {/* Top row: Settings + Logout — half height, side by side */}
         <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
@@ -157,6 +158,7 @@ export default function Sidebar() {
     </aside>
   );
 }
+
 
 
 
