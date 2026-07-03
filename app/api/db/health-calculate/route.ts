@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth } from "@/lib/requireAuth";
 
 interface ClientRow {
   id: string;
@@ -54,7 +55,13 @@ function calculateHealthScore(params: {
   return { score, status };
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Vercel Cron requests carry this User-Agent; everything else must be an authenticated in-app request.
+  const isVercelCron = (req.headers.get("user-agent") || "").includes("vercel-cron");
+  if (!isVercelCron) {
+    const authError = await requireAuth(req);
+    if (authError) return authError;
+  }
   try {
     const clients = await sql(`SELECT id, name, industry FROM clients WHERE deleted_at IS NULL`) as ClientRow[];
 
