@@ -162,7 +162,7 @@ export default function ClientProfilePage() {
     <>
       <Header
         title={(client.name as string)}
-        subtitle={(client.industry as string | null)}
+        subtitle={(client.industry as string) || undefined}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn-secondary">
@@ -307,7 +307,7 @@ export default function ClientProfilePage() {
               {/* Notes */}
               <div className="card">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>Notes</div>
-                <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{(client.notes as string | null)}</div>
+                <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{(client.notes as string) || undefined}</div>
               </div>
 
               {/* Recent communications */}
@@ -619,6 +619,7 @@ export default function ClientProfilePage() {
     </>
   );
 }
+
 
 
 
