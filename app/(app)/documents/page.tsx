@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 
@@ -46,6 +47,7 @@ const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "PO
 const typeRoute: Record<string, string> = { quote: "/documents/quote/new", sow: "/documents/sow/new", poc: "/documents/poc/new", uat: "/documents/uat/new" };
 
 export default function DocumentsPage() {
+  const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,8 +112,13 @@ export default function DocumentsPage() {
   const templatesForType = (type: string) => templates.filter(t => t.type === type);
 
   const useTemplate = (template: Template) => {
-    sessionStorage.setItem("cshub_template_prefill", JSON.stringify(template.content_json));
-    window.location.href = typeRoute[template.type];
+    try {
+      // Try sessionStorage first, fall back to localStorage for mobile compatibility
+      const data = JSON.stringify(template.content_json || {});
+      try { sessionStorage.setItem("cshub_template_prefill", data); } catch {}
+      try { localStorage.setItem("cshub_template_prefill", data); } catch {}
+    } catch {}
+    router.push(typeRoute[template.type]);
   };
 
   const saveNewTemplate = async () => {
@@ -160,7 +167,7 @@ export default function DocumentsPage() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
             {["quote", "sow", "poc", "uat"].map((type, i) => (
-              <div key={type} style={{ padding: 20, borderRight: i < 3 ? "1px solid var(--border)" : "none", position: "relative" }}>
+              <div key={type} style={{ padding: 20, borderRight: i < 3 ? "1px solid var(--border)" : "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: typeColor[type] + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="15" height="15" fill="none" stroke={typeColor[type]} strokeWidth={2} viewBox="0 0 24 24">
@@ -187,10 +194,8 @@ export default function DocumentsPage() {
 
                 {pickerType === type && (
                   <div style={{
-                    position: "absolute", top: "100%", left: 8, right: 8, zIndex: 10,
-                    background: "var(--bg-surface)", border: "1px solid var(--border)",
-                    borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                    marginTop: 4, overflow: "hidden",
+                    background: "var(--bg-elevated)", border: "1px solid var(--accent-green)",
+                    borderRadius: 10, marginTop: 6, overflow: "hidden",
                   }}>
                     {templatesForType(type).length === 0 ? (
                       <div style={{ padding: 16, fontSize: 12, color: "var(--text-muted)", textAlign: "center" }}>
@@ -363,6 +368,7 @@ export default function DocumentsPage() {
     </>
   );
 }
+
 
 
 
