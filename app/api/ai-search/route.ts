@@ -1,3 +1,4 @@
+// v2 - Gemini API key environment active
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
