@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/db/health-calculate",
+      "schedule": "0 4 * * *"
+    }
+  ]
+}
