@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useNav } from "@/lib/navContext";
+import { signOut, useSession } from "next-auth/react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
@@ -30,6 +31,7 @@ interface MobileDrawerProps {
 export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
   const pathname = usePathname();
   const { hiddenItems } = useNav();
+  const { data: session } = useSession();
   const [counts, setCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -127,15 +129,30 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
             </svg>
             <span style={{ fontSize: 14 }}>Settings</span>
           </Link>
-          <Link href="/profile" style={{ textDecoration: "none" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", marginTop: 4, background: "var(--bg-dark-elevated)", borderRadius: 8 }}>
-              <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--accent-green)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "white", flexShrink: 0 }}>JV</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-on-dark)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Jonathan</div>
-                <div style={{ fontSize: 11, color: "#7a827e" }}>Client Success Manager</div>
+          <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+            <Link href="/profile" onClick={onClose} style={{ textDecoration: "none", flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "var(--bg-dark-elevated)", borderRadius: 8 }}>
+                <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--accent-green)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "white", flexShrink: 0 }}>
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "J"}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-on-dark)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {session?.user?.name || "Jonathan"}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#7a827e" }}>Client Success Manager</div>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              title="Sign out"
+              style={{ background: "var(--bg-dark-elevated)", border: "none", borderRadius: 8, padding: "10px 12px", cursor: "pointer", color: "#7a827e", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -145,6 +162,7 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
     </>
   );
 }
+
 
 
 
