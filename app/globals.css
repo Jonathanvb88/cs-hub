@@ -23,8 +23,8 @@
   --text-on-dark: #f1f3f1;
 
   /* Accents */
-  --accent-green: #15803d;
-  --accent-green-light: #16a34a;
+  --accent-green: #16a34a;
+  --accent-green-light: #22c55e;
   --accent-green-dim: #166534;
   --accent-green-bg: #f0fdf4;
   --accent-amber: #b45309;
@@ -96,9 +96,9 @@ body {
 }
 .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #d0d5d0; }
 .sidebar-link.active {
-  background: linear-gradient(90deg, #15803d, #16a34a);
+  background: linear-gradient(135deg, #15803d, #22c55e);
   color: white;
-  box-shadow: 0 2px 8px rgba(21,128,61,0.35);
+  box-shadow: 0 2px 12px rgba(21,128,61,0.4);
 }
 .sidebar-link.active svg { opacity: 1; }
 
@@ -159,7 +159,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--accent-green);
+  background: linear-gradient(135deg, #15803d, #22c55e);
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
@@ -338,7 +338,7 @@ body {
   animation: toast-out 0.2s ease forwards;
 }
 .toast-success { background: var(--bg-surface); border: 1px solid #bbf7d0; color: var(--text-primary); }
-.toast-success .toast-dot { background: var(--accent-green); }
+.toast-success .toast-dot { background: linear-gradient(135deg, #15803d, #22c55e); }
 .toast-error { background: var(--bg-surface); border: 1px solid #fecaca; color: var(--text-primary); }
 .toast-error .toast-dot { background: var(--accent-red); }
 .toast-info { background: var(--bg-surface); border: 1px solid #bfdbfe; color: var(--text-primary); }
@@ -515,5 +515,6 @@ body {
   border-radius: 0 2px 2px 0;
 }
 .sidebar-link { position: relative; }
+
 
 
