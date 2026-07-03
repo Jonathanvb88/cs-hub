@@ -49,8 +49,8 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
       .catch(() => {});
   }, []);
 
-  // Close on route change
-  useEffect(() => { onClose(); }, [pathname]);
+  // Note: intentionally does NOT auto-close on route change — stays open across
+  // navigations until the user explicitly dismisses it (backdrop, X, or hamburger).
 
   // Prevent body scroll when open
   useEffect(() => {
