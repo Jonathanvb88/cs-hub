@@ -91,42 +91,54 @@ export default function Sidebar() {
       </nav>
 
       <div style={{ padding: "8px 8px 10px", borderTop: "1px solid #2a2e32" }}>
-        {bottomItems.map((item) => (
-          <Link key={item.href} href={item.href} className="sidebar-link">
-            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-            </svg>
-            <span style={{ fontSize: 13 }}>{item.label}</span>
+        {/* Bottom row: Settings | Profile | Logout */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {/* Settings icon */}
+          <Link href="/settings" title="Settings" style={{ textDecoration: "none", flexShrink: 0 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 8, background: "var(--bg-dark-elevated)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: "#7a827e", transition: "all 0.15s",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "#1e2a1e"; (e.currentTarget as HTMLDivElement).style.color = "var(--accent-green)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "var(--bg-dark-elevated)"; (e.currentTarget as HTMLDivElement).style.color = "#7a827e"; }}
+            >
+              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
           </Link>
-        ))}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+
+          {/* Profile — full width */}
           <Link href="/profile" style={{ textDecoration: "none", flex: 1 }}>
             <div style={{
-              display: "flex", alignItems: "center", gap: 10, padding: "8px 12px",
+              display: "flex", alignItems: "center", gap: 8, padding: "5px 10px",
               background: "var(--bg-dark-elevated)", borderRadius: 8,
-              cursor: "pointer", transition: "background 0.15s",
+              cursor: "pointer", transition: "background 0.15s", height: 36,
             }}>
               <div style={{
-                width: 28, height: 28, borderRadius: "50%", background: "var(--accent-green)",
+                width: 24, height: 24, borderRadius: "50%", background: "var(--accent-green)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0,
+                fontSize: 9, fontWeight: 700, color: "white", flexShrink: 0,
               }}>
                 {session?.user?.name?.charAt(0)?.toUpperCase() || "J"}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {session?.user?.name || "Jonathan"}
                 </div>
-                <div style={{ fontSize: 10, color: "#7a827e" }}>Client Success Manager</div>
+                <div style={{ fontSize: 9, color: "#7a827e" }}>Client Success Manager</div>
               </div>
             </div>
           </Link>
+
+          {/* Logout icon */}
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Sign out"
             style={{
-              background: "var(--bg-dark-elevated)", border: "none", borderRadius: 8,
-              padding: "8px 10px", cursor: "pointer", color: "#7a827e",
+              width: 36, height: 36, background: "var(--bg-dark-elevated)", border: "none",
+              borderRadius: 8, cursor: "pointer", color: "#7a827e",
               display: "flex", alignItems: "center", justifyContent: "center",
               transition: "all 0.15s", flexShrink: 0,
             }}
@@ -142,6 +154,7 @@ export default function Sidebar() {
     </aside>
   );
 }
+
 
 
 
