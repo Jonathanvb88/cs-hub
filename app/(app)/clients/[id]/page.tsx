@@ -196,7 +196,7 @@ export default function ClientProfilePage() {
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 20, fontWeight: 700, color: "var(--accent-blue)",
           }}>
-            {client.name.charAt(0)}
+            {(client.name as string)?.charAt(0)}
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>{(client.name as string)}</div>
