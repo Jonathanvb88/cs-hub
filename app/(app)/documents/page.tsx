@@ -299,9 +299,11 @@ export default function DocumentsPage() {
         </div>
 
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <div className="table-scroll-wrapper">
           <div style={{
             display: "grid", gridTemplateColumns: "32px 2fr 1.5fr 90px 100px 130px 120px 70px",
             padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)",
+            minWidth: 720,
           }}>
             {["", "Document", "Client", "Type", "Status", "Value", "Date", ""].map(h => (
               <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
@@ -319,6 +321,7 @@ export default function DocumentsPage() {
               <div key={doc.id} className="table-row" style={{
                 gridTemplateColumns: "32px 2fr 1.5fr 90px 100px 130px 120px 70px",
                 alignItems: "center",
+                minWidth: 720,
               }}>
                 <div style={{
                   width: 28, height: 28, borderRadius: 6,
@@ -364,6 +367,7 @@ export default function DocumentsPage() {
               </div>
             ))
           )}
+          </div>
         </div>
       </div>
     </>

@@ -142,7 +142,7 @@ export default function NewQuotePage() {
         </div>
       )}
 
-      <div style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 320px", gap: 24 }}>
+      <div className="two-col-layout" style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 320px", gap: 24 }}>
 
         {/* Main form */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -150,7 +150,7 @@ export default function NewQuotePage() {
           {/* Client & title */}
           <div className="card">
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>Quote Details</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Client</label>
                 <select

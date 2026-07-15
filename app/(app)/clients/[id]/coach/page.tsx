@@ -149,7 +149,7 @@ Notes: ${client.notes}`;
         }
       />
 
-      <div style={{ padding: 24, display: "grid", gridTemplateColumns: "340px 1fr", gap: 24 }}>
+      <div className="two-col-layout" style={{ padding: 24, display: "grid", gridTemplateColumns: "340px 1fr", gap: 24 }}>
 
         {/* Left — client context */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -296,7 +296,7 @@ Notes: ${client.notes}`;
                 <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{brief.relationshipSummary}</div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
 
                 {/* Key topics */}
                 {brief.keyTopics?.length > 0 && (

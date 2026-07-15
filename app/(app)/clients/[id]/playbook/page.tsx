@@ -108,7 +108,7 @@ Generate a practical client playbook.`;
         }
       />
 
-      <div style={{ padding: 24, display: "grid", gridTemplateColumns: "280px 1fr", gap: 24 }}>
+      <div className="two-col-layout" style={{ padding: 24, display: "grid", gridTemplateColumns: "280px 1fr", gap: 24 }}>
 
         {/* Left sidebar */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -201,7 +201,7 @@ Generate a practical client playbook.`;
                 <div style={{ fontSize: 14, color: "var(--text-primary)", lineHeight: 1.7 }}>{playbook.approachStyle}</div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 {[
                   { key: "preferredComms", title: "Communication Style", color: "var(--accent-purple)" },
                   { key: "decisionProcess", title: "Decision Process", color: "var(--accent-amber)" },
@@ -214,7 +214,7 @@ Generate a practical client playbook.`;
                 ))}
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 {/* Do list */}
                 <div className="card" style={{ padding: 0, overflow: "hidden" }}>
                   <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", fontSize: 12, fontWeight: 600, color: "var(--accent-green)" }}>

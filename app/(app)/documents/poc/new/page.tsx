@@ -110,12 +110,12 @@ export default function NewPOCPage() {
         </div>
       )}
 
-      <div style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
+      <div className="two-col-layout" style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
           <div className="card">
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16, paddingBottom: 10, borderBottom: "1px solid var(--border)" }}>POC Details</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Client</label>
                 <select className="input" value={clientId} onChange={e => { setClientId(e.target.value); const c = clients.find(cl => cl.id === e.target.value); if (c && !title) setTitle(`POC — ${c.name}`); }} style={{ background: "var(--bg-elevated)" }}>
