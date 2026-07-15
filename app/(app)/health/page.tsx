@@ -34,6 +34,11 @@ export default function HealthPage() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [aiActive, setAiActive] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/platform-status").then(r => r.json()).then(d => setAiActive(d.aiFeatures === "active")).catch(() => {});
+  }, []);
 
   const fetchHealth = async () => {
     setLoading(true);
@@ -124,9 +129,11 @@ export default function HealthPage() {
           <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>All Clients by Health Score</div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 11, color: "var(--accent-amber)", background: "#fffbeb", border: "1px solid #fde68a", padding: "3px 10px", borderRadius: 20, fontWeight: 500 }}>
-                AI paused — API key required to enable recommendations
-              </span>
+              {!aiActive && (
+                <span style={{ fontSize: 11, color: "var(--accent-amber)", background: "#fffbeb", border: "1px solid #fde68a", padding: "3px 10px", borderRadius: 20, fontWeight: 500 }}>
+                  AI paused — API key required to enable recommendations
+                </span>
+              )}
             </div>
           </div>
           <div className="table-scroll-wrapper">
@@ -192,6 +199,10 @@ export default function HealthPage() {
                       <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Generating...</span>
                     ) : recommendations[client.id] ? (
                       <span style={{ color: "var(--text-secondary)" }}>{recommendations[client.id]}</span>
+                    ) : aiActive ? (
+                      <span style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic" }}>
+                        Click to generate
+                      </span>
                     ) : (
                       <span style={{ fontSize: 11, color: "var(--accent-amber)", fontStyle: "italic" }}>
                         AI paused

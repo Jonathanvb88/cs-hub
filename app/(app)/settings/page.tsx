@@ -23,6 +23,11 @@ export default function SettingsPage() {
   const [emails, setEmails] = useState<GraphEmail[] | null>(null);
   const [loadingEmails, setLoadingEmails] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [platformStatus, setPlatformStatus] = useState({ aiFeatures: "paused", graphIntegration: "pending" });
+
+  useEffect(() => {
+    fetch("/api/platform-status").then(r => r.json()).then(setPlatformStatus).catch(() => {});
+  }, []);
 
   const isConnected = status === "authenticated" && !!session?.accessToken;
 
@@ -317,8 +322,8 @@ export default function SettingsPage() {
               { label: "Version", value: "Sprint 8+" },
               { label: "Database", value: "Neon PostgreSQL (Frankfurt)" },
               { label: "Deployment", value: "Vercel Edge Network" },
-              { label: "AI Features", value: "Paused — API key required" },
-              { label: "Graph Integration", value: "Pending admin consent" },
+              { label: "AI Features", value: platformStatus.aiFeatures === "active" ? "Active" : "Paused — API key required" },
+              { label: "Graph Integration", value: platformStatus.graphIntegration === "active" ? "Active" : "Sign in with Microsoft to enable" },
             ].map(item => (
               <div key={item.label} style={{ padding: "10px 14px", background: "var(--bg-elevated)", borderRadius: 8 }}>
                 <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>{item.label}</div>
