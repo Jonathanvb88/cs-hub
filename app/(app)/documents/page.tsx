@@ -41,10 +41,11 @@ const typeColor: Record<string, string> = {
   poc: "var(--accent-purple)",
   uat: "var(--accent-amber)",
   proposal: "var(--accent-amber)",
+  change_request: "var(--accent-red)",
 };
 
-const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "POC", uat: "UAT Sign-off" };
-const typeRoute: Record<string, string> = { quote: "/documents/quote/new", sow: "/documents/sow/new", poc: "/documents/poc/new", uat: "/documents/uat/new" };
+const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "POC", uat: "UAT Sign-off", change_request: "Change Request" };
+const typeRoute: Record<string, string> = { quote: "/documents/quote/new", sow: "/documents/sow/new", poc: "/documents/poc/new", uat: "/documents/uat/new", change_request: "/documents/change-request/new" };
 
 export default function DocumentsPage() {
   const router = useRouter();
@@ -166,7 +167,7 @@ export default function DocumentsPage() {
             Create New Document
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
-            {["quote", "sow", "poc", "uat"].map((type, i) => (
+            {["quote", "sow", "poc", "uat", "change_request"].map((type, i) => (
               <div key={type} style={{ padding: 20, borderRight: i < 3 ? "1px solid var(--border)" : "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: typeColor[type] + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>

@@ -17,6 +17,8 @@ interface DocumentDetail {
   created_by: string;
   client_name: string | null;
   content_json: Record<string, unknown>;
+  file_url: string | null;
+  file_name: string | null;
 }
 
 const statusColor: Record<string, string> = {
@@ -25,7 +27,7 @@ const statusColor: Record<string, string> = {
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  quote: "Quote", sow: "Statement of Work", poc: "Proof of Concept", uat: "UAT Sign-off",
+  quote: "Quote", sow: "Statement of Work", poc: "Proof of Concept", uat: "UAT Sign-off", change_request: "Change Request",
 };
 
 function DocumentViewInner() {
@@ -100,7 +102,18 @@ function DocumentViewInner() {
           ))}
         </div>
 
-        {/* QUOTE view */}
+        {doc.file_url && (
+          <div className="card" style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+            <svg width="20" height="20" fill="none" stroke="var(--accent-blue)" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{doc.file_name || "Attachment"}</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Attached file</div>
+            </div>
+            <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+              <button className="btn-primary" style={{ fontSize: 12 }}>Download</button>
+            </a>
+          </div>
+        )}
         {doc.type === "quote" && (content.items as { id: string; description: string; qty: number; unit: string; rate: number }[])?.length > 0 && (
           <div className="card" style={{ marginBottom: 20, padding: 0, overflow: "hidden" }}>
             <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Line Items</div>
@@ -215,6 +228,38 @@ function DocumentViewInner() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* CHANGE REQUEST view */}
+        {doc.type === "change_request" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {(content.reason as string) && (
+              <div className="card">
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>Reason for Change</div>
+                <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{content.reason as string}</div>
+              </div>
+            )}
+            {(content.description as string) && (
+              <div className="card">
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>Description of Change</div>
+                <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{content.description as string}</div>
+              </div>
+            )}
+            <div className="card" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 4 }}>Cost Impact</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{content.costImpact as string || "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 4 }}>Timeline Impact</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{content.timelineImpact as string || "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 4 }}>Requested By</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{content.requestedBy as string || "—"}</div>
+              </div>
+            </div>
           </div>
         )}
 

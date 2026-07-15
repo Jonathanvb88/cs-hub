@@ -27,12 +27,13 @@ export async function POST(req: NextRequest) {
     const {
       clientId, projectId, type, title, version, status,
       contentJson, totalValue, currency, validUntil, createdBy,
+      fileUrl, fileName,
     } = body;
 
     const rows = await sql(
       `INSERT INTO documents
-        (client_id, project_id, type, title, version, status, content_json, total_value, currency, valid_until, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        (client_id, project_id, type, title, version, status, content_json, total_value, currency, valid_until, created_by, file_url, file_name)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING *`,
       [
         clientId || null,
@@ -46,6 +47,8 @@ export async function POST(req: NextRequest) {
         currency || "ZAR",
         validUntil || null,
         createdBy || "Jonathan",
+        fileUrl || null,
+        fileName || null,
       ]
     );
     return NextResponse.json({ document: rows[0] });
@@ -59,20 +62,21 @@ export async function PUT(req: NextRequest) {
   if (authError) return authError;
   try {
     const body = await req.json();
-    const { id, status, contentJson, totalValue } = body;
+    const { id, status, contentJson, totalValue, fileUrl, fileName } = body;
     const rows = await sql(
       `UPDATE documents
        SET status = COALESCE($2, status),
            content_json = COALESCE($3, content_json),
            total_value = COALESCE($4, total_value),
+           file_url = COALESCE($5, file_url),
+           file_name = COALESCE($6, file_name),
            updated_at = now()
        WHERE id = $1
        RETURNING *`,
-      [id, status || null, contentJson ? JSON.stringify(contentJson) : null, totalValue ?? null]
+      [id, status || null, contentJson ? JSON.stringify(contentJson) : null, totalValue ?? null, fileUrl || null, fileName || null]
     );
     return NextResponse.json({ document: rows[0] });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
-
