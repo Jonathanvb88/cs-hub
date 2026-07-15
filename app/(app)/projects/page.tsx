@@ -1,8 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/layout/Header";
 import { useToast } from "@/components/Toast";
+
+interface ClientOption { id: string; name: string }
 
 interface Project {
   id: string;
@@ -37,9 +40,10 @@ const statusColor: Record<string, string> = {
   draft: "badge-gray",
 };
 
-export default function ProjectsPage() {
+function ProjectsPageContent() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [clients, setClients] = useState<ClientOption[]>([]);
   const [priorities, setPriorities] = useState<PriorityOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -50,6 +54,8 @@ export default function ProjectsPage() {
   const [newPriority, setNewPriority] = useState("medium");
   const [newTargetDate, setNewTargetDate] = useState("");
   const [newAssignedUserId, setNewAssignedUserId] = useState("");
+  const [newClientId, setNewClientId] = useState("");
+  const searchParams = useSearchParams();
 
   const getPriorityColor = (key: string) => priorities.find(p => p.key === key)?.color || "#94a3b8";
   const getPriorityLabel = (key: string) => priorities.find(p => p.key === key)?.label || key;
@@ -86,7 +92,26 @@ export default function ProjectsPage() {
     } catch {}
   };
 
-  useEffect(() => { fetchProjects(); fetchTeam(); fetchPriorities(); }, []);
+  const fetchClients = async () => {
+    try {
+      const res = await fetch("/api/db/clients");
+      const data = await res.json();
+      setClients(data.clients || []);
+    } catch {}
+  };
+
+  useEffect(() => { fetchProjects(); fetchTeam(); fetchPriorities(); fetchClients(); }, []);
+
+  // Arriving from a client's page (e.g. "New Project" on their profile) -
+  // pre-select that client and open the form immediately, instead of
+  // landing on a blank list with no indication of where you came from.
+  useEffect(() => {
+    const clientId = searchParams.get("clientId");
+    if (clientId) {
+      setNewClientId(clientId);
+      setShowAdd(true);
+    }
+  }, [searchParams]);
 
   const addProject = async () => {
     if (!newName.trim()) return;
@@ -95,11 +120,11 @@ export default function ProjectsPage() {
       const res = await fetch("/api/db/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, type: newType, priority: newPriority, targetDate: newTargetDate || null, assignedUserId: newAssignedUserId || null }),
+        body: JSON.stringify({ clientId: newClientId || null, name: newName, type: newType, priority: newPriority, targetDate: newTargetDate || null, assignedUserId: newAssignedUserId || null }),
       });
       if (!res.ok) throw new Error("Failed to save project");
       await fetchProjects();
-      setNewName(""); setNewType("new_build"); setNewPriority("medium"); setNewTargetDate(""); setNewAssignedUserId(""); setShowAdd(false);
+      setNewName(""); setNewType("new_build"); setNewPriority("medium"); setNewTargetDate(""); setNewAssignedUserId(""); setNewClientId(""); setShowAdd(false);
       showToast(`Project "${newName}" created`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save project");
@@ -159,7 +184,14 @@ export default function ProjectsPage() {
         {showAdd && (
           <div className="card" style={{ border: "1px solid var(--accent-blue)", marginBottom: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 14 }}>New Project</div>
-            <div className="four-col-layout" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.2fr", gap: 12, marginBottom: 12 }}>
+            <div className="four-col-layout" style={{ display: "grid", gridTemplateColumns: "1.4fr 1.6fr 1fr 1fr 1fr 1.2fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Client</label>
+                <select className="input" value={newClientId} onChange={e => setNewClientId(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="">No client (internal)</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Project Name</label>
                 <input className="input" placeholder="e.g. Loyalty Programme Phase 2" value={newName} onChange={e => setNewName(e.target.value)} />
@@ -195,7 +227,7 @@ export default function ProjectsPage() {
               <button className="btn-primary" style={{ fontSize: 12, opacity: saving ? 0.7 : 1 }} onClick={addProject} disabled={saving}>
                 {saving ? "Saving..." : "Save Project"}
               </button>
-              <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowAdd(false)}>Cancel</button>
+              <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => { setShowAdd(false); setNewClientId(""); }}>Cancel</button>
             </div>
           </div>
         )}
@@ -290,6 +322,14 @@ export default function ProjectsPage() {
         </div>
       </div></div>
     </>
+  );
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProjectsPageContent />
+    </Suspense>
   );
 }
 

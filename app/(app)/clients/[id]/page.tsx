@@ -63,7 +63,7 @@ function RealProjectsTab({ clientId }: { clientId: string }) {
       <div className="empty-state-icon"><svg width="20" height="20" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></div>
       <div className="empty-state-title">No projects yet</div>
       <div className="empty-state-subtitle">Create a project and link it to this client.</div>
-      <Link href="/projects"><button className="btn-primary" style={{ fontSize: 12 }}>New Project</button></Link>
+      <Link href={`/projects?clientId=${clientId}`}><button className="btn-primary" style={{ fontSize: 12 }}>New Project</button></Link>
     </div>
   );
   return (
@@ -205,18 +205,31 @@ export default function ClientProfilePage() {
         breadcrumbs={[{ label: "Clients", href: "/clients" }, { label: client.name }]}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn-secondary">
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Send Email
-            </button>
-            <button className="btn-primary">
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              New Project
-            </button>
+            {client.contacts?.[0]?.email ? (
+              <a href={`mailto:${client.contacts[0].email}`}>
+                <button className="btn-secondary">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Send Email
+                </button>
+              </a>
+            ) : (
+              <button className="btn-secondary" disabled title="No contact email on file for this client" style={{ opacity: 0.5, cursor: "not-allowed" }}>
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Send Email
+              </button>
+            )}
+            <Link href={`/projects?clientId=${id}`}>
+              <button className="btn-primary">
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                New Project
+              </button>
+            </Link>
           </div>
         }
       />
@@ -548,7 +561,7 @@ export default function ClientProfilePage() {
         {activeTab === "Projects" && (
           <div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-              <Link href="/projects">
+              <Link href={`/projects?clientId=${id}`}>
                 <button className="btn-primary" style={{ fontSize: 12 }}>
                   <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
