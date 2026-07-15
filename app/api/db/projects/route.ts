@@ -63,17 +63,19 @@ export async function PUT(req: NextRequest) {
   if (authError) return authError;
   try {
     const body = await req.json();
-    const { id, status, priority, name, assignedUserId } = body;
+    const { id, status, priority, name, assignedUserId, description, clientId } = body;
     const rows = await sql(
       `UPDATE projects
        SET status = COALESCE($2, status),
            priority = COALESCE($3, priority),
            name = COALESCE($4, name),
            assigned_user_id = COALESCE($5, assigned_user_id),
+           description = COALESCE($6, description),
+           client_id = CASE WHEN $7 = '' THEN NULL WHEN $7 IS NOT NULL THEN $7::uuid ELSE client_id END,
            updated_at = now()
        WHERE id = $1
        RETURNING *`,
-      [id, status || null, priority || null, name || null, assignedUserId || null]
+      [id, status || null, priority || null, name || null, assignedUserId || null, description ?? null, clientId ?? null]
     );
     return NextResponse.json({ project: rows[0] });
   } catch (e) {

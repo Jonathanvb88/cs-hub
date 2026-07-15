@@ -38,6 +38,7 @@ export default function ProjectDetailPage() {
   const { showToast } = useToast();
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [description, setDescription] = useState("");
@@ -68,11 +69,20 @@ export default function ProjectDetailPage() {
     } catch {}
   };
 
-  useEffect(() => { if (id) { fetchProject(); fetchTeam(); } }, [id]);
+  const fetchClients = async () => {
+    try {
+      const res = await fetch("/api/db/clients");
+      const data = await res.json();
+      setClients(data.clients || []);
+    } catch {}
+  };
+
+  useEffect(() => { if (id) { fetchProject(); fetchTeam(); fetchClients(); } }, [id]);
 
   const updateField = async (field: string, value: string) => {
     if (!project) return;
-    setProject({ ...project, [field === "assignedUserId" ? "assigned_user_id" : field]: value });
+    const localField = field === "assignedUserId" ? "assigned_user_id" : field === "clientId" ? "client_id" : field;
+    setProject({ ...project, [localField]: value || null });
     try {
       const res = await fetch("/api/db/projects", {
         method: "PUT",
@@ -148,10 +158,10 @@ export default function ProjectDetailPage() {
             />
           </div>
 
-          {project.client_id && (
-            <div className="card">
-              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>Client</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="card">
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>Client</div>
+            {project.client_id ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: 10, background: "var(--accent-green-bg)",
                   border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center",
@@ -159,16 +169,27 @@ export default function ProjectDetailPage() {
                 }}>
                   {project.client_name?.charAt(0)}
                 </div>
-                <div>
+                <div style={{ flex: 1, minWidth: 120 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{project.client_name}</div>
                   <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{project.client_industry}</div>
                 </div>
-                <Link href={`/clients/${project.client_id}`} style={{ marginLeft: "auto" }}>
+                <Link href={`/clients/${project.client_id}`}>
                   <button className="btn-secondary" style={{ fontSize: 11 }}>View Client</button>
                 </Link>
               </div>
-            </div>
-          )}
+            ) : (
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Not linked to a client yet.</div>
+            )}
+            <select
+              className="input"
+              value={project.client_id || ""}
+              onChange={e => updateField("clientId", e.target.value)}
+              style={{ background: "var(--bg-elevated)", marginTop: project.client_id ? 12 : 0 }}
+            >
+              <option value="">No client (internal)</option>
+              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
 
           <div className="card">
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12 }}>Activity</div>
