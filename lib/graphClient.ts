@@ -44,6 +44,13 @@ export async function getRecentEmails(accessToken: string, top = 10): Promise<Gr
   return data.value || [];
 }
 
+export async function markEmailRead(accessToken: string, messageId: string): Promise<void> {
+  await graphFetch(`/me/messages/${messageId}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify({ isRead: true }),
+  });
+}
+
 export async function getTodayEvents(accessToken: string): Promise<GraphEvent[]> {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
