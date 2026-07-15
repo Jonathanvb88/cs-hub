@@ -106,7 +106,7 @@ export default function ProfilePage() {
         }
       />
 
-      <div style={{ padding: 24, display: "grid", gridTemplateColumns: "260px 1fr", gap: 24, maxWidth: 960 }}>
+      <div className="two-col-layout" style={{ padding: 24, display: "grid", gridTemplateColumns: "260px 1fr", gap: 24, maxWidth: 960 }}>
 
         {/* Left — avatar and quick info */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -150,7 +150,7 @@ export default function ProfilePage() {
           {/* Personal details */}
           <div className="card">
             <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 18 }}>Personal Details</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+            <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 5 }}>Full Name</label>
                 <input className="input" value={name} onChange={e => setName(e.target.value)} />
@@ -204,7 +204,7 @@ export default function ProfilePage() {
                   </button>
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
                   <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 5 }}>New Password</label>
                   <div style={{ position: "relative" }}>
