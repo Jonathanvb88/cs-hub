@@ -33,6 +33,9 @@ export default function DashboardPage() {
   const [clients, setClients] = useState<typeof mockClients>([]);
   const [loadingComms, setLoadingComms] = useState(true);
   const [dismissed, setDismissed] = useState<string[]>([]);
+  const [events, setEvents] = useState<{ id: string; subject: string; start: { dateTime: string }; onlineMeeting?: { joinUrl: string } }[]>([]);
+  const [calendarError, setCalendarError] = useState("");
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
   const today = new Date().toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
@@ -55,6 +58,16 @@ export default function DashboardPage() {
       .then(r => r.json())
       .then(d => setClients(d.clients || []))
       .catch(() => setClients(mockClients));
+
+    // Load real Microsoft 365 calendar events for today
+    fetch("/api/graph/calendar")
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) setCalendarError(d.error);
+        else setEvents(d.events || []);
+      })
+      .catch(() => setCalendarError("Couldn't load calendar"))
+      .finally(() => setLoadingEvents(false));
   }, []);
 
   const pendingComms = comms.filter(c => !dismissed.includes(c.id) && c.action_required && c.action_status === "pending");
@@ -243,24 +256,57 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Today&apos;s Meetings</div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{today}</div>
               </div>
-              <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(245,158,11,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="18" height="18" fill="none" stroke="var(--accent-amber)" strokeWidth={1.8} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>Microsoft 365 Calendar</div>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-                      Live calendar sync is pending admin consent approval. Once enabled, your Teams meetings and Outlook calendar will appear here automatically.
+              {loadingEvents ? (
+                <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {[1, 2].map(i => (
+                    <div key={i} style={{ display: "flex", gap: 10 }}>
+                      <div className="skeleton" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <div className="skeleton" style={{ height: 12, width: "60%", marginBottom: 6 }} />
+                        <div className="skeleton" style={{ height: 11, width: "40%" }} />
+                      </div>
                     </div>
-                    <Link href="/settings">
-                      <button className="btn-secondary" style={{ fontSize: 11, marginTop: 10 }}>View Integration Status</button>
-                    </Link>
+                  ))}
+                </div>
+              ) : calendarError ? (
+                <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(245,158,11,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="18" height="18" fill="none" stroke="var(--accent-amber)" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>Microsoft 365 Calendar</div>
+                      <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+                        {calendarError === "Not authenticated"
+                          ? "Sign in with your Microsoft account to see today's real meetings here."
+                          : "Couldn't load your calendar right now."}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : events.length === 0 ? (
+                <div style={{ padding: "20px 20px", textAlign: "center", color: "var(--text-muted)", fontSize: 12 }}>No meetings scheduled today</div>
+              ) : (
+                <div>
+                  {events.slice(0, 4).map(ev => (
+                    <div key={ev.id} style={{ padding: "12px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--accent-blue)", width: 52, flexShrink: 0 }}>
+                        {new Date(ev.start.dateTime).toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ev.subject}</div>
+                      </div>
+                      {ev.onlineMeeting?.joinUrl && (
+                        <a href={ev.onlineMeeting.joinUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                          <button className="btn-secondary" style={{ fontSize: 11, padding: "4px 8px" }}>Join</button>
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Follow-ups — real data */}
