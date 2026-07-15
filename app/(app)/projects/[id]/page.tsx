@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 interface ProjectDetail {
   id: string;
@@ -34,6 +35,7 @@ const priorityColor: Record<string, string> = {
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
+  const { showToast } = useToast();
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,13 +74,16 @@ export default function ProjectDetailPage() {
     if (!project) return;
     setProject({ ...project, [field === "assignedUserId" ? "assigned_user_id" : field]: value });
     try {
-      await fetch("/api/db/projects", {
+      const res = await fetch("/api/db/projects", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: project.id, [field]: value }),
       });
+      if (!res.ok) throw new Error("Save failed");
+      showToast("Saved", "success");
       fetchProject();
     } catch {
+      showToast("Couldn't save - check your connection and try again", "error");
       fetchProject();
     }
   };
@@ -139,7 +144,7 @@ export default function ProjectDetailPage() {
               placeholder="Add a project description..."
               value={description}
               onChange={e => setDescription(e.target.value)}
-              onBlur={() => updateField("description", description)}
+              onBlur={() => { if (description !== (project?.description || "")) updateField("description", description); }}
             />
           </div>
 
