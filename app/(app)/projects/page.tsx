@@ -203,7 +203,7 @@ export default function ProjectsPage() {
         <div className="table-scroll-wrapper"><div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{
             display: "grid", gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px",
-            padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)",
+            padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)", minWidth: 780,
           }}>
             {["Project", "Client", "Status", "Priority", "Target Date", "Assigned To", ""].map(h => (
               <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
@@ -212,7 +212,7 @@ export default function ProjectsPage() {
           {loading ? (
             <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
               {[1,2,3].map(i => (
-                <div key={i} style={{ display: "grid", gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px", gap: 16, alignItems: "center" }}>
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px", gap: 16, alignItems: "center", minWidth: 780 }}>
                   <div className="skeleton" style={{ height: 13 }} />
                   <div className="skeleton" style={{ height: 11 }} />
                   <div className="skeleton" style={{ height: 22, borderRadius: 20 }} />
@@ -239,6 +239,7 @@ export default function ProjectsPage() {
               <div key={project.id} className="table-row" style={{
                 gridTemplateColumns: "1.8fr 1.3fr 90px 90px 110px 1.1fr 70px",
                 alignItems: "center",
+                minWidth: 780,
               }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{project.name}</div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{project.client_name || "—"}</div>

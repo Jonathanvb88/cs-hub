@@ -117,7 +117,8 @@ function DocumentViewInner() {
         {doc.type === "quote" && (content.items as { id: string; description: string; qty: number; unit: string; rate: number }[])?.length > 0 && (
           <div className="card" style={{ marginBottom: 20, padding: 0, overflow: "hidden" }}>
             <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Line Items</div>
-            <div style={{ display: "grid", gridTemplateColumns: "3fr 80px 80px 120px 120px", padding: "10px 20px", background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)" }}>
+            <div className="table-scroll-wrapper">
+            <div style={{ display: "grid", gridTemplateColumns: "3fr 80px 80px 120px 120px", padding: "10px 20px", background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)", minWidth: 560 }}>
               {["Description", "Qty", "Unit", "Rate", "Amount"].map(h => (
                 <div key={h} style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
               ))}
@@ -125,7 +126,7 @@ function DocumentViewInner() {
             {(content.items as { id: string; description: string; qty: number; unit: string; rate: number }[]).map((item) => {
               const amount = (item.qty || 1) * (item.rate || 0);
               return (
-                <div key={item.id} style={{ display: "grid", gridTemplateColumns: "3fr 80px 80px 120px 120px", padding: "12px 20px", borderBottom: "1px solid var(--border)" }}>
+                <div key={item.id} style={{ display: "grid", gridTemplateColumns: "3fr 80px 80px 120px 120px", padding: "12px 20px", borderBottom: "1px solid var(--border)", minWidth: 560 }}>
                   <div style={{ fontSize: 13, color: "var(--text-primary)" }}>{item.description}</div>
                   <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{item.qty}</div>
                   <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{item.unit}</div>
@@ -134,6 +135,7 @@ function DocumentViewInner() {
                 </div>
               );
             })}
+            </div>
             <div style={{ padding: "14px 20px", display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
               <div style={{ display: "flex", gap: 24 }}>
                 <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Subtotal</span>

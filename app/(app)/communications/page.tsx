@@ -39,6 +39,8 @@ export default function CommunicationsPage() {
   const [type, setType] = useState("email");
   const [aiSummary, setAiSummary] = useState("");
   const [analysing, setAnalysing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => { setIsMobile(window.innerWidth < 768); }, []);
 
   const fetchComms = async () => {
     setLoading(true);
@@ -48,7 +50,8 @@ export default function CommunicationsPage() {
       if (!res.ok) throw new Error("Failed to load communications");
       const data = await res.json();
       setComms(data.communications || []);
-      if (data.communications?.length > 0 && !selected) setSelected(data.communications[0].id);
+      const mobileNow = typeof window !== "undefined" && window.innerWidth < 768;
+      if (data.communications?.length > 0 && !selected && !mobileNow) setSelected(data.communications[0].id);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
     } finally {
@@ -136,7 +139,8 @@ export default function CommunicationsPage() {
       />
 
       <div style={{ display: "flex", height: "calc(100vh - 60px)" }}>
-        <div style={{ width: 340, borderRight: "1px solid var(--border)", overflowY: "auto", flexShrink: 0 }}>
+        {(!isMobile || !selected) && (
+        <div style={{ width: isMobile ? "100%" : 340, borderRight: "1px solid var(--border)", overflowY: "auto", flexShrink: 0 }}>
           {loading ? (
             <div style={{ display: "flex", flexDirection: "column" }}>
               {[1,2,3].map(i => (
@@ -188,11 +192,15 @@ export default function CommunicationsPage() {
             ))
           )}
         </div>
+        )}
 
         {selectedComm && !newOpen && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-              <div>
+            <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+              <div style={{ minWidth: 0 }}>
+                {isMobile && (
+                  <button onClick={() => setSelected(null)} className="btn-secondary" style={{ fontSize: 11, marginBottom: 8 }}>← Back to list</button>
+                )}
                 <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginBottom: 2 }}>{selectedComm.subject}</div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
                   {selectedComm.client_name} · {selectedComm.sender || "—"} · {new Date(selectedComm.received_at).toLocaleString("en-ZA")}

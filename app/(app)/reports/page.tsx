@@ -216,9 +216,11 @@ export default function ReportsPage() {
           <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
             Top Clients by Document Value
           </div>
+          <div className="table-scroll-wrapper">
           <div style={{
             display: "grid", gridTemplateColumns: "2fr 100px 150px",
             padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)",
+            minWidth: 420,
           }}>
             {["Client", "Documents", "Total Value"].map(h => (
               <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
@@ -229,7 +231,7 @@ export default function ReportsPage() {
           ) : (
             data.topClients.map((c, i) => (
               <Link key={c.name} href="/clients" style={{ textDecoration: "none" }}>
-                <div className="table-row" style={{ gridTemplateColumns: "2fr 100px 150px", alignItems: "center", cursor: "pointer" }}>
+                <div className="table-row" style={{ gridTemplateColumns: "2fr 100px 150px", alignItems: "center", cursor: "pointer", minWidth: 420 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-green-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "var(--accent-green)", flexShrink: 0 }}>
                       {i + 1}
@@ -242,6 +244,7 @@ export default function ReportsPage() {
               </Link>
             ))
           )}
+          </div>
         </div>
       </div>
     </>

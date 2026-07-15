@@ -54,6 +54,8 @@ export default function ConversationsPage() {
   const [comms, setComms] = useState<Communication[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => { setIsMobile(window.innerWidth < 768); }, []);
   const [showCapture, setShowCapture] = useState(false);
   const [channel, setChannel] = useState("whatsapp");
   const [rawText, setRawText] = useState("");
@@ -304,7 +306,10 @@ export default function ConversationsPage() {
 
         {/* Right — conversation capture panel */}
         {showCapture && (
-          <div style={{ width: 380, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={isMobile
+            ? { position: "fixed", inset: 0, zIndex: 50, background: "var(--bg-base)", display: "flex", flexDirection: "column", overflow: "hidden" }
+            : { width: 380, display: "flex", flexDirection: "column", overflow: "hidden" }
+          }>
             <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>Log Conversation</div>
               <button onClick={() => setShowCapture(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 20 }}>×</button>

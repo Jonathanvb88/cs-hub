@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import OneDriveFiles from "@/components/OneDriveFiles";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients } from "@/lib/mockData";
 
 const mockAssets = [
   { id: "a1", clientId: "1", clientName: "ABC Retail Group", type: "journey_url", label: "Black Friday Journey 2025", url: "https://journey.abcretail.co.za/bf2025", notes: "Full loyalty journey, tested and live", tags: ["black-friday", "loyalty"], createdAt: "2025-11-01" },
@@ -25,6 +24,8 @@ const typeConfig: Record<string, { label: string; color: string; icon: string }>
   lessons_learned: { label: "Lessons Learned", color: "var(--accent-red)", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
 };
 
+interface ClientOption { id: string; name: string }
+
 export default function KnowledgePage() {
   const [search, setSearch] = useState("");
   const [clientFilter, setClientFilter] = useState("all");
@@ -34,6 +35,11 @@ export default function KnowledgePage() {
   const [assets, setAssets] = useState(mockAssets);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState<ClientOption[]>([]);
+
+  useEffect(() => {
+    fetch("/api/db/clients").then(r => r.json()).then(d => setClients(d.clients || [])).catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch("/api/db/knowledge")
@@ -192,7 +198,7 @@ export default function KnowledgePage() {
             </div>
             <select className="input" style={{ background: "var(--bg-elevated)", width: 180 }} value={clientFilter} onChange={e => setClientFilter(e.target.value)}>
               <option value="all">All Clients</option>
-              {mockClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <select className="input" style={{ background: "var(--bg-elevated)", width: 160 }} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
               <option value="all">All Types</option>

@@ -128,7 +128,7 @@ export default function ProjectDetailPage() {
         <Link href="/projects"><button className="btn-secondary" style={{ fontSize: 12 }}>Back to Projects</button></Link>
       </div>
 
-      <div style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 300px", gap: 24, maxWidth: 1100 }}>
+      <div className="two-col-layout" style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 300px", gap: 24, maxWidth: 1100 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div className="card">
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12 }}>Description</div>

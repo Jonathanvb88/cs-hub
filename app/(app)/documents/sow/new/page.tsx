@@ -185,7 +185,7 @@ export default function NewSOWPage() {
               <button className="btn-secondary" style={{ fontSize: 12 }} onClick={addDeliverable}>+ Add Deliverable</button>
             </div>
             {deliverables.map((d, i) => (
-              <div key={d.id} style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr 120px 28px", gap: 10, alignItems: "start" }}>
+              <div key={d.id} className="form-grid" style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr 120px 28px", gap: 10, alignItems: "start" }}>
                 <div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Deliverable {i + 1}</div>
                   <input className="input" style={{ padding: "6px 10px" }} placeholder="Title" value={d.title} onChange={e => setDeliverables(p => p.map(x => x.id === d.id ? { ...x, title: e.target.value } : x))} />

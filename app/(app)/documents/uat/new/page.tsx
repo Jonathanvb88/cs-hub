@@ -173,7 +173,7 @@ export default function UATBuilderPage() {
         }
       />
 
-      <div style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 300px", gap: 24, maxWidth: 1100 }}>
+      <div className="two-col-layout" style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 300px", gap: 24, maxWidth: 1100 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {saveError && (
             <div style={{ padding: "10px 14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, fontSize: 13, color: "#dc2626" }}>

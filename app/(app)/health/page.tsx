@@ -129,12 +129,14 @@ export default function HealthPage() {
               </span>
             </div>
           </div>
+          <div className="table-scroll-wrapper">
           <div style={{
             display: "grid",
             gridTemplateColumns: "2fr 70px 140px 100px 130px 1fr 110px",
             padding: "10px 20px",
             borderBottom: "1px solid var(--border)",
             background: "var(--bg-elevated)",
+            minWidth: 760,
           }}>
             {["Client", "Score", "Health", "Status", "Last Contact", "AI Recommendation", ""].map(h => (
               <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
@@ -144,7 +146,7 @@ export default function HealthPage() {
           {loading ? (
             <div>
               {[1,2,3,4,5].map(i => (
-                <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 70px 140px 100px 130px 1fr 110px", padding: "13px 16px", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}>
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 70px 140px 100px 130px 1fr 110px", padding: "13px 16px", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center", minWidth: 760 }}>
                   <div className="skeleton" style={{ height: 13, width: "60%" }} />
                   <div className="skeleton" style={{ height: 22, borderRadius: 4 }} />
                   <div className="skeleton" style={{ height: 6, borderRadius: 3 }} />
@@ -173,7 +175,7 @@ export default function HealthPage() {
               <div key={client.id}>
                 <div
                   className="table-row"
-                  style={{ gridTemplateColumns: "2fr 70px 140px 100px 130px 1fr 110px", alignItems: "center", cursor: "pointer" }}
+                  style={{ gridTemplateColumns: "2fr 70px 140px 100px 130px 1fr 110px", alignItems: "center", cursor: "pointer", minWidth: 760 }}
                   onClick={() => setExpandedId(expandedId === client.id ? null : client.id)}
                 >
                   <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{client.name}</div>
@@ -234,6 +236,7 @@ export default function HealthPage() {
               </div>
             ))
           )}
+          </div>
         </div>
       </div>
     </>

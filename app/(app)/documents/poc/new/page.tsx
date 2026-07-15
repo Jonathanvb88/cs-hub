@@ -164,7 +164,7 @@ export default function NewPOCPage() {
               <div />
             </div>
             {criteria.map(c => (
-              <div key={c.id} style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr 28px", gap: 10, alignItems: "center" }}>
+              <div key={c.id} className="form-grid" style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr 28px", gap: 10, alignItems: "center" }}>
                 <input className="input" style={{ padding: "6px 10px" }} placeholder="Success criteria" value={c.criteria} onChange={e => setCriteria(p => p.map(x => x.id === c.id ? { ...x, criteria: e.target.value } : x))} />
                 <input className="input" style={{ padding: "6px 10px" }} placeholder="How it will be measured" value={c.measure} onChange={e => setCriteria(p => p.map(x => x.id === c.id ? { ...x, measure: e.target.value } : x))} />
                 <button onClick={() => removeCriteria(c.id)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 18 }}>×</button>

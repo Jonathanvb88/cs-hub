@@ -194,10 +194,11 @@ export default function NewQuotePage() {
             </div>
 
             {/* Header row */}
+            <div className="table-scroll-wrapper">
             <div style={{
               display: "grid", gridTemplateColumns: "1fr 80px 100px 120px 130px 32px",
               padding: "8px 20px", background: "var(--bg-elevated)",
-              borderBottom: "1px solid var(--border)",
+              borderBottom: "1px solid var(--border)", minWidth: 620,
             }}>
               {["Description", "Qty", "Unit", "Rate (ZAR)", "Amount", ""].map(h => (
                 <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>{h}</div>
@@ -207,7 +208,7 @@ export default function NewQuotePage() {
             {items.map((item, idx) => (
               <div key={item.id} style={{
                 display: "grid", gridTemplateColumns: "1fr 80px 100px 120px 130px 32px",
-                padding: "10px 20px", borderBottom: "1px solid var(--border)", alignItems: "center", gap: 8,
+                padding: "10px 20px", borderBottom: "1px solid var(--border)", alignItems: "center", gap: 8, minWidth: 620,
               }}>
                 <input
                   className="input"
@@ -246,6 +247,7 @@ export default function NewQuotePage() {
                 >×</button>
               </div>
             ))}
+            </div>
 
             {/* Totals */}
             <div style={{ padding: "16px 20px", background: "var(--bg-elevated)" }}>
