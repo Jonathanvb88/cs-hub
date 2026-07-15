@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients } from "@/lib/mockData";
+interface ClientOption { id: string; name: string; industry?: string; website?: string; contacts: { name: string; email: string }[] }
 
 interface Deliverable { id: string; title: string; description: string; milestone: string; }
 interface Assumption { id: string; text: string; }
@@ -17,6 +17,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function NewSOWPage() {
+  const [clients, setClients] = useState<ClientOption[]>([]);
   const [clientId, setClientId] = useState("");
   const [title, setTitle] = useState("");
   const [projectName, setProjectName] = useState("");
@@ -50,6 +51,10 @@ export default function NewSOWPage() {
   ]);
 
   useEffect(() => {
+    fetch("/api/db/clients").then(r => r.json()).then(d => setClients(d.clients || [])).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const prefill = (() => {
       try { return sessionStorage.getItem("cshub_template_prefill"); } catch {}
       try { return localStorage.getItem("cshub_template_prefill"); } catch {}
@@ -75,7 +80,7 @@ export default function NewSOWPage() {
   const removeDeliverable = (id: string) => setDeliverables(p => p.filter(d => d.id !== id));
   const removeAssumption = (id: string) => setAssumptions(p => p.filter(a => a.id !== id));
 
-  const selectedClient = mockClients.find(c => c.id === clientId);
+  const selectedClient = clients.find(c => c.id === clientId);
 
   const handleSaveSOW = async () => {
     setSaveError("");
@@ -141,9 +146,9 @@ export default function NewSOWPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Client</label>
-                <select className="input" value={clientId} onChange={e => { setClientId(e.target.value); const c = mockClients.find(cl => cl.id === e.target.value); if (c && !title) setTitle(`SOW — ${c.name}`); }} style={{ background: "var(--bg-elevated)" }}>
+                <select className="input" value={clientId} onChange={e => { setClientId(e.target.value); const c = clients.find(cl => cl.id === e.target.value); if (c && !title) setTitle(`SOW — ${c.name}`); }} style={{ background: "var(--bg-elevated)" }}>
                   <option value="">Select client...</option>
-                  {mockClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>

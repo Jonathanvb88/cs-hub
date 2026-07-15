@@ -2,11 +2,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients } from "@/lib/mockData";
+interface ClientOption { id: string; name: string; industry?: string; website?: string; contacts: { name: string; email: string }[] }
 
 interface SuccessCriteria { id: string; criteria: string; measure: string; }
 
 export default function NewPOCPage() {
+  const [clients, setClients] = useState<ClientOption[]>([]);
   const [clientId, setClientId] = useState("");
   const [title, setTitle] = useState("");
   const [objective, setObjective] = useState("Demonstrate that the proposed solution meets the client's core requirements within a controlled environment before full development commences.");
@@ -27,7 +28,11 @@ export default function NewPOCPage() {
   const addCriteria = () => setCriteria(p => [...p, { id: Date.now().toString(), criteria: "", measure: "" }]);
   const removeCriteria = (id: string) => setCriteria(p => p.filter(c => c.id !== id));
 
-  const selectedClient = mockClients.find(c => c.id === clientId);
+  const selectedClient = clients.find(c => c.id === clientId);
+
+  useEffect(() => {
+    fetch("/api/db/clients").then(r => r.json()).then(d => setClients(d.clients || [])).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const prefill = (() => {
@@ -113,9 +118,9 @@ export default function NewPOCPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Client</label>
-                <select className="input" value={clientId} onChange={e => { setClientId(e.target.value); const c = mockClients.find(cl => cl.id === e.target.value); if (c && !title) setTitle(`POC — ${c.name}`); }} style={{ background: "var(--bg-elevated)" }}>
+                <select className="input" value={clientId} onChange={e => { setClientId(e.target.value); const c = clients.find(cl => cl.id === e.target.value); if (c && !title) setTitle(`POC — ${c.name}`); }} style={{ background: "var(--bg-elevated)" }}>
                   <option value="">Select client...</option>
-                  {mockClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>

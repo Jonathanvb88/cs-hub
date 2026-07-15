@@ -1,8 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients, mockProjects } from "@/lib/mockData";
+
+interface ClientOption { id: string; name: string; industry?: string; website?: string; contacts: { name: string; email: string }[] }
+interface ProjectOption { id: string; client_id: string; name: string; type: string; status: string }
 
 interface SimilarProject {
   projectId: string;
@@ -26,14 +28,28 @@ interface ProjectIntelligenceResult {
 }
 
 export default function ProjectIntelligencePage() {
-  const [clientId, setClientId] = useState("1");
+  const [clients, setClients] = useState<ClientOption[]>([]);
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [clientId, setClientId] = useState("");
   const [request, setRequest] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ProjectIntelligenceResult | null>(null);
   const [error, setError] = useState("");
 
-  const selectedClient = mockClients.find(c => c.id === clientId);
-  const clientProjects = mockProjects.filter(p => p.clientId === clientId);
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/db/clients").then(r => r.json()),
+      fetch("/api/db/projects").then(r => r.json()),
+    ]).then(([clientsData, projectsData]) => {
+      const list = clientsData.clients || [];
+      setClients(list);
+      setProjects(projectsData.projects || []);
+      if (list.length > 0) setClientId(list[0].id);
+    }).catch(() => {});
+  }, []);
+
+  const selectedClient = clients.find(c => c.id === clientId);
+  const clientProjects = projects.filter(p => p.client_id === clientId);
 
   const SAMPLE_REQUEST = `We would like to launch our Annual Black Friday Campaign again this year. Same as last year — full loyalty journey, email notifications when points are processed, and the bulk import spreadsheet for customer data. We may want to add a new SMS notification option this time.`;
 
@@ -128,7 +144,7 @@ Assess similarity and estimate reuse potential.`;
             <div>
               <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 5 }}>Client</label>
               <select className="input" value={clientId} onChange={e => setClientId(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
-                {mockClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
               {clientProjects.length > 0 && (
                 <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-muted)" }}>

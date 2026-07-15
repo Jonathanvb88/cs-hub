@@ -1,17 +1,38 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients, mockProjects, getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
+import { getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
+
+interface Contact { id: string; name: string; title: string }
+interface Client {
+  id: string; name: string; industry: string | null; health_score: number
+  health_status: string; notes: string | null; client_since: string; contacts: Contact[]
+}
+interface Project { id: string; client_id: string; name: string; status: string }
 
 export default function ClientPlaybookPage() {
   const { id } = useParams();
+  const [loadingData, setLoadingData] = useState(true);
+  const [client, setClient] = useState<Client | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [playbook, setPlaybook] = useState<Record<string, string> | null>(null);
 
-  const client = mockClients.find(c => c.id === id);
-  const projects = mockProjects.filter(p => p.clientId === id);
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/db/clients").then(r => r.json()),
+      fetch("/api/db/projects").then(r => r.json()),
+    ]).then(([clientsData, projectsData]) => {
+      setClient((clientsData.clients || []).find((c: Client) => c.id === id) || null);
+      setProjects((projectsData.projects || []).filter((p: Project) => p.client_id === id));
+    }).catch(() => {}).finally(() => setLoadingData(false));
+  }, [id]);
+
+  if (loadingData) return (
+    <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>Loading...</div>
+  );
 
   if (!client) return (
           <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
@@ -42,9 +63,8 @@ JSON structure:
 
       const user = `Client: ${client.name}
 Industry: ${client.industry}
-Health: ${client.healthStatus} (${client.healthScore}/100)
-Client since: ${client.clientSince}
-Last contact: ${client.lastContact}
+Health: ${client.health_status} (${client.health_score}/100)
+Client since: ${client.client_since}
 Active projects: ${projects.filter(p => p.status === "active").map(p => p.name).join(", ") || "None"}
 Completed projects: ${projects.filter(p => p.status === "completed").length}
 Notes: ${client.notes}
@@ -99,12 +119,12 @@ Generate a practical client playbook.`;
               </div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>{client.name}</div>
-                <span className={getHealthBadgeClass(client.healthStatus)}>{getHealthLabel(client.healthStatus)}</span>
+                <span className={getHealthBadgeClass(client.health_status)}>{getHealthLabel(client.health_status)}</span>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { label: "Client Since", value: new Date(client.clientSince).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
+                { label: "Client Since", value: new Date(client.client_since).toLocaleDateString("en-ZA", { month: "short", year: "numeric" }) },
                 { label: "Total Projects", value: projects.length },
                 { label: "Active Now", value: projects.filter(p => p.status === "active").length },
                 { label: "Completed", value: projects.filter(p => p.status === "completed").length },

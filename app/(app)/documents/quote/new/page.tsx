@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients } from "@/lib/mockData";
+interface ClientOption { id: string; name: string; industry?: string; website?: string; contacts: { name: string; email: string }[] }
 
 interface LineItem {
   id: string;
@@ -20,6 +20,7 @@ const defaultItems: LineItem[] = [
 ];
 
 export default function NewQuotePage() {
+  const [clients, setClients] = useState<ClientOption[]>([]);
   const [clientId, setClientId] = useState("");
   const [title, setTitle] = useState("");
   const [validUntil, setValidUntil] = useState("");
@@ -29,6 +30,10 @@ export default function NewQuotePage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/db/clients").then(r => r.json()).then(d => setClients(d.clients || [])).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const prefill = (() => {
@@ -49,7 +54,7 @@ export default function NewQuotePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const selectedClient = mockClients.find(c => c.id === clientId);
+  const selectedClient = clients.find(c => c.id === clientId);
 
   const subtotal = items.reduce((s, i) => s + i.qty * i.rate, 0);
   const vat = includeVat ? subtotal * 0.15 : 0;
@@ -153,13 +158,13 @@ export default function NewQuotePage() {
                   value={clientId}
                   onChange={e => {
                     setClientId(e.target.value);
-                    const c = mockClients.find(cl => cl.id === e.target.value);
+                    const c = clients.find(cl => cl.id === e.target.value);
                     if (c && !title) setTitle(`Quote — ${c.name}`);
                   }}
                   style={{ background: "var(--bg-elevated)" }}
                 >
                   <option value="">Select a client...</option>
-                  {mockClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>

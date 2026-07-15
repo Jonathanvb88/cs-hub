@@ -1,10 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
-import { mockClients, mockProjects, getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
-import { mockCommunications, mockFollowUpsFull } from "@/lib/mockDataSprint2";
+import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
+
+interface Client {
+  id: string; name: string; industry: string | null; health_score: number
+  health_status: string; notes: string | null;
+}
+interface Project { id: string; client_id: string; name: string; status: string }
+interface Communication { id: string; client_id: string; subject: string; received_at: string }
+interface FollowUp { id: string; client_id: string; title: string; status: string }
 
 interface CoachBrief {
   relationshipSummary: string;
@@ -17,15 +24,37 @@ interface CoachBrief {
 
 export default function RelationshipCoachPage() {
   const { id } = useParams();
+  const [loadingData, setLoadingData] = useState(true);
+  const [client, setClient] = useState<Client | null>(null);
+  const [clientProjects, setClientProjects] = useState<Project[]>([]);
+  const [clientComms, setClientComms] = useState<Communication[]>([]);
+  const [clientFollowUps, setClientFollowUps] = useState<FollowUp[]>([]);
   const [loading, setLoading] = useState(false);
   const [brief, setBrief] = useState<CoachBrief | null>(null);
   const [meetingPurpose, setMeetingPurpose] = useState("quarterly_review");
   const [copied, setCopied] = useState(false);
 
-  const client = mockClients.find(c => c.id === id);
-  const clientProjects = mockProjects.filter(p => p.clientId === id);
-  const clientComms = mockCommunications.filter(c => c.clientId === id);
-  const clientFollowUps = mockFollowUpsFull.filter(f => f.clientId === id && f.status === "pending");
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/db/clients").then(r => r.json()),
+      fetch("/api/db/projects").then(r => r.json()),
+      fetch("/api/db/communications").then(r => r.json()),
+      fetch("/api/db/followups").then(r => r.json()),
+    ]).then(([clientsData, projectsData, commsData, followUpsData]) => {
+      setClient((clientsData.clients || []).find((c: Client) => c.id === id) || null);
+      setClientProjects((projectsData.projects || []).filter((p: Project) => p.client_id === id));
+      setClientComms((commsData.communications || []).filter((c: Communication) => c.client_id === id));
+      setClientFollowUps((followUpsData.followUps || followUpsData.followups || []).filter((f: FollowUp) => f.client_id === id && f.status === "pending"));
+    }).catch(() => {}).finally(() => setLoadingData(false));
+  }, [id]);
+
+  const lastContact = clientComms.length > 0
+    ? new Date(Math.max(...clientComms.map(c => new Date(c.received_at).getTime()))).toLocaleDateString("en-ZA")
+    : "No contact on record";
+
+  if (loadingData) return (
+    <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>Loading...</div>
+  );
 
   if (!client) return (
           <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>
@@ -55,8 +84,8 @@ Be specific and practical. South African business context applies.`;
 
       const context = `Client: ${client.name}
 Industry: ${client.industry}
-Health Score: ${client.healthScore}/100 (${client.healthStatus})
-Last Contact: ${client.lastContact}
+Health Score: ${client.health_score}/100 (${client.health_status})
+Last Contact: ${lastContact}
 Active Projects: ${clientProjects.filter(p => p.status === "active").map(p => p.name).join(", ") || "None"}
 Open Follow-ups: ${clientFollowUps.map(f => f.title).join(", ") || "None"}
 Recent emails: ${clientComms.map(c => c.subject).join(", ") || "None on record"}
@@ -142,9 +171,9 @@ Notes: ${client.notes}`;
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[
-                { label: "Health Score", value: <span style={{ color: getHealthColor(client.healthStatus), fontWeight: 700 }}>{client.healthScore}/100</span> },
-                { label: "Status", value: <span className={getHealthBadgeClass(client.healthStatus)}>{getHealthLabel(client.healthStatus)}</span> },
-                { label: "Last Contact", value: client.lastContact },
+                { label: "Health Score", value: <span style={{ color: getHealthColor(client.health_status), fontWeight: 700 }}>{client.health_score}/100</span> },
+                { label: "Status", value: <span className={getHealthBadgeClass(client.health_status)}>{getHealthLabel(client.health_status)}</span> },
+                { label: "Last Contact", value: lastContact },
                 { label: "Active Projects", value: clientProjects.filter(p => p.status === "active").length },
                 { label: "Open Follow-ups", value: clientFollowUps.length },
               ].map(row => (
