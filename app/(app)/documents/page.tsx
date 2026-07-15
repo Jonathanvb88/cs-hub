@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
+import UploadFileModal from "@/components/UploadFileModal";
 
 interface Document {
   id: string;
@@ -42,9 +43,10 @@ const typeColor: Record<string, string> = {
   uat: "var(--accent-amber)",
   proposal: "var(--accent-amber)",
   change_request: "var(--accent-red)",
+  attachment: "var(--text-muted)",
 };
 
-const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "POC", uat: "UAT Sign-off", change_request: "Change Request" };
+const typeLabel: Record<string, string> = { quote: "Quote", sow: "SOW", poc: "POC", uat: "UAT Sign-off", change_request: "Change Request", attachment: "File" };
 const typeRoute: Record<string, string> = { quote: "/documents/quote/new", sow: "/documents/sow/new", poc: "/documents/poc/new", uat: "/documents/uat/new", change_request: "/documents/change-request/new" };
 
 export default function DocumentsPage() {
@@ -57,6 +59,8 @@ export default function DocumentsPage() {
   const [search, setSearch] = useState("");
   const [pickerType, setPickerType] = useState<string | null>(null);
   const [showAddTemplate, setShowAddTemplate] = useState(false);
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [showUpload, setShowUpload] = useState(false);
 
   const updateStatus = async (id: string, status: string) => {
     setDocuments(p => p.map(d => d.id === id ? { ...d, status } : d));
@@ -96,7 +100,10 @@ export default function DocumentsPage() {
     } catch {}
   };
 
-  useEffect(() => { fetchDocuments(); fetchTemplates(); }, []);
+  useEffect(() => {
+    fetchDocuments(); fetchTemplates();
+    fetch("/api/db/clients").then(r => r.json()).then(d => setClients(d.clients || [])).catch(() => {});
+  }, []);
 
   const filtered = documents.filter(d => {
     const matchType = filter === "all" || d.type === filter;
@@ -147,12 +154,17 @@ export default function DocumentsPage() {
         subtitle="Quotes, SOWs, POCs and proposals — saved to database"
         actions={
           <div style={{ display: "flex", gap: 8 }}>
+            <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowUpload(true)}>
+              Upload a File
+            </button>
             <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowAddTemplate(true)}>
               + New Template
             </button>
           </div>
         }
       />
+
+      {showUpload && <UploadFileModal clients={clients} onClose={() => setShowUpload(false)} onUploaded={fetchDocuments} />}
 
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
         {error && (

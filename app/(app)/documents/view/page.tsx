@@ -27,7 +27,7 @@ const statusColor: Record<string, string> = {
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  quote: "Quote", sow: "Statement of Work", poc: "Proof of Concept", uat: "UAT Sign-off", change_request: "Change Request",
+  quote: "Quote", sow: "Statement of Work", poc: "Proof of Concept", uat: "UAT Sign-off", change_request: "Change Request", attachment: "Uploaded File",
 };
 
 function DocumentViewInner() {

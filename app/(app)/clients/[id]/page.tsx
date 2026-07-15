@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 import OneDriveFiles from "@/components/OneDriveFiles";
+import UploadFileModal from "@/components/UploadFileModal";
 
 interface Contact {
   id: string;
@@ -90,24 +91,42 @@ interface DocRow { id: string; title: string; type: string; version: string; sta
 function RealDocumentsTab({ clientId }: { clientId: string }) {
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [showUpload, setShowUpload] = useState(false);
+
+  const loadDocs = () => {
     fetch("/api/db/documents")
       .then(r => r.json())
       .then(d => setDocs((d.documents || []).filter((doc: DocRow) => doc.client_id === clientId)))
       .catch(() => setDocs([]))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadDocs();
+    fetch("/api/db/clients").then(r => r.json()).then(d => setClients(d.clients || [])).catch(() => {});
   }, [clientId]);
+
   if (loading) return <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 10 }}>{[1,2].map(i => <div key={i} className="skeleton" style={{ height: 56, borderRadius: 10 }} />)}</div>;
   if (docs.length === 0) return (
-    <div className="empty-state">
-      <div className="empty-state-icon"><svg width="20" height="20" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
-      <div className="empty-state-title">No documents yet</div>
-      <div className="empty-state-subtitle">Create a Quote, SOW, POC, or UAT Sign-off for this client.</div>
-      <Link href="/documents"><button className="btn-primary" style={{ fontSize: 12 }}>Create Document</button></Link>
-    </div>
+    <>
+      <div className="empty-state">
+        <div className="empty-state-icon"><svg width="20" height="20" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+        <div className="empty-state-title">No documents yet</div>
+        <div className="empty-state-subtitle">Create a Quote, SOW, POC, or UAT Sign-off - or upload something the client sent directly.</div>
+        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+          <Link href="/documents"><button className="btn-primary" style={{ fontSize: 12 }}>Create Document</button></Link>
+          <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowUpload(true)}>Upload a File</button>
+        </div>
+      </div>
+      {showUpload && <UploadFileModal clients={clients} defaultClientId={clientId} onClose={() => setShowUpload(false)} onUploaded={loadDocs} />}
+    </>
   );
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowUpload(true)}>Upload a File</button>
+      </div>
       {docs.map(doc => (
         <div key={doc.id} className="card" style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 18px" }}>
           <div style={{ flex: 1 }}>
@@ -119,6 +138,7 @@ function RealDocumentsTab({ clientId }: { clientId: string }) {
           <Link href={`/documents/view?id=${doc.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>View</button></Link>
         </div>
       ))}
+      {showUpload && <UploadFileModal clients={clients} defaultClientId={clientId} onClose={() => setShowUpload(false)} onUploaded={loadDocs} />}
     </div>
   );
 }
