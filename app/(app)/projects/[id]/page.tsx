@@ -154,8 +154,26 @@ export default function ProjectDetailPage() {
               placeholder="Add a project description..."
               value={description}
               onChange={e => setDescription(e.target.value)}
-              onBlur={() => { if (description !== (project?.description || "")) updateField("description", description); }}
             />
+            {description !== (project?.description || "") && (
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button
+                  className="btn-primary"
+                  style={{ fontSize: 12, opacity: savingDesc ? 0.7 : 1 }}
+                  disabled={savingDesc}
+                  onClick={async () => { setSavingDesc(true); await updateField("description", description); setSavingDesc(false); }}
+                >
+                  {savingDesc ? "Saving..." : "Save Description"}
+                </button>
+                <button
+                  className="btn-secondary"
+                  style={{ fontSize: 12 }}
+                  onClick={() => setDescription(project?.description || "")}
+                >
+                  Discard
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="card">
