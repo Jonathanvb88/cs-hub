@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/requireAuth";
 import { sql } from "@/lib/db";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAuth(req);
@@ -64,6 +65,10 @@ export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
     const { id, status, priority, name, assignedUserId, description, clientId } = body;
+
+    const before = await sql(`SELECT status, name FROM projects WHERE id = $1`, [id]);
+    const statusChanging = status && status !== before[0]?.status;
+
     const rows = await sql(
       `UPDATE projects
        SET status = COALESCE($2, status),
@@ -77,6 +82,12 @@ export async function PUT(req: NextRequest) {
        RETURNING *`,
       [id, status || null, priority || null, name || null, assignedUserId || null, description ?? null, clientId ?? null]
     );
+
+    if (statusChanging) {
+      const action = status === "completed" ? "project_closed" : "project_status_changed";
+      await logAudit(req, action, "project", id, rows[0]?.name, { from: before[0]?.status, to: status });
+    }
+
     return NextResponse.json({ project: rows[0] });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
