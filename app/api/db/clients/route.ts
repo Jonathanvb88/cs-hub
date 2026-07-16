@@ -33,18 +33,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       name, industry, website, productionUrl, uatUrl, notes, assignedCsm, assignedUserId,
-      contractValue, contractStartDate, renewalDate,
+      contractValue, contractStartDate, renewalDate, stage,
     } = body;
 
     const rows = await sql(
       `INSERT INTO clients
-        (name, industry, website, production_url, uat_url, notes, assigned_csm, assigned_user_id, client_since, contract_value, contract_start_date, renewal_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_DATE, $9, $10, $11)
+        (name, industry, website, production_url, uat_url, notes, assigned_csm, assigned_user_id, client_since, contract_value, contract_start_date, renewal_date, stage)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_DATE, $9, $10, $11, $12)
        RETURNING *`,
       [
         name, industry || null, website || null, productionUrl || null, uatUrl || null, notes || null,
         assignedCsm || "Jonathan", assignedUserId || null,
         contractValue || null, contractStartDate || null, renewalDate || null,
+        stage || "active",
       ]
     );
     return NextResponse.json({ client: rows[0] });
@@ -60,7 +61,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const {
       id, name, industry, notes, healthScore, healthStatus, assignedUserId,
-      contractValue, contractStartDate, renewalDate,
+      contractValue, contractStartDate, renewalDate, stage,
     } = body;
     const rows = await sql(
       `UPDATE clients
@@ -74,12 +75,13 @@ export async function PUT(req: NextRequest) {
            contract_start_date = COALESCE($9, contract_start_date),
            renewal_date = COALESCE($10, renewal_date),
            renewal_notified_at = CASE WHEN $10 IS NOT NULL THEN NULL ELSE renewal_notified_at END,
+           stage = COALESCE($11, stage),
            updated_at = now()
        WHERE id = $1
        RETURNING *`,
       [
         id, name || null, industry || null, notes || null, healthScore ?? null, healthStatus || null, assignedUserId || null,
-        contractValue ?? null, contractStartDate || null, renewalDate || null,
+        contractValue ?? null, contractStartDate || null, renewalDate || null, stage || null,
       ]
     );
     return NextResponse.json({ client: rows[0] });
