@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { mockFollowUps, mockClients, getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
+import { getHealthBadgeClass, getHealthLabel } from "@/lib/mockData";
 
 interface Communication {
   id: string;
@@ -26,11 +26,18 @@ interface FollowUp {
   status: string;
 }
 
+interface ClientRow {
+  id: string;
+  name: string;
+  health_status?: string;
+  health_score?: number;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [comms, setComms] = useState<Communication[]>([]);
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
-  const [clients, setClients] = useState<typeof mockClients>([]);
+  const [clients, setClients] = useState<ClientRow[]>([]);
   const [loadingComms, setLoadingComms] = useState(true);
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [events, setEvents] = useState<{ id: string; subject: string; start: { dateTime: string }; onlineMeeting?: { joinUrl: string } }[]>([]);
@@ -57,7 +64,7 @@ export default function DashboardPage() {
     fetch("/api/db/clients")
       .then(r => r.json())
       .then(d => setClients(d.clients || []))
-      .catch(() => setClients(mockClients));
+      .catch(() => setClients([]));
 
     // Load real Microsoft 365 calendar events for today
     fetch("/api/graph/calendar")
@@ -71,8 +78,8 @@ export default function DashboardPage() {
   }, []);
 
   const pendingComms = comms.filter(c => !dismissed.includes(c.id) && c.action_required && c.action_status === "pending");
-  const atRiskClients = clients.filter((c: { health_status?: string; healthStatus?: string }) =>
-    (c.health_status || c.healthStatus) === "at_risk" || (c.health_status || c.healthStatus) === "quiet"
+  const atRiskClients = clients.filter((c: ClientRow) =>
+    c.health_status === "at_risk" || c.health_status === "quiet"
   );
 
   const todayStr = new Date().toISOString().split("T")[0];
@@ -90,11 +97,11 @@ export default function DashboardPage() {
     ...pendingComms.slice(0, 5).map((c): FocusItem => ({
       key: `comm-${c.id}`, icon: "blue", label: c.subject, sub: `${c.client_name || "—"} · Needs a response`, href: "/communications", weight: 60,
     })),
-    ...atRiskClients.slice(0, 5).map((c: Record<string, unknown>): FocusItem => ({
+    ...atRiskClients.slice(0, 5).map((c: ClientRow): FocusItem => ({
       key: `client-${c.id}`,
       icon: "red",
-      label: c.name as string,
-      sub: `${(c.health_status || c.healthStatus) === "at_risk" ? "At risk" : "Gone quiet"} · Health score ${c.health_score || c.healthScore}`,
+      label: c.name,
+      sub: `${c.health_status === "at_risk" ? "At risk" : "Gone quiet"} · Health score ${c.health_score}`,
       href: `/clients/${c.id}`,
       weight: 40,
     })),
@@ -164,7 +171,7 @@ export default function DashboardPage() {
         {/* Quick Stats — real data */}
         <div className="stat-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {[
-            { label: "Active Clients", value: clients.length || mockClients.length, color: "var(--accent-blue)", href: "/clients", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
+            { label: "Active Clients", value: clients.length, color: "var(--accent-blue)", href: "/clients", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
             { label: "Comms to Action", value: pendingComms.length, color: "var(--accent-amber)", href: "/communications", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
             { label: "Follow-ups Due", value: followUps.length, color: "var(--accent-green)", href: "/followups", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
             { label: "At Risk / Quiet", value: atRiskClients.length, color: "var(--accent-red)", href: "/health", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
@@ -358,20 +365,20 @@ export default function DashboardPage() {
               <Link href="/health" style={{ fontSize: 12, color: "var(--accent-green)", fontWeight: 500, textDecoration: "none" }}>View Health Dashboard →</Link>
             </div>
             <div className="three-col-layout" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
-              {atRiskClients.slice(0, 3).map((client: Record<string, unknown>, i: number) => (
+              {atRiskClients.slice(0, 3).map((client: ClientRow, i: number) => (
                 <div
-                  key={client.id as string}
+                  key={client.id}
                   style={{ padding: "16px 20px", borderRight: i < 2 ? "1px solid var(--border)" : "none", cursor: "pointer", transition: "background 0.1s" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   onClick={() => router.push(`/clients/${client.id}`)}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{client.name as string}</span>
-                    <span className={getHealthBadgeClass((client.health_status || client.healthStatus) as string)}>{getHealthLabel((client.health_status || client.healthStatus) as string)}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{client.name}</span>
+                    <span className={getHealthBadgeClass(client.health_status as string)}>{getHealthLabel(client.health_status as string)}</span>
                   </div>
                   <div style={{ height: 4, borderRadius: 2, background: "var(--bg-elevated)", marginBottom: 12 }}>
-                    <div style={{ height: "100%", borderRadius: 2, width: `${client.health_score || client.healthScore}%`, background: (client.health_status || client.healthStatus) === "at_risk" ? "var(--accent-red)" : "var(--accent-amber)" }} />
+                    <div style={{ height: "100%", borderRadius: 2, width: `${client.health_score}%`, background: client.health_status === "at_risk" ? "var(--accent-red)" : "var(--accent-amber)" }} />
                   </div>
                   <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
                     <Link href={`/clients/${client.id}`}><button className="btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}>Open Profile</button></Link>
