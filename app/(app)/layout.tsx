@@ -9,6 +9,7 @@ import { ToastProvider } from "@/components/Toast";
 import { NavProvider } from "@/lib/navContext";
 import InstallBanner from "@/components/InstallBanner";
 import DevBar from "@/components/DevBar";
+import AttendanceTracker from "@/components/AttendanceTracker";
 import { createContext, useContext } from "react";
 
 // Context so any Header deep in the tree can open the drawer
@@ -42,6 +43,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
         <MobileBottomNav />
         <InstallBanner />
         <DevBar />
+        <AttendanceTracker />
       </div>
     </DrawerContext.Provider>
   );
