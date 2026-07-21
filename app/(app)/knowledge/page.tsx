@@ -4,16 +4,10 @@ import OneDriveFiles from "@/components/OneDriveFiles";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 
-const mockAssets = [
-  { id: "a1", clientId: "1", clientName: "ABC Retail Group", type: "journey_url", label: "Black Friday Journey 2025", url: "https://journey.abcretail.co.za/bf2025", notes: "Full loyalty journey, tested and live", tags: ["black-friday", "loyalty"], createdAt: "2025-11-01" },
-  { id: "a2", clientId: "1", clientName: "ABC Retail Group", type: "import_template", label: "Customer Import Template v3", url: "", notes: "Excel template, 12 columns, includes loyalty tier", tags: ["import", "excel"], createdAt: "2025-08-15" },
-  { id: "a3", clientId: "1", clientName: "ABC Retail Group", type: "email_template", label: "Points Earned Notification", url: "", notes: "HTML email template, branded, mobile responsive", tags: ["email", "notifications"], createdAt: "2025-09-10" },
-  { id: "a4", clientId: "1", clientName: "ABC Retail Group", type: "test_cases", label: "Black Friday Test Suite", url: "", notes: "100 test cases covering upload, notifications, redemption", tags: ["testing", "black-friday"], createdAt: "2025-10-20" },
-  { id: "a5", clientId: "4", clientName: "Apex Bank Limited", type: "journey_url", label: "Digital Banking Dashboard v2", url: "https://digital.apexbank.co.za/dashboard", notes: "Production URL for v2 — v3 in development", tags: ["dashboard", "banking"], createdAt: "2025-12-01" },
-  { id: "a6", clientId: "4", clientName: "Apex Bank Limited", type: "sow", label: "SOW — Mobile App Phase 1", url: "", notes: "Signed SOW, R280,000, delivered Q4 2025", tags: ["sow", "mobile"], createdAt: "2025-07-01" },
-  { id: "a7", clientId: "2", clientName: "MedPharm SA", type: "sow", label: "SOW — POPIA Compliance Module", url: "", notes: "Signed and delivered. Client signed off June 2026.", tags: ["sow", "popia"], createdAt: "2026-04-10" },
-  { id: "a8", clientId: "1", clientName: "ABC Retail Group", type: "lessons_learned", label: "Black Friday 2025 Retrospective", url: "", notes: "Key lesson: start bulk import testing 3 weeks earlier. Notification delays caused by queue backlog.", tags: ["lessons", "black-friday"], createdAt: "2025-12-10" },
-];
+interface KnowledgeAsset {
+  id: string; clientId: string; clientName: string; type: string
+  label: string; url: string; notes: string; tags: string[]; createdAt: string;
+}
 
 const typeConfig: Record<string, { label: string; color: string; icon: string }> = {
   journey_url: { label: "Journey URL", color: "var(--accent-blue)", icon: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" },
@@ -30,9 +24,9 @@ export default function KnowledgePage() {
   const [search, setSearch] = useState("");
   const [clientFilter, setClientFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [selected, setSelected] = useState<typeof mockAssets[0] | null>(null);
+  const [selected, setSelected] = useState<KnowledgeAsset | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [assets, setAssets] = useState(mockAssets);
+  const [assets, setAssets] = useState<KnowledgeAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [clients, setClients] = useState<ClientOption[]>([]);
@@ -207,6 +201,11 @@ export default function KnowledgePage() {
           </div>
 
           {/* Asset grid */}
+          {loading ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+              {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 120, borderRadius: 10 }} />)}
+            </div>
+          ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
             {filtered.map(asset => {
               const cfg = typeConfig[asset.type] || { label: asset.type, color: "var(--accent-blue)", icon: "" };
@@ -238,18 +237,19 @@ export default function KnowledgePage() {
                 </div>
               );
             })}
-            {filtered.length === 0 && (
+            {!loading && filtered.length === 0 && (
               <div className="empty-state" style={{ gridColumn: "1/-1" }}>
                 <div className="empty-state-icon">
                   <svg width="22" height="22" fill="none" stroke="var(--text-muted)" strokeWidth={1.8} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                <div className="empty-state-title">No assets match your search</div>
-                <div className="empty-state-subtitle">Try adjusting your filters or search terms.</div>
+                <div className="empty-state-title">{assets.length === 0 ? "No knowledge assets yet" : "No assets match your search"}</div>
+                <div className="empty-state-subtitle">{assets.length === 0 ? "Add your first client-specific asset above." : "Try adjusting your filters or search terms."}</div>
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Asset detail panel */}
