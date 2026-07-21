@@ -46,6 +46,7 @@ export const config = {
     "/reports/:path*",
     "/analytics/:path*",
     "/team/:path*",
+    "/attendance/:path*",
     "/search/:path*",
     "/inbox/:path*",
     "/profile/:path*",
