@@ -1,0 +1,244 @@
+"use client";
+import { useState, useEffect, useCallback } from "react";
+import Header from "@/components/layout/Header";
+import { useToast } from "@/components/Toast";
+
+interface AttendanceRecord {
+  id: string;
+  user_id: string;
+  user_name: string;
+  avatar_initials: string;
+  date: string;
+  clock_in: string | null;
+  clock_out: string | null;
+  last_activity_at: string | null;
+  status: string;
+  is_manual: boolean;
+  notes: string | null;
+  hours_worked: number | null;
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  present: "Present", absent: "Absent", leave: "Leave", half_day: "Half Day",
+};
+const STATUS_BADGE: Record<string, string> = {
+  present: "badge-green", absent: "badge-red", leave: "badge-amber", half_day: "badge-blue",
+};
+
+function monthBounds(offset: number) {
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  const from = new Date(target.getFullYear(), target.getMonth(), 1);
+  const to = new Date(target.getFullYear(), target.getMonth() + 1, 0);
+  return {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10),
+    label: target.toLocaleDateString("en-ZA", { month: "long", year: "numeric" }),
+  };
+}
+
+function fmtTime(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" });
+}
+
+export default function AttendancePage() {
+  const { showToast } = useToast();
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
+  const [isOwner, setIsOwner] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [viewUserId, setViewUserId] = useState("");
+  const [monthOffset, setMonthOffset] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<AttendanceRecord | null>(null);
+  const [fDate, setFDate] = useState(new Date().toISOString().slice(0, 10));
+  const [fClockIn, setFClockIn] = useState("");
+  const [fClockOut, setFClockOut] = useState("");
+  const [fStatus, setFStatus] = useState("present");
+  const [fNotes, setFNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const { from, to, label } = monthBounds(monthOffset);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    const params = new URLSearchParams({ from, to });
+    if (viewUserId) params.set("userId", viewUserId);
+    fetch(`/api/db/attendance?${params}`)
+      .then(r => r.json())
+      .then(d => {
+        setRecords(d.records || []);
+        setIsOwner(d.isOwner || false);
+        setCurrentUserId(d.currentUserId || "");
+        setUsers(d.users || []);
+      })
+      .catch(() => setRecords([]))
+      .finally(() => setLoading(false));
+  }, [from, to, viewUserId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openNewEntry = () => {
+    setEditing(null);
+    setFDate(new Date().toISOString().slice(0, 10));
+    setFClockIn(""); setFClockOut(""); setFStatus("present"); setFNotes("");
+    setShowModal(true);
+  };
+
+  const openEdit = (r: AttendanceRecord) => {
+    setEditing(r);
+    setFDate(r.date);
+    setFClockIn(r.clock_in ? new Date(r.clock_in).toISOString().slice(11, 16) : "");
+    setFClockOut(r.clock_out ? new Date(r.clock_out).toISOString().slice(11, 16) : "");
+    setFStatus(r.status);
+    setFNotes(r.notes || "");
+    setShowModal(true);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const toISO = (time: string) => time ? new Date(`${fDate}T${time}:00`).toISOString() : null;
+      const res = await fetch("/api/db/attendance", {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: editing?.user_id || viewUserId || undefined,
+          date: fDate, clockIn: toISO(fClockIn), clockOut: toISO(fClockOut),
+          status: fStatus, notes: fNotes,
+        }),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Save failed"); }
+      showToast("Attendance saved", "success");
+      setShowModal(false);
+      load();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Couldn't save", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const totalHours = records.reduce((s, r) => s + (Number(r.hours_worked) || 0), 0);
+  const daysPresent = records.filter(r => r.status === "present").length;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const today = records.find(r => r.date === todayStr && r.user_id === (viewUserId || currentUserId));
+
+  return (
+    <>
+      <Header
+        title="Attendance Register"
+        subtitle="Auto-tracked from real app activity, editable when you need to correct it"
+        actions={<button className="btn-primary" style={{ fontSize: 12 }} onClick={openNewEntry}>+ Manual Entry</button>}
+      />
+
+      <div style={{ padding: 24 }}>
+        <div className="stat-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 20 }}>
+          <div className="stat-card card">
+            <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 6 }}>Hours This Month</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>{totalHours.toFixed(1)}</div>
+          </div>
+          <div className="stat-card card">
+            <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 6 }}>Days Present</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: "var(--accent-green)" }}>{daysPresent}</div>
+          </div>
+          <div className="stat-card card">
+            <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 6 }}>Today</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: today ? "var(--accent-green)" : "var(--text-muted)" }}>
+              {today ? `Since ${fmtTime(today.clock_in)}${today.is_manual ? " (manual)" : ""}` : "Not started yet"}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+          <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setMonthOffset(o => o - 1)}>← Prev</button>
+          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", minWidth: 140, textAlign: "center" }}>{label}</div>
+          <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setMonthOffset(o => o + 1)} disabled={monthOffset >= 0}>Next →</button>
+          {isOwner && (
+            <select className="input" style={{ maxWidth: 200, background: "var(--bg-elevated)", marginLeft: "auto" }} value={viewUserId} onChange={e => setViewUserId(e.target.value)}>
+              <option value="">My attendance</option>
+              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </select>
+          )}
+        </div>
+
+        {loading ? (
+          <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>Loading...</div>
+        ) : records.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-title">No attendance recorded for {label}</div>
+            <div className="empty-state-subtitle">Records appear automatically as the app is used, or add one manually.</div>
+          </div>
+        ) : (
+          <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+            <div className="table-scroll-wrapper">
+              <div style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 90px 110px 1fr 70px", padding: "10px 20px", background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)", minWidth: 780 }}>
+                {["Date", "Person", "In", "Out", "Hours", "Status", "Notes", ""].map(h => (
+                  <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
+                ))}
+              </div>
+              {records.map(r => (
+                <div key={r.id} style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 90px 110px 1fr 70px", padding: "10px 20px", borderBottom: "1px solid var(--border)", alignItems: "center", minWidth: 780 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{new Date(r.date).toLocaleDateString("en-ZA", { day: "2-digit", month: "short" })}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{r.user_name}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{fmtTime(r.clock_in)}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{r.clock_out ? fmtTime(r.clock_out) : r.date === todayStr ? "Active" : "—"}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{r.hours_worked ? Number(r.hours_worked).toFixed(1) : "—"}</div>
+                  <div><span className={`badge ${STATUS_BADGE[r.status] || "badge-gray"}`} style={{ fontSize: 10 }}>{STATUS_LABEL[r.status] || r.status}{r.is_manual && " ✎"}</span></div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.notes || "—"}</div>
+                  <button className="btn-secondary" style={{ fontSize: 10, padding: "3px 8px" }} onClick={() => openEdit(r)}>Edit</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {showModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 16, width: "100%", maxWidth: 420, boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "18px 20px", borderBottom: "1px solid var(--border)" }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>{editing ? "Edit Attendance" : "Manual Entry"}</h3>
+              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 18, cursor: "pointer" }}>×</button>
+            </div>
+            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Date</label>
+                <input className="input" type="date" value={fDate} onChange={e => setFDate(e.target.value)} disabled={!!editing} />
+              </div>
+              <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Clock In</label>
+                  <input className="input" type="time" value={fClockIn} onChange={e => setFClockIn(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Clock Out</label>
+                  <input className="input" type="time" value={fClockOut} onChange={e => setFClockOut(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Status</label>
+                <select className="input" value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="present">Present</option>
+                  <option value="absent">Absent</option>
+                  <option value="leave">Leave</option>
+                  <option value="half_day">Half Day</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Notes</label>
+                <textarea className="input" rows={2} value={fNotes} onChange={e => setFNotes(e.target.value)} style={{ resize: "vertical" }} placeholder="Optional" />
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancel</button>
+                <button className="btn-primary" style={{ flex: 1, opacity: saving ? 0.7 : 1 }} onClick={save} disabled={saving}>{saving ? "Saving..." : "Save"}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
