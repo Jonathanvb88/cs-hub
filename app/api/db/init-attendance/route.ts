@@ -23,6 +23,10 @@ export async function GET(req: NextRequest) {
         UNIQUE(user_id, date)
       )
     `);
+    await sql(`ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS overtime_hours NUMERIC(5,2) DEFAULT 0`);
+    await sql(`ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS project_id UUID REFERENCES projects(id)`);
+    await sql(`ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS break_minutes NUMERIC(5,2) DEFAULT 0`);
+    await sql(`ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS location VARCHAR(255)`);
     await sql(`CREATE INDEX IF NOT EXISTS idx_attendance_user_date ON attendance_records(user_id, date)`);
 
     return NextResponse.json({ success: true, message: "attendance_records table created" });
