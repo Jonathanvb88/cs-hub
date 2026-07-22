@@ -71,20 +71,38 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "You can only edit your own attendance" }, { status: 403 });
     }
 
-    const rows = await sql(
-      `INSERT INTO attendance_records (user_id, date, clock_in, clock_out, status, notes, is_manual, edited_by)
-       VALUES ($1, $2, $3, $4, $5, $6, true, $7)
-       ON CONFLICT (user_id, date) DO UPDATE SET
-         clock_in = COALESCE($3, attendance_records.clock_in),
-         clock_out = $4,
-         status = COALESCE($5, attendance_records.status),
-         notes = COALESCE($6, attendance_records.notes),
-         is_manual = true,
-         edited_by = $7,
-         updated_at = now()
-       RETURNING *`,
-      [targetUserId, date, clockIn || null, clockOut || null, status || null, notes ?? null, me.id]
+    // Explicit existence check rather than relying on ON CONFLICT - more
+    // robust, and lets clock_out use COALESCE properly so leaving it blank
+    // while editing (e.g. just changing the status) doesn't wipe out an
+    // existing clock-out time.
+    const existing = await sql(
+      `SELECT id FROM attendance_records WHERE user_id = $1 AND date = $2`,
+      [targetUserId, date]
     );
+
+    let rows;
+    if (existing.length > 0) {
+      rows = await sql(
+        `UPDATE attendance_records SET
+           clock_in = COALESCE($2, clock_in),
+           clock_out = COALESCE($3, clock_out),
+           status = COALESCE($4, status),
+           notes = COALESCE($5, notes),
+           is_manual = true,
+           edited_by = $6,
+           updated_at = now()
+         WHERE id = $1
+         RETURNING *`,
+        [existing[0].id, clockIn || null, clockOut || null, status || null, notes ?? null, me.id]
+      );
+    } else {
+      rows = await sql(
+        `INSERT INTO attendance_records (user_id, date, clock_in, clock_out, status, notes, is_manual, edited_by)
+         VALUES ($1, $2, $3, $4, $5, $6, true, $7)
+         RETURNING *`,
+        [targetUserId, date, clockIn || null, clockOut || null, status || "present", notes ?? null, me.id]
+      );
+    }
 
     await logAudit(req, "attendance_edited", "attendance", rows[0]?.id, `${date} - ${status || "updated"}`, { targetUserId, editedBy: me.name });
 
