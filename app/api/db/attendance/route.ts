@@ -28,10 +28,11 @@ export async function GET(req: NextRequest) {
     const scopedUserId = me.is_developer ? requestedUserId : me.id;
 
     let query = `
-      SELECT a.*, u.name as user_name, u.avatar_initials,
-        EXTRACT(EPOCH FROM (COALESCE(a.clock_out, a.last_activity_at, a.clock_in) - a.clock_in)) / 3600 as hours_worked
+      SELECT a.*, u.name as user_name, u.avatar_initials, p.name as project_name,
+        GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(a.clock_out, a.last_activity_at, a.clock_in) - a.clock_in)) / 3600 - COALESCE(a.break_minutes, 0) / 60) as hours_worked
       FROM attendance_records a
       JOIN users u ON a.user_id = u.id
+      LEFT JOIN projects p ON a.project_id = p.id
       WHERE 1=1`;
     const params: string[] = [];
     if (scopedUserId) { params.push(scopedUserId); query += ` AND a.user_id = $${params.length}`; }
@@ -47,7 +48,10 @@ export async function GET(req: NextRequest) {
       users = userRows as { id: string; name: string }[];
     }
 
-    return NextResponse.json({ records, isOwner: me.is_developer, currentUserId: me.id, users });
+    const projectRows = await sql(`SELECT id, name FROM projects WHERE deleted_at IS NULL AND status != 'completed' ORDER BY name ASC`);
+    const projects = projectRows as { id: string; name: string }[];
+
+    return NextResponse.json({ records, isOwner: me.is_developer, currentUserId: me.id, users, projects });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
@@ -61,7 +65,7 @@ export async function PUT(req: NextRequest) {
     if (!me) return NextResponse.json({ error: "No session" }, { status: 401 });
 
     const body = await req.json();
-    const { userId, date, clockIn, clockOut, status, notes } = body;
+    const { userId, date, clockIn, clockOut, status, notes, overtimeHours, projectId, breakMinutes, location } = body;
     if (!date) return NextResponse.json({ error: "date is required" }, { status: 400 });
 
     // Editing someone else's record requires being the account owner -
@@ -88,19 +92,23 @@ export async function PUT(req: NextRequest) {
            clock_out = COALESCE($3, clock_out),
            status = COALESCE($4, status),
            notes = COALESCE($5, notes),
+           overtime_hours = COALESCE($6, overtime_hours),
+           project_id = CASE WHEN $7 = '' THEN NULL WHEN $7 IS NOT NULL THEN $7::uuid ELSE project_id END,
+           break_minutes = COALESCE($8, break_minutes),
+           location = COALESCE($9, location),
            is_manual = true,
-           edited_by = $6,
+           edited_by = $10,
            updated_at = now()
          WHERE id = $1
          RETURNING *`,
-        [existing[0].id, clockIn || null, clockOut || null, status || null, notes ?? null, me.id]
+        [existing[0].id, clockIn || null, clockOut || null, status || null, notes ?? null, overtimeHours ?? null, projectId ?? null, breakMinutes ?? null, location ?? null, me.id]
       );
     } else {
       rows = await sql(
-        `INSERT INTO attendance_records (user_id, date, clock_in, clock_out, status, notes, is_manual, edited_by)
-         VALUES ($1, $2, $3, $4, $5, $6, true, $7)
+        `INSERT INTO attendance_records (user_id, date, clock_in, clock_out, status, notes, overtime_hours, project_id, break_minutes, location, is_manual, edited_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, true, $11)
          RETURNING *`,
-        [targetUserId, date, clockIn || null, clockOut || null, status || "present", notes ?? null, me.id]
+        [targetUserId, date, clockIn || null, clockOut || null, status || "present", notes ?? null, overtimeHours || 0, projectId || null, breakMinutes || 0, location || null, me.id]
       );
     }
 
