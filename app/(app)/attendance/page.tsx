@@ -25,21 +25,56 @@ const STATUS_BADGE: Record<string, string> = {
   present: "badge-green", absent: "badge-red", leave: "badge-amber", half_day: "badge-blue",
 };
 
+// South Africa is UTC+2 year-round (no daylight saving), so this is a
+// fixed offset rather than something that needs a timezone library.
+const SAST_TZ = "Africa/Johannesburg";
+
+// Returns "YYYY-MM-DD" for what the date actually is in SAST right now,
+// regardless of what timezone the device itself is set to.
+function getSASTDateString(d: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: SAST_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
+// Takes a "HH:MM" value from a <input type="time"> and treats it as SAST
+// (not the browser's local time, which might not be SAST at all), then
+// converts to a proper UTC instant for storage.
+function sastTimeToISO(dateStr: string, time: string): string | null {
+  if (!time) return null;
+  return new Date(`${dateStr}T${time}:00+02:00`).toISOString();
+}
+
+// Extracts "HH:MM" in SAST from a stored UTC timestamp, for pre-filling
+// the edit form - deliberately not just slicing .toISOString(), which
+// would show the UTC hour instead.
+function isoToSASTTimeInput(iso: string | null): string {
+  if (!iso) return "";
+  return new Intl.DateTimeFormat("en-GB", { timeZone: SAST_TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso));
+}
+
 function monthBounds(offset: number) {
   const now = new Date();
   const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
   const from = new Date(target.getFullYear(), target.getMonth(), 1);
   const to = new Date(target.getFullYear(), target.getMonth() + 1, 0);
   return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
+    from: getSASTDateString(from),
+    to: getSASTDateString(to),
     label: target.toLocaleDateString("en-ZA", { month: "long", year: "numeric" }),
   };
 }
 
 function fmtTime(iso: string | null) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("en-ZA", { timeZone: SAST_TZ, hour: "2-digit", minute: "2-digit" });
+}
+
+// Formats a plain "YYYY-MM-DD" value directly, without going through
+// Date parsing at all - avoids the UTC-midnight-then-shift-to-local bug
+// that plain-date columns are prone to in timezones behind UTC.
+function fmtDateOnly(dateStr: string) {
+  const [, month, day] = dateStr.split("-");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${day} ${months[parseInt(month, 10) - 1]}`;
 }
 
 export default function AttendancePage() {
@@ -54,7 +89,7 @@ export default function AttendancePage() {
 
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<AttendanceRecord | null>(null);
-  const [fDate, setFDate] = useState(new Date().toISOString().slice(0, 10));
+  const [fDate, setFDate] = useState(getSASTDateString());
   const [fClockIn, setFClockIn] = useState("");
   const [fClockOut, setFClockOut] = useState("");
   const [fStatus, setFStatus] = useState("present");
@@ -83,7 +118,7 @@ export default function AttendancePage() {
 
   const openNewEntry = () => {
     setEditing(null);
-    setFDate(new Date().toISOString().slice(0, 10));
+    setFDate(getSASTDateString());
     setFClockIn(""); setFClockOut(""); setFStatus("present"); setFNotes("");
     setShowModal(true);
   };
@@ -91,8 +126,8 @@ export default function AttendancePage() {
   const openEdit = (r: AttendanceRecord) => {
     setEditing(r);
     setFDate(r.date);
-    setFClockIn(r.clock_in ? new Date(r.clock_in).toISOString().slice(11, 16) : "");
-    setFClockOut(r.clock_out ? new Date(r.clock_out).toISOString().slice(11, 16) : "");
+    setFClockIn(isoToSASTTimeInput(r.clock_in));
+    setFClockOut(isoToSASTTimeInput(r.clock_out));
     setFStatus(r.status);
     setFNotes(r.notes || "");
     setShowModal(true);
@@ -101,12 +136,11 @@ export default function AttendancePage() {
   const save = async () => {
     setSaving(true);
     try {
-      const toISO = (time: string) => time ? new Date(`${fDate}T${time}:00`).toISOString() : null;
       const res = await fetch("/api/db/attendance", {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: editing?.user_id || viewUserId || undefined,
-          date: fDate, clockIn: toISO(fClockIn), clockOut: toISO(fClockOut),
+          date: fDate, clockIn: sastTimeToISO(fDate, fClockIn), clockOut: sastTimeToISO(fDate, fClockOut),
           status: fStatus, notes: fNotes,
         }),
       });
@@ -123,7 +157,7 @@ export default function AttendancePage() {
 
   const totalHours = records.reduce((s, r) => s + (Number(r.hours_worked) || 0), 0);
   const daysPresent = records.filter(r => r.status === "present").length;
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getSASTDateString();
   const today = records.find(r => r.date === todayStr && r.user_id === (viewUserId || currentUserId));
 
   return (
@@ -181,7 +215,7 @@ export default function AttendancePage() {
               </div>
               {records.map(r => (
                 <div key={r.id} style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 90px 110px 1fr 70px", padding: "10px 20px", borderBottom: "1px solid var(--border)", alignItems: "center", minWidth: 780 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{new Date(r.date).toLocaleDateString("en-ZA", { day: "2-digit", month: "short" })}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{fmtDateOnly(r.date)}</div>
                   <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{r.user_name}</div>
                   <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{fmtTime(r.clock_in)}</div>
                   <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{r.clock_out ? fmtTime(r.clock_out) : r.date === todayStr ? "Active" : "—"}</div>
