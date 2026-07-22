@@ -16,13 +16,18 @@ interface AttendanceRecord {
   is_manual: boolean;
   notes: string | null;
   hours_worked: number | null;
+  overtime_hours: number | null;
+  project_id: string | null;
+  project_name: string | null;
+  break_minutes: number | null;
+  location: string | null;
 }
 
 const STATUS_LABEL: Record<string, string> = {
-  present: "Present", absent: "Absent", leave: "Leave", half_day: "Half Day",
+  present: "Present", absent: "Absent", leave: "Leave", half_day: "Half Day", overtime: "Overtime",
 };
 const STATUS_BADGE: Record<string, string> = {
-  present: "badge-green", absent: "badge-red", leave: "badge-amber", half_day: "badge-blue",
+  present: "badge-green", absent: "badge-red", leave: "badge-amber", half_day: "badge-blue", overtime: "badge-purple",
 };
 
 // South Africa is UTC+2 year-round (no daylight saving), so this is a
@@ -94,6 +99,11 @@ export default function AttendancePage() {
   const [fClockOut, setFClockOut] = useState("");
   const [fStatus, setFStatus] = useState("present");
   const [fNotes, setFNotes] = useState("");
+  const [fOvertimeHours, setFOvertimeHours] = useState("");
+  const [fProjectId, setFProjectId] = useState("");
+  const [fBreakMinutes, setFBreakMinutes] = useState("");
+  const [fLocation, setFLocation] = useState("");
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
 
   const { from, to, label } = monthBounds(monthOffset);
@@ -105,10 +115,16 @@ export default function AttendancePage() {
     fetch(`/api/db/attendance?${params}`)
       .then(r => r.json())
       .then(d => {
-        setRecords(d.records || []);
+        // The database driver returns DATE columns as full timestamp
+        // strings ("2026-07-22T00:00:00.000Z"), not plain "YYYY-MM-DD" -
+        // normalize once here so every downstream comparison and display
+        // can safely assume a clean date string.
+        const normalized = (d.records || []).map((r: AttendanceRecord) => ({ ...r, date: r.date.slice(0, 10) }));
+        setRecords(normalized);
         setIsOwner(d.isOwner || false);
         setCurrentUserId(d.currentUserId || "");
         setUsers(d.users || []);
+        setProjects(d.projects || []);
       })
       .catch(() => setRecords([]))
       .finally(() => setLoading(false));
@@ -119,7 +135,8 @@ export default function AttendancePage() {
   const openNewEntry = () => {
     setEditing(null);
     setFDate(getSASTDateString());
-    setFClockIn(""); setFClockOut(""); setFStatus("present"); setFNotes("");
+    setFClockIn(""); setFClockOut(""); setFStatus("present"); setFNotes(""); setFOvertimeHours("");
+    setFProjectId(""); setFBreakMinutes(""); setFLocation("");
     setShowModal(true);
   };
 
@@ -130,6 +147,10 @@ export default function AttendancePage() {
     setFClockOut(isoToSASTTimeInput(r.clock_out));
     setFStatus(r.status);
     setFNotes(r.notes || "");
+    setFOvertimeHours(r.overtime_hours ? String(r.overtime_hours) : "");
+    setFProjectId(r.project_id || "");
+    setFBreakMinutes(r.break_minutes ? String(r.break_minutes) : "");
+    setFLocation(r.location || "");
     setShowModal(true);
   };
 
@@ -141,7 +162,8 @@ export default function AttendancePage() {
         body: JSON.stringify({
           userId: editing?.user_id || viewUserId || undefined,
           date: fDate, clockIn: sastTimeToISO(fDate, fClockIn), clockOut: sastTimeToISO(fDate, fClockOut),
-          status: fStatus, notes: fNotes,
+          status: fStatus, notes: fNotes, overtimeHours: fOvertimeHours ? parseFloat(fOvertimeHours) : null,
+          projectId: fProjectId, breakMinutes: fBreakMinutes ? parseFloat(fBreakMinutes) : null, location: fLocation,
         }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Save failed"); }
@@ -208,19 +230,23 @@ export default function AttendancePage() {
         ) : (
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
             <div className="table-scroll-wrapper">
-              <div style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 90px 110px 1fr 70px", padding: "10px 20px", background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)", minWidth: 780 }}>
-                {["Date", "Person", "In", "Out", "Hours", "Status", "Notes", ""].map(h => (
+              <div style={{ display: "grid", gridTemplateColumns: "100px 1.1fr 80px 80px 70px 60px 100px 1fr 60px 1fr 1fr 60px", padding: "10px 20px", background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)", minWidth: 1100 }}>
+                {["Date", "Person", "In", "Out", "Hours", "OT", "Status", "Project", "Break", "Location", "Notes", ""].map(h => (
                   <div key={h} style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</div>
                 ))}
               </div>
               {records.map(r => (
-                <div key={r.id} style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 90px 110px 1fr 70px", padding: "10px 20px", borderBottom: "1px solid var(--border)", alignItems: "center", minWidth: 780 }}>
+                <div key={r.id} style={{ display: "grid", gridTemplateColumns: "100px 1.1fr 80px 80px 70px 60px 100px 1fr 60px 1fr 1fr 60px", padding: "10px 20px", borderBottom: "1px solid var(--border)", alignItems: "center", minWidth: 1100 }}>
                   <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{fmtDateOnly(r.date)}</div>
                   <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{r.user_name}</div>
                   <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{fmtTime(r.clock_in)}</div>
                   <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{r.clock_out ? fmtTime(r.clock_out) : r.date === todayStr ? "Active" : "—"}</div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{r.hours_worked ? Number(r.hours_worked).toFixed(1) : "—"}</div>
+                  <div style={{ fontSize: 12, color: "var(--accent-purple)" }}>{r.overtime_hours ? Number(r.overtime_hours).toFixed(1) : "—"}</div>
                   <div><span className={`badge ${STATUS_BADGE[r.status] || "badge-gray"}`} style={{ fontSize: 10 }}>{STATUS_LABEL[r.status] || r.status}{r.is_manual && " ✎"}</span></div>
+                  <div style={{ fontSize: 11, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.project_name || "—"}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{r.break_minutes ? `${r.break_minutes}m` : "—"}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.location || "—"}</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.notes || "—"}</div>
                   <button className="btn-secondary" style={{ fontSize: 10, padding: "3px 8px" }} onClick={() => openEdit(r)}>Edit</button>
                 </div>
@@ -252,14 +278,38 @@ export default function AttendancePage() {
                   <input className="input" type="time" value={fClockOut} onChange={e => setFClockOut(e.target.value)} />
                 </div>
               </div>
+              <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Status</label>
+                  <select className="input" value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                    <option value="leave">Leave</option>
+                    <option value="half_day">Half Day</option>
+                    <option value="overtime">Overtime</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Overtime Hours</label>
+                  <input className="input" type="number" step="0.5" min="0" placeholder="0" value={fOvertimeHours} onChange={e => setFOvertimeHours(e.target.value)} />
+                </div>
+              </div>
               <div>
-                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Status</label>
-                <select className="input" value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
-                  <option value="present">Present</option>
-                  <option value="absent">Absent</option>
-                  <option value="leave">Leave</option>
-                  <option value="half_day">Half Day</option>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Project Worked On</label>
+                <select className="input" value={fProjectId} onChange={e => setFProjectId(e.target.value)} style={{ background: "var(--bg-elevated)" }}>
+                  <option value="">No specific project</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
+              </div>
+              <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Break Duration (min)</label>
+                  <input className="input" type="number" step="5" min="0" placeholder="0" value={fBreakMinutes} onChange={e => setFBreakMinutes(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Location</label>
+                  <input className="input" placeholder="e.g. Office, Client site" value={fLocation} onChange={e => setFLocation(e.target.value)} />
+                </div>
               </div>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Notes</label>
