@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { getHealthBadgeClass, getHealthLabel, getHealthColor } from "@/lib/mockData";
 import OneDriveFiles from "@/components/OneDriveFiles";
 import UploadFileModal from "@/components/UploadFileModal";
+import { useToast } from "@/components/Toast";
 
 interface Contact {
   id: string;
@@ -147,7 +148,11 @@ const TABS = ["Overview", "Contacts", "Timeline", "Projects", "Documents", "Conv
 
 export default function ClientProfilePage() {
   const { id } = useParams();
+  const router = useRouter();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState("Overview");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [timelineEvents, setTimelineEvents] = useState<{ type: string; title: string; date: string; meta: string }[]>([]);
   const [showQuickFollowUp, setShowQuickFollowUp] = useState(false);
   const [quickFollowUpTitle, setQuickFollowUpTitle] = useState("");
@@ -173,6 +178,20 @@ export default function ClientProfilePage() {
     } catch {}
     finally { setSavingFollowUp(false); }
   };
+
+  const deleteClient = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/db/clients?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      showToast("Client deleted", "success");
+      router.push("/clients");
+    } catch {
+      showToast("Couldn't delete this client - try again", "error");
+      setDeleting(false);
+    }
+  };
+
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [client, setClient] = useState<ClientRecord | null>(null);
   const [clientLoading, setClientLoading] = useState(true);
@@ -315,6 +334,7 @@ export default function ClientProfilePage() {
       {/* Tab Content */}
       <div style={{ padding: 24 }}>
         {activeTab === "Overview" && (
+          <>
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
@@ -488,6 +508,21 @@ export default function ClientProfilePage() {
               </div>
             </div>
           </div>
+
+          <div className="card" style={{ marginTop: 20, borderColor: "rgba(239,68,68,0.3)", background: "rgba(239,68,68,0.03)" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-red)", marginBottom: 6 }}>Danger Zone</div>
+            <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 12px", lineHeight: 1.5 }}>
+              Deleting a client hides them and their history (projects, documents, communications) from the app. This can be reversed by contacting whoever manages the database directly - it does not permanently erase the underlying data.
+            </p>
+            <button
+              className="btn-secondary"
+              style={{ fontSize: 12, borderColor: "var(--accent-red)", color: "var(--accent-red)" }}
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              Delete This Client
+            </button>
+          </div>
+          </>
         )}
 
         {activeTab === "Contacts" && (
@@ -689,6 +724,27 @@ export default function ClientProfilePage() {
           </div>
         )}
       </div>
+
+      {showDeleteConfirm && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 16, width: "100%", maxWidth: 400, padding: 24 }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>Delete {client?.name}?</h3>
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "0 0 20px", lineHeight: 1.5 }}>
+              This hides {client?.name} and everything linked to them - projects, documents, communications - from the app. It does not permanently erase the underlying data.
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>Cancel</button>
+              <button
+                style={{ flex: 1, background: "var(--accent-red)", border: "none", borderRadius: 8, color: "white", fontSize: 13, fontWeight: 600, padding: 10, cursor: deleting ? "default" : "pointer", opacity: deleting ? 0.7 : 1 }}
+                onClick={deleteClient}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete Client"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
