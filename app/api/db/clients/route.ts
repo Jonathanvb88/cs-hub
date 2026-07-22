@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/requireAuth";
 import { sql } from "@/lib/db";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAuth(req);
@@ -85,6 +86,25 @@ export async function PUT(req: NextRequest) {
       ]
     );
     return NextResponse.json({ client: rows[0] });
+  } catch (e) {
+    return NextResponse.json({ error: String(e) }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const authError = await requireAuth(req);
+  if (authError) return authError;
+  try {
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
+
+    const before = await sql(`SELECT name FROM clients WHERE id = $1`, [id]);
+    if (!before[0]) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+
+    await sql(`UPDATE clients SET deleted_at = now() WHERE id = $1`, [id]);
+    await logAudit(req, "client_deleted", "client", id, before[0].name, {});
+
+    return NextResponse.json({ success: true });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
